@@ -21,3 +21,4 @@
 | stripeCharges               | `true`  | Sync stripeCharges               |
 | stripePaymentMethods        | `true`  | Sync stripePaymentMethods        |
 | stripeSubscriptionSchedules | `true`  | Sync stripeSubscriptionSchedules |
+| stripeMandates              | `true`  | Sync stripeMandates              |

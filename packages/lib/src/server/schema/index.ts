@@ -13,6 +13,7 @@ import { CustomerSchema } from "@/schema/customer";
 import { DisputeSchema } from "@/schema/dispute";
 import { EarlyFraudWarningSchema } from "@/schema/early-fraud-warning";
 import { InvoiceSchema } from "@/schema/invoice";
+import { MandateSchema } from "@/schema/mandate";
 import { PaymentIntentSchema } from "@/schema/payment-intent";
 import { PaymentMethodSchema } from "@/schema/payment-method";
 import { PayoutSchema } from "@/schema/payout";
@@ -145,6 +146,11 @@ export const stripeTables = {
     stripe: v.object(SubscriptionScheduleSchema),
     lastSyncedAt: v.number(),
   }).index("bySubscriptionScheduleId", ["subscriptionScheduleId"]),
+  stripeMandates: defineTable({
+    mandateId: v.string(),
+    stripe: v.object(MandateSchema),
+    lastSyncedAt: v.number(),
+  }).index("byMandateId", ["mandateId"]),
 };
 
 const stripeSchema = defineSchema(stripeTables);

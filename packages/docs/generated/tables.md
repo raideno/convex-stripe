@@ -278,3 +278,16 @@ Stores Stripe stripeSubscriptionSchedules.
 
 Indexes:
 - `bySubscriptionScheduleId`: `subscriptionScheduleId`
+
+## `stripeMandates`
+Stores Stripe stripeMandates.
+
+| Field        | Type      | Description         |
+| :----------- | :-------- | :------------------ |
+| mandateId    | `string`  |                     |
+| stripe       | `object`  | Full Stripe object. |
+| lastSyncedAt | `float64` |                     |
+
+
+Indexes:
+- `byMandateId`: `mandateId`
