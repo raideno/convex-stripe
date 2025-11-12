@@ -69,7 +69,12 @@ export const PortalImplementation = defineActionCallableFunction<
     });
 
     const portal = await stripe.billingPortal.sessions.create({
-      ...args,
+      ...{
+        ...args,
+        createStripeCustomerIfMissing: undefined,
+        entityId: undefined,
+        return_url: undefined,
+      },
       customer: customerId,
       return_url: returnUrl,
     });

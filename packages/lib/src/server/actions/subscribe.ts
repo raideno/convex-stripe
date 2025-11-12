@@ -91,7 +91,15 @@ export const SubscribeImplementation = defineActionCallableFunction<
     });
 
     const checkout = await stripe.checkout.sessions.create({
-      ...args,
+      ...{
+        ...args,
+        createStripeCustomerIfMissing: undefined,
+        entityId: undefined,
+        priceId: undefined,
+        cancel_url: undefined,
+        success_url: undefined,
+        mode: undefined,
+      },
       customer: customerId,
       ui_mode: "hosted",
       mode: args.mode,
