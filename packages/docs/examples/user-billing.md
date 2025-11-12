@@ -1,3 +1,3 @@
 # User Billing
 
-Coming soon...
+Already showed in [Main page](/).

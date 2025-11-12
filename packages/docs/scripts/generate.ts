@@ -12,6 +12,10 @@ const __dirname = path.dirname(__filename);
 
 const GENERATIONS_DIRECTORY = path.resolve(__dirname, "../generated/");
 
+if (!fs.existsSync(GENERATIONS_DIRECTORY)) {
+  fs.mkdirSync(GENERATIONS_DIRECTORY, { recursive: true });
+}
+
 fs.writeFileSync(
   path.join(GENERATIONS_DIRECTORY, "sync-config.md"),
   Object.entries(stripeTables)

@@ -37,9 +37,9 @@ bun add @raideno/convex-stripe stripe
   https://<your-convex-app>.convex.site/stripe/webhook
   ```
 - Enable the following [Stripe Events](./references/events.md).  
-- Enable the Stripe Billing Portal.
+- Enable the [Stripe Billing Portal](https://dashboard.stripe.com/test/settings/billing/portal).
 
-### 2. Set ENV
+### 2. Set Environment Variables on Convex
 
 ```bash
 npx convex env set STRIPE_SECRET_KEY "<secret>"
@@ -151,10 +151,10 @@ It must be done in both your development and production deployments after instal
 This might not be necessary if you are starting with a fresh empty stripe project.
 
 ### 8. Start building 
-Now you can use the different provided functions to:
+Now you can use the provided functions to:
 - Generate a subscription or payment link [`stripe.subscribe`](#subscribe-function), [`stripe.pay`](#pay-function) for a given entity.
 - Generate a link to the entity's [`stripe.portal`](#portal-function) to manage their subscriptions.
-- Consult the different synced tables.
+- Consult the [synced tables](./references/tables.md).
 - Etc.
 
 ## Usage
@@ -170,7 +170,7 @@ You can query these tables at any time to:
 
 ### `setup` Action
 
-Creates or updates a Stripe customer for a given entity (user or organization).
+Creates or updates a Stripe customer for a given entity (user or organization). Will call [`stripe.customers.create`](https://docs.stripe.com/api/customers/create) under the hood.
 
 This should be called whenever a new entity is created in your app, or when you want to ensure the entity has a Stripe customer associated with it.
 
@@ -210,7 +210,7 @@ Sync all existing data on stripe to convex database.
 
 ### `subscribe` Function
 
-Creates a Stripe Subscription Checkout session for a given entity.
+Creates a Stripe Subscription Checkout session for a given entity. Will call [`stripe.checkout.sessions.create`](https://docs.stripe.com/api/checkout/sessions/create) under the hood, the same parameters can be passed.
 
 ```ts
 import { v } from "convex/values";
@@ -226,10 +226,12 @@ export const createCheckout = action({
     const response = await stripe.subscribe(context, {
       entityId: args.entityId,
       priceId: args.priceId,
-      successUrl: "http://localhost:3000/payments/success",
-      cancelUrl: "http://localhost:3000/payments/cancel",
-      // NOTE: true by default. if set to false will throw an error if provided entityId don't have a customerId associated to it.
-      // createStripeCustomerIfMissing: true
+      mode: "subscription",
+      success_url: "http://localhost:3000/payments/success",
+      cancel_url: "http://localhost:3000/payments/cancel",
+      /*
+       * Other parameters from stripe.checkout.sessions.create(...)
+       */
     });
 
     return response.url;
@@ -240,7 +242,7 @@ export const createCheckout = action({
 
 ### `portal` Function
 
-Allows an entity to manage their subscription via the Stripe Portal.
+Allows an entity to manage their subscription via the Stripe Portal. Will call [`stripe.billingPortal.sessions.create`](https://docs.stripe.com/api/customer_portal/sessions/create) under the hood, the same parameters can be passed.
 
 ```ts
 import { v } from "convex/values";
@@ -254,6 +256,9 @@ export const portal = action({
     const response = await stripe.portal(context, {
       entityId: args.entityId,
       returnUrl: "http://localhost:3000/return-from-portal",
+      /*
+       * Other parameters from stripe.billingPortal.sessions.create(...)
+       */
     });
 
     return response.url;
@@ -264,7 +269,7 @@ The provided entityId must have a customerId associated to it otherwise the acti
 
 ### `pay` Function
 
-Creates a Stripe One Time Payment Checkout session for a given entity.
+Creates a Stripe One Time Payment Checkout session for a given entity. Will call [`stripe.checkout.sessions.create`](https://docs.stripe.com/api/checkout/sessions/create) under the hood, the same parameters can be passed.
 
 ```ts
 import { v } from "convex/values";
@@ -272,13 +277,21 @@ import { v } from "convex/values";
 import { stripe } from "./stripe";
 import { action, internal } from "./_generated/api";
 
-export const subscribe = action({
-  args: { entityId: v.string(), priceId: v.string() },
+export const pay = action({
+  args: { entityId: v.string(), orderId: v.string(), priceId: v.string() },
   handler: async (context, args) => {
     // Add your own auth/authorization logic here
 
     const response = await stripe.pay(context, {
-      // TODO: complete
+      referenceId: args.orderId,
+      entityId: args.entityId,
+      mode: "payment",
+      line_items: [{ price: args.priceId, quantity: 1 }],
+      success_url: `${process.env.SITE_URL}/?return-from-pay=success`,
+      cancel_url: `${process.env.SITE_URL}/?return-from-pay=cancel`,
+      /*
+       * Other parameters from stripe.checkout.sessions.create(...)
+       */
     });
 
     return response.url;
