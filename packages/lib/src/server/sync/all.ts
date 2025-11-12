@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 
 import { defineActionImplementation } from "@/helpers";
+import { stripeTables } from "@/schema";
 
 const HANDLERS_MODULES = Object.values(
   import.meta.glob("./*.handler.ts", {
@@ -27,6 +28,7 @@ export const SyncAllImplementation = defineActionImplementation({
       HANDLERS.map(async (handler) => {
         try {
           await handler.handler(context, {}, configuration);
+          console.info(`[STRIPE SYNC ${handler.name}](Success)`);
         } catch (error) {
           configuration.logger.error(
             `[STRIPE SYNC ${handler.name}](Error): ${error}`

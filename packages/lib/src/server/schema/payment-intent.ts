@@ -154,11 +154,12 @@ export const PaymentIntentSchema = {
   ),
   object: v.string(),
   amount_capturable: v.number(),
-  amount_details: optionalnullableobject({
-    tip: optionalnullableobject({
-      amount: v.optional(nullablenumber()),
-    }),
-  }),
+  // amount_details: optionalnullableobject({
+  //   tip: optionalnullableobject({
+  //     amount: v.optional(nullablenumber()),
+  //   }),
+  // }),
+  amount_details: v.optional(v.union(v.null(), v.any())),
   amount_received: v.number(),
   application: v.optional(nullablestring()),
   application_fee_amount: v.optional(nullablenumber()),

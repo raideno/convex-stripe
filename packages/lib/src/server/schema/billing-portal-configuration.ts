@@ -9,7 +9,7 @@ export const BillingPortalConfigurationStripeToConvex = (
   const object: Infer<typeof BillingPortalConfigurationObject> = {
     id: configuration.id,
     object: configuration.object,
-    active: configuration.active.toString(),
+    active: configuration.active,
     application:
       typeof configuration.application === "string"
         ? configuration.application
@@ -80,7 +80,7 @@ export const BillingPortalConfigurationStripeToConvex = (
 export const BillingPortalConfigurationSchema = {
   id: v.string(),
   object: v.string(),
-  active: v.string(),
+  active: v.boolean(),
   application: v.union(v.null(), v.string()),
   business_profile: v.object({
     headline: nullablestring(),

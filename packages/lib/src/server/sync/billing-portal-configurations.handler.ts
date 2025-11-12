@@ -25,7 +25,7 @@ export const BillingPortalConfigurationsSyncImplementation =
         configuration
       );
       const localBillingPortalConfigurationsById = new Map(
-        (localBillingPortalConfigurationsRes.docs || []).map((p: any) => [
+        (localBillingPortalConfigurationsRes.docs || []).map((p) => [
           p.billingPortalConfigurationId,
           p,
         ])
