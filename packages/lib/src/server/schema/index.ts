@@ -15,6 +15,7 @@ import { EarlyFraudWarningSchema } from "@/schema/early-fraud-warning";
 import { InvoiceSchema } from "@/schema/invoice";
 import { MandateSchema } from "@/schema/mandate";
 import { PaymentIntentSchema } from "@/schema/payment-intent";
+import { BillingPortalConfigurationSchema } from "@/schema/billing-portal-configuration";
 import { PaymentMethodSchema } from "@/schema/payment-method";
 import { PayoutSchema } from "@/schema/payout";
 import { PlanSchema } from "@/schema/plan";
@@ -151,6 +152,11 @@ export const stripeTables = {
     stripe: v.object(MandateSchema),
     lastSyncedAt: v.number(),
   }).index("byMandateId", ["mandateId"]),
+  stripeBillingPortalConfigurations: defineTable({
+    billingPortalConfigurationId: v.string(),
+    stripe: v.object(BillingPortalConfigurationSchema),
+    lastSyncedAt: v.number(),
+  }).index("byBillingPortalConfigurationId", ["billingPortalConfigurationId"]),
 };
 
 const stripeSchema = defineSchema(stripeTables);

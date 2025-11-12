@@ -20,3 +20,4 @@
 	stripePaymentMethods?: boolean;
 	stripeSubscriptionSchedules?: boolean;
 	stripeMandates?: boolean;
+	stripeBillingPortalConfigurations?: boolean;

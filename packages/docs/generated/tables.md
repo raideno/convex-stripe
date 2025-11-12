@@ -291,3 +291,16 @@ Stores Stripe stripeMandates.
 
 Indexes:
 - `byMandateId`: `mandateId`
+
+## `stripeBillingPortalConfigurations`
+Stores Stripe stripeBillingPortalConfigurations.
+
+| Field                        | Type      | Description         |
+| :--------------------------- | :-------- | :------------------ |
+| billingPortalConfigurationId | `string`  |                     |
+| stripe                       | `object`  | Full Stripe object. |
+| lastSyncedAt                 | `float64` |                     |
+
+
+Indexes:
+- `byBillingPortalConfigurationId`: `billingPortalConfigurationId`

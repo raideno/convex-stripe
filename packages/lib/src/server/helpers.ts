@@ -43,6 +43,7 @@ export const normalizeConfiguration = (
       stripeSubscriptionSchedules: true,
       stripeTaxIds: true,
       stripeMandates: true,
+      stripeBillingPortalConfigurations: true,
     },
     debug: false,
     logger: new Logger(config.debug || false),
