@@ -1,4 +1,3 @@
-import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { SetupImplementation } from "@/actions/setup";
@@ -7,29 +6,32 @@ import { CheckoutSessionStripeToConvex } from "@/schema/checkout-session";
 import { SubscriptionStripeToConvex } from "@/schema/subscription";
 import { storeDispatchTyped } from "@/store";
 
-import { defineActionImplementation, metadata } from "../helpers";
+import { defineActionCallableFunction } from "../helpers";
 
 const DEFAULT_CREATE_STRIPE_CUSTOMER_IF_MISSING = true;
 
-export const SubscribeImplementation = defineActionImplementation({
+export const SubscribeImplementation = defineActionCallableFunction<
+  {
+    createStripeCustomerIfMissing?: boolean;
+    entityId: string;
+    priceId: string;
+    cancel_url: string;
+    success_url: string;
+    mode: "subscription";
+  } & Omit<
+    Stripe.Checkout.SessionCreateParams,
+    | "customer"
+    | "ui_mode"
+    | "mode"
+    | "line_items"
+    | "client_reference_id"
+    | "success_url"
+    | "cancel_url"
+  >,
+  Promise<Stripe.Response<Stripe.Checkout.Session>>
+>({
   name: "subscriptionCheckout",
-  args: v.object({
-    createStripeCustomerIfMissing: v.optional(v.boolean()),
-    entityId: v.string(),
-    priceId: v.string(),
-    metadata: v.optional(v.union(metadata(), v.null())),
-    success: v.object({
-      url: v.string(),
-    }),
-    cancel: v.object({
-      url: v.string(),
-    }),
-  }),
-  handler: async (
-    context,
-    args,
-    configuration
-  ): Promise<{ url: string | null }> => {
+  handler: async (context, args, configuration) => {
     const createStripeCustomerIfMissing =
       args.createStripeCustomerIfMissing ??
       DEFAULT_CREATE_STRIPE_CUSTOMER_IF_MISSING;
@@ -77,7 +79,7 @@ export const SubscribeImplementation = defineActionImplementation({
       data: {
         entityId: args.entityId,
       },
-      targetUrl: args.success.url,
+      targetUrl: args.success_url,
     });
     const cancelUrl = await buildSignedReturnUrl({
       configuration: configuration,
@@ -85,13 +87,14 @@ export const SubscribeImplementation = defineActionImplementation({
       data: {
         entityId: args.entityId,
       },
-      targetUrl: args.cancel.url,
+      targetUrl: args.cancel_url,
     });
 
     const checkout = await stripe.checkout.sessions.create({
+      ...args,
       customer: customerId,
       ui_mode: "hosted",
-      mode: "subscription",
+      mode: args.mode,
       line_items: [
         {
           price: args.priceId,
@@ -99,7 +102,7 @@ export const SubscribeImplementation = defineActionImplementation({
         },
       ],
       metadata: {
-        ...args.metadata,
+        ...(args.metadata || {}),
         entityId: args.entityId,
         customerId: customerId,
       },
@@ -107,12 +110,14 @@ export const SubscribeImplementation = defineActionImplementation({
       success_url: successUrl,
       cancel_url: cancelUrl,
       subscription_data: {
+        ...args.subscription_data,
         metadata: {
+          ...(args.subscription_data?.metadata || {}),
           entityId: args.entityId,
           customerId: customerId,
         },
       },
-      expand: ["subscription"],
+      expand: [...(args.expand || []), "subscription"],
     });
 
     await storeDispatchTyped(

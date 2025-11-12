@@ -7,7 +7,6 @@ import {
   internalMutationGeneric,
   RoutableMethod,
 } from "convex/server";
-import { Infer } from "convex/values";
 import Stripe from "stripe";
 import {
   PayImplementation,
@@ -88,15 +87,15 @@ export const internalConvexStripe = (configuration_: InputConfiguration) => {
       },
       portal: (
         context: GenericActionCtx<StripeDataModel>,
-        args: Infer<typeof PortalImplementation.args>
+        args: Parameters<(typeof PortalImplementation)["handler"]>[1]
       ) => PortalImplementation.handler(context, args, configuration),
       subscribe: (
         context: GenericActionCtx<StripeDataModel>,
-        args: Infer<typeof SubscribeImplementation.args>
+        args: Parameters<(typeof SubscribeImplementation)["handler"]>[1]
       ) => SubscribeImplementation.handler(context, args, configuration),
       pay: (
         context: GenericActionCtx<StripeDataModel>,
-        args: Infer<typeof PayImplementation.args>
+        args: Parameters<(typeof PayImplementation)["handler"]>[1]
       ) => PayImplementation.handler(context, args, configuration),
     },
     store: internalMutationGeneric({

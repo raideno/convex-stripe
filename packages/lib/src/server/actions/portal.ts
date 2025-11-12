@@ -1,23 +1,22 @@
-import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { SetupImplementation } from "@/actions/setup";
 import { buildSignedReturnUrl } from "@/redirects";
 import { storeDispatchTyped } from "@/store";
 
-import { defineActionImplementation } from "../helpers";
+import { defineActionCallableFunction } from "../helpers";
 
 const DEFAULT_CREATE_STRIPE_CUSTOMER_IF_MISSING = true;
 
-export const PortalImplementation = defineActionImplementation({
+export const PortalImplementation = defineActionCallableFunction<
+  {
+    createStripeCustomerIfMissing?: boolean;
+    entityId: string;
+    return_url: string;
+  } & Omit<Stripe.BillingPortal.SessionCreateParams, "customer" | "return_url">,
+  Promise<Stripe.Response<Stripe.BillingPortal.Session>>
+>({
   name: "portal",
-  args: v.object({
-    createStripeCustomerIfMissing: v.optional(v.boolean()),
-    entityId: v.string(),
-    return: v.object({
-      url: v.string(),
-    }),
-  }),
   handler: async (context, args, configuration) => {
     const createStripeCustomerIfMissing =
       args.createStripeCustomerIfMissing ??
@@ -66,10 +65,11 @@ export const PortalImplementation = defineActionImplementation({
       data: {
         entityId: args.entityId,
       },
-      targetUrl: args.return.url,
+      targetUrl: args.return_url,
     });
 
     const portal = await stripe.billingPortal.sessions.create({
+      ...args,
       customer: customerId,
       return_url: returnUrl,
     });

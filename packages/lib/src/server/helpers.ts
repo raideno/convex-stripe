@@ -1,4 +1,8 @@
-import { GenericActionCtx, GenericMutationCtx } from "convex/server";
+import {
+  AnyDataModel,
+  GenericActionCtx,
+  GenericMutationCtx,
+} from "convex/server";
 import { Infer, v, VObject } from "convex/values";
 
 import { Logger } from "@/logger";
@@ -38,12 +42,22 @@ export const normalizeConfiguration = (
       stripeSetupIntents: true,
       stripeSubscriptionSchedules: true,
       stripeTaxIds: true,
+      stripeMandates: true,
     },
     debug: false,
     logger: new Logger(config.debug || false),
     base: config.base || "stripe",
   };
 };
+
+export const defineActionCallableFunction = <const S extends object, R>(spec: {
+  name: string;
+  handler: (
+    context: GenericActionCtx<StripeDataModel>,
+    args: S,
+    configuration: InternalConfiguration
+  ) => R;
+}) => spec;
 
 export const defineActionImplementation = <
   S extends VObject<any, any>,
@@ -75,3 +89,4 @@ export const metadata = () =>
   v.record(v.string(), v.union(v.string(), v.number(), v.null()));
 export const optionalnullableobject = <T extends ArgSchema>(object: T) =>
   v.optional(v.union(v.object(object), v.null()));
+export const optionalany = () => v.optional(v.any());
