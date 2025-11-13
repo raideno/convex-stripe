@@ -1,7 +1,7 @@
 import { EarlyFraudWarningStripeToConvex } from "@/schema/early-fraud-warning";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "./types";
+import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: [

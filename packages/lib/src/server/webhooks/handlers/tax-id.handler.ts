@@ -1,7 +1,7 @@
 import { TaxIdStripeToConvex } from "@/schema/tax-id";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "./types";
+import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: [

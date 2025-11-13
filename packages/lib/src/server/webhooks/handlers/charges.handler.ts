@@ -1,7 +1,7 @@
 import { ChargeStripeToConvex } from "@/schema/charge";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "./types";
+import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: [

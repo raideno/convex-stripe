@@ -1,31 +1,39 @@
 import { v } from "convex/values";
 
 import { defineActionImplementation } from "@/helpers";
-import { stripeTables } from "@/schema";
 
 const HANDLERS_MODULES = Object.values(
-  import.meta.glob("./*.handler.ts", {
+  import.meta.glob("./handlers/*.handler.ts", {
     eager: true,
   })
 ) as unknown as Array<
   Record<string, ReturnType<typeof defineActionImplementation>>
 >;
 
-if (HANDLERS_MODULES.some((handler) => Object.keys(handler).length > 1)) {
+if (HANDLERS_MODULES.some((handler) => Object.keys(handler).length > 1))
   throw new Error(
-    "Each handler file should only have one export / default export"
+    "Each sync handler file should only have one export / default export"
   );
-}
 
-// TODO: add a check to make sure the thing is of type ReturnType<typeof defineActionImplementation>
-const HANDLERS = HANDLERS_MODULES.map((exports) => Object.values(exports)[0]);
+export const SYNC_HANDLERS = HANDLERS_MODULES.map(
+  (exports) => Object.values(exports)[0]
+);
 
-export const SyncAllImplementation = defineActionImplementation({
+if (
+  SYNC_HANDLERS.some(
+    (handler) => !["handler", "name"].every((key) => key in handler)
+  )
+)
+  throw new Error(
+    "Each sync handler file should export a valid implementation"
+  );
+
+export const SyncDataImplementation = defineActionImplementation({
   args: v.object({}),
   name: "sync",
   handler: async (context, args, configuration) => {
     await Promise.all(
-      HANDLERS.map(async (handler) => {
+      SYNC_HANDLERS.map(async (handler) => {
         try {
           await handler.handler(context, {}, configuration);
           console.info(`[STRIPE SYNC ${handler.name}](Success)`);

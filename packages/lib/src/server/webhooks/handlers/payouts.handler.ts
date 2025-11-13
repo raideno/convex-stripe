@@ -1,7 +1,7 @@
 import { PayoutStripeToConvex } from "@/schema/payout";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "./types";
+import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: [

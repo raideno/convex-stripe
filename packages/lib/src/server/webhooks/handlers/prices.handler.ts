@@ -1,26 +1,26 @@
-import { ProductStripeToConvex } from "@/schema/product";
+import { PriceStripeToConvex } from "@/schema/price";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "./types";
+import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
-  events: ["product.created", "product.updated", "product.deleted"],
+  events: ["price.created", "price.updated", "price.deleted"],
   handle: async (event, context, configuration) => {
-    if (configuration.sync.stripeProducts !== true) return;
+    if (configuration.sync.stripePrices !== true) return;
 
-    const product = event.data.object;
+    const price = event.data.object;
 
     switch (event.type) {
-      case "product.created":
-      case "product.updated":
+      case "price.created":
+      case "price.updated":
         await storeDispatchTyped(
           {
             operation: "upsert",
-            table: "stripeProducts",
-            idField: "productId",
+            table: "stripePrices",
+            idField: "priceId",
             data: {
-              productId: product.id,
-              stripe: ProductStripeToConvex(product),
+              priceId: price.id,
+              stripe: PriceStripeToConvex(price),
               lastSyncedAt: Date.now(),
             },
           },
@@ -30,13 +30,13 @@ export default defineWebhookHandler({
         break;
       // TODO: careful here as the deletion is just a soft delete in Stripe
       // so maybe we want to keep the record and just mark it as deleted?
-      case "product.deleted":
+      case "price.deleted":
         await storeDispatchTyped(
           {
             operation: "deleteById",
-            table: "stripeProducts",
-            idField: "productId",
-            idValue: product.id,
+            table: "stripePrices",
+            idField: "priceId",
+            idValue: price.id,
           },
           context,
           configuration

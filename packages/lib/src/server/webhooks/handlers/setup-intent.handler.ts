@@ -1,7 +1,7 @@
 import { SetupIntentStripeToConvex } from "@/schema/setup-intent";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "./types";
+import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: [

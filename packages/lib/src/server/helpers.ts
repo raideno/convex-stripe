@@ -14,6 +14,10 @@ import {
   InternalConfiguration,
 } from "@/types";
 
+export const DEFAULT_PATH = "/stripe/webhook";
+export const DEFAULT_DESCRIPTION = "Convex Stripe Webhook Endpoint";
+export const DEFAULT_METADATA = {};
+
 export const normalizeConfiguration = (
   config: InputConfiguration
 ): InternalConfiguration => {
@@ -44,6 +48,11 @@ export const normalizeConfiguration = (
       stripeTaxIds: true,
       stripeMandates: true,
       stripeBillingPortalConfigurations: true,
+    },
+    webhook: {
+      path: config.webhook?.path || DEFAULT_PATH,
+      description: config.webhook?.description || DEFAULT_DESCRIPTION,
+      metadata: config.webhook?.metadata || DEFAULT_METADATA,
     },
     debug: false,
     logger: new Logger(config.debug || false),

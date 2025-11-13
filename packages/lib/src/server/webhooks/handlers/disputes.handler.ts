@@ -1,7 +1,7 @@
 import { DisputeStripeToConvex } from "@/schema/dispute";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "./types";
+import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: [

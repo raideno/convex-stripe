@@ -19,9 +19,10 @@ import { normalizeConfiguration } from "./helpers";
 import { redirectImplementation } from "./redirects";
 import { StripeDataModel } from "./schema";
 import { StoreImplementation } from "./store";
-import { SyncAllImplementation } from "./sync/all";
-import type { InputConfiguration, InternalConfiguration } from "./types";
+import { SyncImplementation } from "./sync";
 import { webhookImplementation } from "./webhooks";
+
+import type { InputConfiguration, InternalConfiguration } from "./types";
 
 export { stripeTables } from "./schema";
 
@@ -126,9 +127,9 @@ export const internalConvexStripe = (configuration_: InputConfiguration) => {
         StoreImplementation.handler(context, args, configuration),
     }),
     sync: internalActionGeneric({
-      args: SyncAllImplementation.args,
+      args: SyncImplementation.args,
       handler: (context, args) =>
-        SyncAllImplementation.handler(context, args, configuration),
+        SyncImplementation.handler(context, args, configuration),
     }),
     setup: internalActionGeneric({
       args: SetupImplementation.args,

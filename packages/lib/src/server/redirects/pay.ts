@@ -2,7 +2,7 @@ import { v } from "convex/values";
 
 import { storeDispatchTyped } from "@/store";
 
-import { SubscriptionSyncImplementation } from "../sync/subscription";
+import { SubscriptionSyncImplementation } from "../sync/handlers/subscription";
 import { defineRedirectHandler } from "./types";
 
 export const PayReturnImplementation = defineRedirectHandler({

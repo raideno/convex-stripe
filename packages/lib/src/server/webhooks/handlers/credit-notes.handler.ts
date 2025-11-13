@@ -1,7 +1,7 @@
 import { CreditNoteStripeToConvex } from "@/schema/credit-note";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "./types";
+import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: ["credit_note.created", "credit_note.updated", "credit_note.voided"],

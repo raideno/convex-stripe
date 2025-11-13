@@ -1,7 +1,7 @@
 import { CustomerStripeToConvex } from "@/schema/customer";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "./types";
+import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: ["customer.created", "customer.updated", "customer.deleted"],

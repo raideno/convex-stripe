@@ -1,7 +1,7 @@
 import { PromotionCodeStripeToConvex } from "@/schema/promotion-code";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "./types";
+import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: ["promotion_code.created", "promotion_code.updated"],

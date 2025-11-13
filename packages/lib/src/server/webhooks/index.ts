@@ -7,19 +7,28 @@ import { InternalConfiguration } from "@/types";
 import { WebhookHandler } from "./types";
 
 const HANDLERS_MODULES = Object.values(
-  import.meta.glob("./*.handler.ts", {
+  import.meta.glob("./handlers/*.handler.ts", {
     eager: true,
   })
 ) as unknown as Array<Record<string, WebhookHandler<Stripe.Event.Type>>>;
 
-if (HANDLERS_MODULES.some((handler) => Object.keys(handler).length > 1)) {
+if (HANDLERS_MODULES.some((handler) => Object.keys(handler).length > 1))
   throw new Error(
-    "Each handler file should only have one export / default export"
+    "Each webhook handler file should only have one export / default export"
   );
-}
 
-// TODO: add a compile time check to make sure the thing is of type ReturnType<typeof defineActionImplementation>
-const HANDLERS = HANDLERS_MODULES.map((exports) => Object.values(exports)[0]);
+export const WEBHOOK_HANDLERS = HANDLERS_MODULES.map(
+  (exports) => Object.values(exports)[0]
+);
+
+if (
+  WEBHOOK_HANDLERS.some(
+    (handler) => !["handle", "events"].every((key) => key in handler)
+  )
+)
+  throw new Error(
+    "Each webhook handler file should export a valid implementation"
+  );
 
 export const webhookImplementation = async (
   configuration: InternalConfiguration,
@@ -49,10 +58,10 @@ export const webhookImplementation = async (
 
   configuration.logger.debug(`[STRIPE HOOK](RECEIVED): ${event.type}`);
 
-  for (const handler of HANDLERS) {
-    if (handler.events.includes(event.type as never)) {
+  for (const handler of WEBHOOK_HANDLERS) {
+    if (handler.events.includes(event.type)) {
       try {
-        await handler.handle(event as never, context, configuration);
+        await handler.handle(event, context, configuration);
         configuration.logger.debug(`[STRIPE HOOK](HANDLED): ${event.type}`);
       } catch (error) {
         configuration.logger.error(`[STRIPE HOOK](Error): ${error}`);

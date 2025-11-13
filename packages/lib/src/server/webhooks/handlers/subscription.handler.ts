@@ -1,6 +1,6 @@
-import { SubscriptionSyncImplementation } from "@/sync/subscription";
+import { SubscriptionSyncImplementation } from "@/sync/handlers/subscription";
 
-import { defineWebhookHandler } from "./types";
+import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: [

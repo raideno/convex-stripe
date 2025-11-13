@@ -1,7 +1,7 @@
 import { ReviewStripeToConvex } from "@/schema/review";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "./types";
+import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: ["review.closed", "review.opened"],

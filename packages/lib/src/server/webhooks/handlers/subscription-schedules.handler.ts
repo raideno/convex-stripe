@@ -1,7 +1,7 @@
 import { SubscriptionScheduleStripeToConvex } from "@/schema/subscription-schedule";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "./types";
+import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: [

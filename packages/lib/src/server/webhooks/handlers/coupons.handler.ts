@@ -1,7 +1,7 @@
 import { CouponStripeToConvex } from "@/schema/coupon";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "./types";
+import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: ["coupon.created", "coupon.updated", "coupon.deleted"],

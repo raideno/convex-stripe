@@ -1,7 +1,7 @@
 import { PlanStripeToConvex } from "@/schema/plan";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "./types";
+import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: ["plan.created", "plan.deleted", "plan.updated"],

@@ -1,7 +1,7 @@
 import { RefundStripeToConvex } from "@/schema/refund";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "./types";
+import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: [
