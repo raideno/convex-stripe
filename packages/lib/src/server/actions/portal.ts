@@ -14,10 +14,11 @@ export const PortalImplementation = defineActionCallableFunction<
     entityId: string;
     return_url: string;
   } & Omit<Stripe.BillingPortal.SessionCreateParams, "customer" | "return_url">,
+  Stripe.RequestOptions,
   Promise<Stripe.Response<Stripe.BillingPortal.Session>>
 >({
   name: "portal",
-  handler: async (context, args, configuration) => {
+  handler: async (context, args, options, configuration) => {
     const createStripeCustomerIfMissing =
       args.createStripeCustomerIfMissing ??
       DEFAULT_CREATE_STRIPE_CUSTOMER_IF_MISSING;
@@ -68,16 +69,19 @@ export const PortalImplementation = defineActionCallableFunction<
       targetUrl: args.return_url,
     });
 
-    const portal = await stripe.billingPortal.sessions.create({
-      ...{
-        ...args,
-        createStripeCustomerIfMissing: undefined,
-        entityId: undefined,
-        return_url: undefined,
+    const portal = await stripe.billingPortal.sessions.create(
+      {
+        ...{
+          ...args,
+          createStripeCustomerIfMissing: undefined,
+          entityId: undefined,
+          return_url: undefined,
+        },
+        customer: customerId,
+        return_url: returnUrl,
       },
-      customer: customerId,
-      return_url: returnUrl,
-    });
+      options
+    );
 
     return portal;
   },

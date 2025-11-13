@@ -157,6 +157,7 @@ Now you can use the provided functions to:
 - Consult the [synced tables](./references/tables.md).
 - Etc.
 
+
 ## Usage
 
 The library automatically syncs the [following tables](./references/tables.md).
@@ -167,6 +168,7 @@ You can query these tables at any time to:
 - Retrieve customers and their `customerId`.
 - Check active subscriptions.
 - Etc.
+
 
 ### `setup` Action
 
@@ -204,9 +206,11 @@ export const setupCustomer = action({
 - If the entity already has a Stripe customer, setup will return the existing one instead of creating a duplicate.
 - Typically, you’ll call this automatically in your user/org creation flow (see [Configuration - 6](#configuration)).
 
+
 ### `sync` Action
 
 Sync all existing data on stripe to convex database.
+
 
 ### `subscribe` Function
 
@@ -221,7 +225,7 @@ import { action, internal } from "./_generated/api";
 export const createCheckout = action({
   args: { entityId: v.string(), priceId: v.string() },
   handler: async (context, args) => {
-    // Add your own auth/authorization logic here
+    // TODO: add your own auth/authorization logic here
 
     const response = await stripe.subscribe(context, {
       entityId: args.entityId,
@@ -231,6 +235,10 @@ export const createCheckout = action({
       cancel_url: "http://localhost:3000/payments/cancel",
       /*
        * Other parameters from stripe.checkout.sessions.create(...)
+       */
+    }, {
+      /*
+       * Optional Stripe Request Options
        */
     });
 
@@ -259,6 +267,10 @@ export const portal = action({
       /*
        * Other parameters from stripe.billingPortal.sessions.create(...)
        */
+    }, {
+      /*
+       * Optional Stripe Request Options
+       */
     });
 
     return response.url;
@@ -266,6 +278,7 @@ export const portal = action({
 });
 ```
 The provided entityId must have a customerId associated to it otherwise the action will throw an error.
+
 
 ### `pay` Function
 
@@ -292,6 +305,10 @@ export const pay = action({
       /*
        * Other parameters from stripe.checkout.sessions.create(...)
        */
+    }, {
+      /*
+       * Optional Stripe Request Options
+       */
     });
 
     return response.url;
@@ -299,12 +316,14 @@ export const pay = action({
 });
 ```
 
+
 ## Best Practices
 
 - Always create a Stripe customer (`setup`) when a new entity is created.  
 - Use `metadata` or `marketing_features` on products to store feature flags or limits.  
 - Run `sync` when you first configure the extension to sync already existing stripe resources.  
 - Never expose internal actions directly to clients, wrap them in public actions with proper authorization.
+
 
 ## Resources
 

@@ -8,6 +8,7 @@ import {
   RoutableMethod,
 } from "convex/server";
 import Stripe from "stripe";
+
 import {
   PayImplementation,
   PortalImplementation,
@@ -86,17 +87,38 @@ export const internalConvexStripe = (configuration_: InputConfiguration) => {
         });
       },
       portal: (
-        context: GenericActionCtx<StripeDataModel>,
-        args: Parameters<(typeof PortalImplementation)["handler"]>[1]
-      ) => PortalImplementation.handler(context, args, configuration),
+        context: GenericActionCtx<any>,
+        args: Parameters<(typeof PortalImplementation)["handler"]>[1],
+        options: Parameters<(typeof PortalImplementation)["handler"]>[2] = {}
+      ) =>
+        PortalImplementation.handler(
+          context as unknown as GenericActionCtx<StripeDataModel>,
+          args,
+          options,
+          configuration
+        ),
       subscribe: (
-        context: GenericActionCtx<StripeDataModel>,
-        args: Parameters<(typeof SubscribeImplementation)["handler"]>[1]
-      ) => SubscribeImplementation.handler(context, args, configuration),
+        context: GenericActionCtx<any>,
+        args: Parameters<(typeof SubscribeImplementation)["handler"]>[1],
+        options: Parameters<(typeof SubscribeImplementation)["handler"]>[2] = {}
+      ) =>
+        SubscribeImplementation.handler(
+          context as unknown as GenericActionCtx<StripeDataModel>,
+          args,
+          options,
+          configuration
+        ),
       pay: (
-        context: GenericActionCtx<StripeDataModel>,
-        args: Parameters<(typeof PayImplementation)["handler"]>[1]
-      ) => PayImplementation.handler(context, args, configuration),
+        context: GenericActionCtx<any>,
+        args: Parameters<(typeof PayImplementation)["handler"]>[1],
+        options: Parameters<(typeof PayImplementation)["handler"]>[2] = {}
+      ) =>
+        PayImplementation.handler(
+          context as unknown as GenericActionCtx<StripeDataModel>,
+          args,
+          options,
+          configuration
+        ),
     },
     store: internalMutationGeneric({
       args: StoreImplementation.args,

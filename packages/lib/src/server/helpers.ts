@@ -51,11 +51,16 @@ export const normalizeConfiguration = (
   };
 };
 
-export const defineActionCallableFunction = <const S extends object, R>(spec: {
+export const defineActionCallableFunction = <
+  const S extends object,
+  const O extends object,
+  R,
+>(spec: {
   name: string;
   handler: (
     context: GenericActionCtx<StripeDataModel>,
     args: S,
+    options: O,
     configuration: InternalConfiguration
   ) => R;
 }) => spec;

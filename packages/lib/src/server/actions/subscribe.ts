@@ -28,10 +28,11 @@ export const SubscribeImplementation = defineActionCallableFunction<
     | "success_url"
     | "cancel_url"
   >,
+  Stripe.RequestOptions,
   Promise<Stripe.Response<Stripe.Checkout.Session>>
 >({
   name: "subscriptionCheckout",
-  handler: async (context, args, configuration) => {
+  handler: async (context, args, options, configuration) => {
     const createStripeCustomerIfMissing =
       args.createStripeCustomerIfMissing ??
       DEFAULT_CREATE_STRIPE_CUSTOMER_IF_MISSING;
@@ -90,43 +91,46 @@ export const SubscribeImplementation = defineActionCallableFunction<
       targetUrl: args.cancel_url,
     });
 
-    const checkout = await stripe.checkout.sessions.create({
-      ...{
-        ...args,
-        createStripeCustomerIfMissing: undefined,
-        entityId: undefined,
-        priceId: undefined,
-        cancel_url: undefined,
-        success_url: undefined,
-        mode: undefined,
-      },
-      customer: customerId,
-      ui_mode: "hosted",
-      mode: args.mode,
-      line_items: [
-        {
-          price: args.priceId,
-          quantity: 1,
+    const checkout = await stripe.checkout.sessions.create(
+      {
+        ...{
+          ...args,
+          createStripeCustomerIfMissing: undefined,
+          entityId: undefined,
+          priceId: undefined,
+          cancel_url: undefined,
+          success_url: undefined,
+          mode: undefined,
         },
-      ],
-      metadata: {
-        ...(args.metadata || {}),
-        entityId: args.entityId,
-        customerId: customerId,
-      },
-      client_reference_id: args.entityId,
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-      subscription_data: {
-        ...args.subscription_data,
+        customer: customerId,
+        ui_mode: "hosted",
+        mode: args.mode,
+        line_items: [
+          {
+            price: args.priceId,
+            quantity: 1,
+          },
+        ],
         metadata: {
-          ...(args.subscription_data?.metadata || {}),
+          ...(args.metadata || {}),
           entityId: args.entityId,
           customerId: customerId,
         },
+        client_reference_id: args.entityId,
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        subscription_data: {
+          ...args.subscription_data,
+          metadata: {
+            ...(args.subscription_data?.metadata || {}),
+            entityId: args.entityId,
+            customerId: customerId,
+          },
+        },
+        expand: [...(args.expand || []), "subscription"],
       },
-      expand: [...(args.expand || []), "subscription"],
-    });
+      options
+    );
 
     await storeDispatchTyped(
       {

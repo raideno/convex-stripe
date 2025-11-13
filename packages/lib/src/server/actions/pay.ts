@@ -27,10 +27,11 @@ export const PayImplementation = defineActionCallableFunction<
     | "success_url"
     | "cancel_url"
   >,
+  Stripe.RequestOptions,
   Promise<Stripe.Response<Stripe.Checkout.Session>>
 >({
   name: "pay",
-  handler: async (context, args, configuration) => {
+  handler: async (context, args, options, configuration) => {
     const createStripeCustomerIfMissing =
       args.createStripeCustomerIfMissing ??
       DEFAULT_CREATE_STRIPE_CUSTOMER_IF_MISSING;
@@ -93,40 +94,43 @@ export const PayImplementation = defineActionCallableFunction<
       targetUrl: args.cancel_url,
     });
 
-    const checkout = await stripe.checkout.sessions.create({
-      ...{
-        ...args,
-        createStripeCustomerIfMissing: undefined,
-        entityId: undefined,
-        cancel_url: undefined,
-        success_url: undefined,
-        referenceId: undefined,
-        mode: undefined,
-      },
-      customer: customerId,
-      ui_mode: "hosted",
-      mode: args.mode,
-      client_reference_id: args.referenceId,
-      metadata: {
-        ...args.metadata,
-        entityId: args.entityId,
-        customerId: customerId,
-        referenceId: args.referenceId,
-      },
-      line_items: args.line_items,
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-      payment_intent_data: {
-        ...(args.payment_intent_data || {}),
+    const checkout = await stripe.checkout.sessions.create(
+      {
+        ...{
+          ...args,
+          createStripeCustomerIfMissing: undefined,
+          entityId: undefined,
+          cancel_url: undefined,
+          success_url: undefined,
+          referenceId: undefined,
+          mode: undefined,
+        },
+        customer: customerId,
+        ui_mode: "hosted",
+        mode: args.mode,
+        client_reference_id: args.referenceId,
         metadata: {
-          ...(args.payment_intent_data?.metadata || {}),
+          ...args.metadata,
           entityId: args.entityId,
           customerId: customerId,
           referenceId: args.referenceId,
         },
+        line_items: args.line_items,
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        payment_intent_data: {
+          ...(args.payment_intent_data || {}),
+          metadata: {
+            ...(args.payment_intent_data?.metadata || {}),
+            entityId: args.entityId,
+            customerId: customerId,
+            referenceId: args.referenceId,
+          },
+        },
+        expand: [...(args.expand || []), "payment_intent"],
       },
-      expand: [...(args.expand || []), "payment_intent"],
-    });
+      options
+    );
 
     await storeDispatchTyped(
       {
