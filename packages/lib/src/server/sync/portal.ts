@@ -27,48 +27,9 @@ export const SyncPortalImplementation = defineActionImplementation({
       return null;
     }
 
-    const newConfiguration = await stripe.billingPortal.configurations.create({
-      business_profile: {
-        headline: undefined,
-        privacy_policy_url: undefined,
-        terms_of_service_url: undefined,
-      },
-      features: {
-        customer_update: {
-          enabled: true,
-          allowed_updates: ["email", "address", "shipping", "phone", "name"],
-        },
-        invoice_history: {
-          enabled: true,
-        },
-        payment_method_update: {
-          enabled: true,
-        },
-        subscription_cancel: {
-          enabled: true,
-          mode: "at_period_end",
-          cancellation_reason: {
-            enabled: true,
-            options: [
-              "too_expensive",
-              "missing_features",
-              "switched_service",
-              "unused",
-              "customer_service",
-              "too_complex",
-              "low_quality",
-              "other",
-            ],
-          },
-        },
-        subscription_update: {
-          enabled: false,
-          default_allowed_updates: [],
-          proration_behavior: "none",
-          products: [],
-        },
-      },
-    });
+    const newConfiguration = await stripe.billingPortal.configurations.create(
+      configuration.portal
+    );
 
     console.info(
       "[STRIPE SYNC PORTAL](Created) Default billing portal configuration created."

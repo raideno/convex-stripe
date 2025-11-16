@@ -1,8 +1,10 @@
+import { GenericMutationCtx } from "convex/server";
 import { Infer, Validator } from "convex/values";
+import Stripe from "stripe";
 
 import { Logger } from "@/logger";
 import { stripeTables } from "@/schema";
-import { GenericMutationCtx } from "convex/server";
+
 import { StoreImplementation } from "./store";
 
 export interface InternalConfiguration {
@@ -16,6 +18,8 @@ export interface InternalConfiguration {
     description: string;
     path: string;
   };
+
+  portal: Stripe.BillingPortal.ConfigurationCreateParams;
 
   callback?: {
     unstable__afterChange?: (
@@ -43,7 +47,14 @@ export type WithOptional<T, K extends keyof T = never> = Omit<T, K> &
 
 export type InputConfiguration = WithOptional<
   InternalConfiguration,
-  "base" | "store" | "debug" | "logger" | "sync" | "redirectTtlMs" | "webhook"
+  | "base"
+  | "portal"
+  | "store"
+  | "debug"
+  | "logger"
+  | "sync"
+  | "redirectTtlMs"
+  | "webhook"
 >;
 
 export type ArgSchema = Record<

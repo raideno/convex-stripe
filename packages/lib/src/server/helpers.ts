@@ -54,6 +54,48 @@ export const normalizeConfiguration = (
       description: config.webhook?.description || DEFAULT_DESCRIPTION,
       metadata: config.webhook?.metadata || DEFAULT_METADATA,
     },
+    portal: config.portal || {
+      business_profile: {
+        headline: undefined,
+        privacy_policy_url: undefined,
+        terms_of_service_url: undefined,
+      },
+      features: {
+        customer_update: {
+          enabled: true,
+          allowed_updates: ["email", "address", "shipping", "phone", "name"],
+        },
+        invoice_history: {
+          enabled: true,
+        },
+        payment_method_update: {
+          enabled: true,
+        },
+        subscription_cancel: {
+          enabled: true,
+          mode: "at_period_end",
+          cancellation_reason: {
+            enabled: true,
+            options: [
+              "too_expensive",
+              "missing_features",
+              "switched_service",
+              "unused",
+              "customer_service",
+              "too_complex",
+              "low_quality",
+              "other",
+            ],
+          },
+        },
+        subscription_update: {
+          enabled: false,
+          default_allowed_updates: [],
+          proration_behavior: "none",
+          products: [],
+        },
+      },
+    },
     debug: false,
     store: "store",
     logger: new Logger(config.debug || false),
