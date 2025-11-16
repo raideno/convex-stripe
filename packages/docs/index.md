@@ -209,8 +209,15 @@ export const setupCustomer = action({
 
 ### `sync` Action
 
-Sync all existing data on stripe to convex database.
+Synchronizes Stripe resources with your Convex database.
 
+This action is typically manually called or setup to be automatically called in your ci/cd pipeline.
+
+**Parameters:**
+
+- `data` (optional, default: `true`): Syncs all existing Stripe resources to Convex tables.
+- `webhook` (optional, default: `false`): Creates/updates the webhook endpoint. Returns the webhook secret if a new endpoint is created. You must set it in your convex environment variables as `STRIPE_WEBHOOK_SECRET`.
+- `portal` (optional, default: `false`): Creates the default billing portal configuration if it doesn't exist.
 
 ### `subscribe` Function
 
