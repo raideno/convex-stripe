@@ -1,8 +1,8 @@
-import { Infer, v, Validator } from "convex/values";
+import { Infer, Validator } from "convex/values";
 
 import { Logger } from "@/logger";
 import { stripeTables } from "@/schema";
-import { AnyDataModel, GenericMutationCtx } from "convex/server";
+import { GenericMutationCtx } from "convex/server";
 import { StoreImplementation } from "./store";
 
 export interface InternalConfiguration {

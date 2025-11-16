@@ -7,8 +7,8 @@ import { SyncPortalImplementation } from "./portal";
 import { SyncWebhookImplementation } from "./webhook";
 
 const DEFAULT_SYNC_DATA = true;
-const DEFAULT_SYNC_WEBHOOK = true;
-const DEFAULT_SYNC_PORTAL = true;
+const DEFAULT_SYNC_WEBHOOK = false;
+const DEFAULT_SYNC_PORTAL = false;
 
 export const SyncImplementation = defineActionImplementation({
   args: v.object({
@@ -26,15 +26,23 @@ export const SyncImplementation = defineActionImplementation({
     },
     configuration
   ) => {
-    const jobs = [];
-
-    if (syncData)
-      jobs.push(SyncDataImplementation.handler(context, {}, configuration));
-    if (syncWebhook)
-      jobs.push(SyncWebhookImplementation.handler(context, {}, configuration));
-    if (syncPortal)
-      jobs.push(SyncPortalImplementation.handler(context, {}, configuration));
-
-    return await Promise.all(jobs);
+    try {
+      if (syncData)
+        await SyncDataImplementation.handler(context, {}, configuration);
+    } catch (error) {
+      console.error("Failed to sync data:", error);
+    }
+    try {
+      if (syncWebhook)
+        await SyncWebhookImplementation.handler(context, {}, configuration);
+    } catch (error) {
+      console.error("Failed to sync webhook:", error);
+    }
+    try {
+      if (syncPortal)
+        await SyncPortalImplementation.handler(context, {}, configuration);
+    } catch (error) {
+      console.error("Failed to sync portal:", error);
+    }
   },
 });

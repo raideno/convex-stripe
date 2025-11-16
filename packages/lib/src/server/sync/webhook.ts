@@ -9,7 +9,7 @@ export const SyncWebhookImplementation = defineActionImplementation({
   args: v.object({}),
   name: "syncWebhook",
   handler: async (context, args, configuration) => {
-    const url = `${configuration.webhook.path}/stripe/webhook`;
+    const url = `${process.env.CONVEX_SITE_URL}${configuration.webhook.path}`;
 
     const events = new Set(
       WEBHOOK_HANDLERS.map((handler) => handler.events).flat()
