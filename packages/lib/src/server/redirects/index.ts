@@ -3,9 +3,9 @@ import { GenericActionCtx } from "convex/server";
 import { StripeDataModel } from "@/schema";
 import { InferArgs, InternalConfiguration } from "@/types";
 
-import { PayReturnImplementation } from "./pay";
-import { PortalReturnImplementation } from "./portal";
-import { SubscribeReturnImplementation } from "./subscribe";
+import { PayReturnImplementation } from "./handlers/pay.handler";
+import { PortalReturnImplementation } from "./handlers/portal.handler";
+import { SubscribeReturnImplementation } from "./handlers/subscribe.handler";
 import { RedirectHandler } from "./types";
 
 export function backendBaseUrl(configuration: InternalConfiguration): string {
@@ -160,37 +160,6 @@ export const REDIRECT_HANDLERS = [
   SubscribeReturnImplementation,
   PayReturnImplementation,
 ] as const;
-
-// const _ = compileTime(() => {
-//   console.log();
-
-//   const origins = REDIRECT_HANDLERS.map((handler) => new Set(handler.origins));
-
-//   const intersections: Array<[number, number]> = [];
-
-//   for (let i = 0; i < origins.length; i++) {
-//     for (let j = i + 1; j < origins.length; j++) {
-//       const hasOverlap = [...origins[i]].some((origin) =>
-//         origins[j].has(origin)
-//       );
-
-//       if (hasOverlap) {
-//         intersections.push([i, j]);
-//       }
-//     }
-//   }
-
-//   if (intersections.length > 0) {
-//     intersections.forEach(([i, j]) => {
-//       console.log(
-//         `Error: Redirect handlers at index ${i} and ${j} have overlapping origins.`
-//       );
-//     });
-//     throw new Error("Redirect handlers have overlapping origins");
-//   }
-
-//   return true;
-// });
 
 type AllRedirectHandlers = (typeof REDIRECT_HANDLERS)[number];
 

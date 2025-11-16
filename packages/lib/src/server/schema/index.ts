@@ -5,29 +5,29 @@ import {
 } from "convex/server";
 import { v } from "convex/values";
 
-import { ChargeSchema } from "@/schema/charge";
-import { CheckoutSessionSchema } from "@/schema/checkout-session";
-import { CouponSchema } from "@/schema/coupon";
-import { CreditNoteSchema } from "@/schema/credit-note";
-import { CustomerSchema } from "@/schema/customer";
-import { DisputeSchema } from "@/schema/dispute";
-import { EarlyFraudWarningSchema } from "@/schema/early-fraud-warning";
-import { InvoiceSchema } from "@/schema/invoice";
-import { MandateSchema } from "@/schema/mandate";
-import { PaymentIntentSchema } from "@/schema/payment-intent";
-import { BillingPortalConfigurationSchema } from "@/schema/billing-portal-configuration";
-import { PaymentMethodSchema } from "@/schema/payment-method";
-import { PayoutSchema } from "@/schema/payout";
-import { PlanSchema } from "@/schema/plan";
-import { PriceSchema } from "@/schema/price";
-import { ProductSchema } from "@/schema/product";
-import { PromotionCodeSchema } from "@/schema/promotion-code";
-import { RefundSchema } from "@/schema/refund";
-import { ReviewSchema } from "@/schema/review";
-import { SetupIntentSchema } from "@/schema/setup-intent";
-import { SubscriptionObject } from "@/schema/subscription";
-import { SubscriptionScheduleSchema } from "@/schema/subscription-schedule";
-import { TaxIdSchema } from "@/schema/tax-id";
+import { BillingPortalConfigurationSchema } from "@/schema/models/billing-portal-configuration";
+import { ChargeSchema } from "@/schema/models/charge";
+import { CheckoutSessionSchema } from "@/schema/models/checkout-session";
+import { CouponSchema } from "@/schema/models/coupon";
+import { CreditNoteSchema } from "@/schema/models/credit-note";
+import { CustomerSchema } from "@/schema/models/customer";
+import { DisputeSchema } from "@/schema/models/dispute";
+import { EarlyFraudWarningSchema } from "@/schema/models/early-fraud-warning";
+import { InvoiceSchema } from "@/schema/models/invoice";
+import { MandateSchema } from "@/schema/models/mandate";
+import { PaymentIntentSchema } from "@/schema/models/payment-intent";
+import { PaymentMethodSchema } from "@/schema/models/payment-method";
+import { PayoutSchema } from "@/schema/models/payout";
+import { PlanSchema } from "@/schema/models/plan";
+import { PriceSchema } from "@/schema/models/price";
+import { ProductSchema } from "@/schema/models/product";
+import { PromotionCodeSchema } from "@/schema/models/promotion-code";
+import { RefundSchema } from "@/schema/models/refund";
+import { ReviewSchema } from "@/schema/models/review";
+import { SetupIntentSchema } from "@/schema/models/setup-intent";
+import { SubscriptionObject } from "@/schema/models/subscription";
+import { SubscriptionScheduleSchema } from "@/schema/models/subscription-schedule";
+import { TaxIdSchema } from "@/schema/models/tax-id";
 
 export const stripeTables = {
   stripeProducts: defineTable({

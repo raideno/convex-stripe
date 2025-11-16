@@ -2,11 +2,11 @@ import { v } from "convex/values";
 
 import { storeDispatchTyped } from "@/store";
 
-import { SubscriptionSyncImplementation } from "../sync/handlers/subscription";
-import { defineRedirectHandler } from "./types";
+import { SubscriptionSyncImplementation } from "../../sync/handlers/subscription";
+import { defineRedirectHandler } from "../types";
 
-export const PortalReturnImplementation = defineRedirectHandler({
-  origins: ["portal-return"],
+export const SubscribeReturnImplementation = defineRedirectHandler({
+  origins: ["subscribe-cancel", "subscribe-success", "subscribe-return"],
   data: {
     entityId: v.string(),
   },

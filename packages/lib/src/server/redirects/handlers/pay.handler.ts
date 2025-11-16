@@ -2,13 +2,15 @@ import { v } from "convex/values";
 
 import { storeDispatchTyped } from "@/store";
 
-import { SubscriptionSyncImplementation } from "../sync/handlers/subscription";
-import { defineRedirectHandler } from "./types";
+import { SubscriptionSyncImplementation } from "../../sync/handlers/subscription";
+import { defineRedirectHandler } from "../types";
 
-export const SubscribeReturnImplementation = defineRedirectHandler({
-  origins: ["subscribe-cancel", "subscribe-success", "subscribe-return"],
+export const PayReturnImplementation = defineRedirectHandler({
+  origins: ["pay-cancel", "pay-success", "pay-return"],
   data: {
     entityId: v.string(),
+    customerId: v.string(),
+    referenceId: v.string(),
   },
   handle: async (origin, context, data, configuration) => {
     const customer = await storeDispatchTyped(
