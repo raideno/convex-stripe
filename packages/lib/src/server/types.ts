@@ -1,7 +1,9 @@
-import { Infer, Validator } from "convex/values";
+import { Infer, v, Validator } from "convex/values";
 
 import { Logger } from "@/logger";
 import { stripeTables } from "@/schema";
+import { AnyDataModel, GenericMutationCtx } from "convex/server";
+import { StoreImplementation } from "./store";
 
 export interface InternalConfiguration {
   stripe: {
@@ -14,6 +16,16 @@ export interface InternalConfiguration {
     description: string;
     path: string;
   };
+
+  callback?: {
+    unstable__afterChange?: (
+      context: GenericMutationCtx<any>,
+      args: InferArgs<(typeof StoreImplementation)["args"]>,
+      returned: any
+    ) => Promise<void>;
+  };
+
+  store: string;
 
   redirectTtlMs: number;
 
@@ -31,7 +43,7 @@ export type WithOptional<T, K extends keyof T = never> = Omit<T, K> &
 
 export type InputConfiguration = WithOptional<
   InternalConfiguration,
-  "base" | "debug" | "logger" | "sync" | "redirectTtlMs" | "webhook"
+  "base" | "store" | "debug" | "logger" | "sync" | "redirectTtlMs" | "webhook"
 >;
 
 export type ArgSchema = Record<

@@ -55,6 +55,7 @@ export const normalizeConfiguration = (
       metadata: config.webhook?.metadata || DEFAULT_METADATA,
     },
     debug: false,
+    store: "store",
     logger: new Logger(config.debug || false),
     base: config.base || "stripe",
   };
