@@ -3,10 +3,43 @@ import { GenericActionCtx } from "convex/server";
 import { StripeDataModel } from "@/schema";
 import { InferArgs, InternalConfiguration } from "@/types";
 
-import { PayReturnImplementation } from "./handlers/pay.handler";
-import { PortalReturnImplementation } from "./handlers/portal.handler";
-import { SubscribeReturnImplementation } from "./handlers/subscribe.handler";
-import { RedirectHandler } from "./types";
+import { defineRedirectHandler, RedirectHandler } from "./types";
+
+const HANDLERS_MODULES = Object.values(
+  import.meta.glob("./handlers/*.handler.ts", {
+    eager: true,
+  })
+) as unknown as Array<Record<string, ReturnType<typeof defineRedirectHandler>>>;
+
+if (HANDLERS_MODULES.some((handler) => Object.keys(handler).length > 1))
+  throw new Error(
+    "Each redirect handler file should only have one export / default export"
+  );
+
+export const REDIRECT_HANDLERS = HANDLERS_MODULES.map(
+  (exports) => Object.values(exports)[0]
+);
+
+if (
+  REDIRECT_HANDLERS.some(
+    (handler) => !["origins", "data", "handle"].every((key) => key in handler)
+  )
+)
+  throw new Error(
+    "Each redirect handler file should export a valid implementation"
+  );
+
+const originToHandlers = new Map<string, number>();
+REDIRECT_HANDLERS.forEach((handler, handlerIndex) => {
+  handler.origins.forEach((origin) => {
+    if (originToHandlers.has(origin)) {
+      throw new Error(
+        `Origin "${origin}" is used by multiple handlers (handler indices: ${originToHandlers.get(origin)}, ${handlerIndex})`
+      );
+    }
+    originToHandlers.set(origin, handlerIndex);
+  });
+});
 
 export function backendBaseUrl(configuration: InternalConfiguration): string {
   return process.env.CONVEX_SITE_URL!;
@@ -153,13 +186,6 @@ export async function decodeSignedPayload<O extends ReturnOrigin>({
     return { error: "Invalid token" };
   }
 }
-
-// NOTE: multiple handlers with the same origin are not supported yet
-export const REDIRECT_HANDLERS = [
-  PortalReturnImplementation,
-  SubscribeReturnImplementation,
-  PayReturnImplementation,
-] as const;
 
 type AllRedirectHandlers = (typeof REDIRECT_HANDLERS)[number];
 
