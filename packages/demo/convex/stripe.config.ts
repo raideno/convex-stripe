@@ -6,8 +6,5 @@ export default {
     webhook_secret: process.env.STRIPE_WEBHOOK_SECRET!,
   },
 
-  convex: { projectId: "amicable-marmot-910" },
-
-  store: "stripe:store",
   debug: true,
 } as InputConfiguration;

@@ -82,7 +82,7 @@ export const UserForm = () => {
     <Card>
       <Box>
         <Heading size={"6"}>Welcome {username}!</Heading>
-        {subscription ? (
+        {subscription && subscription.status === "active" ? (
           <Heading weight={"regular"} size={"6"}>
             You are subscribed{" "}
             <Text weight={"bold"}>
@@ -96,7 +96,7 @@ export const UserForm = () => {
           </Heading>
         )}
         <Box mt={"4"} mb={"5"}>
-          {subscription && start && end && (
+          {subscription && subscription.status === "active" && start && end && (
             <>
               <Text as="div">
                 Period:{" "}
@@ -116,9 +116,9 @@ export const UserForm = () => {
           )}
         </Box>
         <Flex direction={"column"} gap={"3"}>
-          {subscription && (
+          {subscription && subscription.status === "active" && (
             <Button
-              className="!w-full"
+              className="w-full!"
               variant="classic"
               onClick={handlePortal}
               loading={loading === "portal"}
@@ -127,7 +127,7 @@ export const UserForm = () => {
             </Button>
           )}
           <Button
-            className="!w-full"
+            className="w-full!"
             color="red"
             variant="soft"
             onClick={handleSignout}

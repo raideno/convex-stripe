@@ -2,9 +2,9 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { internalConvexStripe } from "@raideno/convex-stripe/server";
 import { v } from "convex/values";
 
-import { action, internalMutation, mutation, query } from "./_generated/server";
-import configuration from "./stripe.config";
 import { internal } from "./_generated/api";
+import { action, internalMutation, query } from "./_generated/server";
+import configuration from "./stripe.config";
 
 export const { stripe, store, sync, setup } =
   internalConvexStripe(configuration);
@@ -39,10 +39,10 @@ export const pay = action({
     const checkout = await stripe.pay(context as any, {
       referenceId: orderId,
       entityId: userId,
-      // metadata: {},
+      mode: "payment",
       line_items: [{ price: args.priceId, quantity: 1 }],
-      success: { url: `${process.env.SITE_URL}/?return-from-pay=success` },
-      cancel: { url: `${process.env.SITE_URL}/?return-from-pay=cancel` },
+      success_url: `${process.env.SITE_URL}/?return-from-pay=success`,
+      cancel_url: `${process.env.SITE_URL}/?return-from-pay=cancel`,
     });
 
     await context.runMutation(internal.stripe.createInternalPaymentRecord, {
@@ -72,8 +72,9 @@ export const subscribe = action({
     const checkout = await stripe.subscribe(context as any, {
       entityId: userId,
       priceId: args.priceId,
-      success: { url: `${process.env.SITE_URL}/?return-from-checkout=success` },
-      cancel: { url: `${process.env.SITE_URL}/?return-from-checkout=cancel` },
+      mode: "subscription",
+      success_url: `${process.env.SITE_URL}/?return-from-checkout=success`,
+      cancel_url: `${process.env.SITE_URL}/?return-from-checkout=cancel`,
     });
 
     return checkout;
@@ -162,7 +163,7 @@ export const portal = action({
 
     const portal = await stripe.portal(context as any, {
       entityId: userId,
-      return: { url: `${process.env.SITE_URL}/?return-from-portal=success` },
+      return_url: `${process.env.SITE_URL}/?return-from-portal=success`,
     });
 
     return portal;
