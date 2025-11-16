@@ -63,6 +63,15 @@ export const StoreImplementation = defineMutationImplementation({
           args.data as any
         );
         returned = { id };
+        if (
+          configuration.callback &&
+          configuration.callback.unstable__afterChange
+        )
+          await configuration.callback.unstable__afterChange(
+            context,
+            args,
+            returned
+          );
         return { id };
       }
 
@@ -80,6 +89,15 @@ export const StoreImplementation = defineMutationImplementation({
           args.idValue as any
         );
         returned = { deleted };
+        if (
+          configuration.callback &&
+          configuration.callback.unstable__afterChange
+        )
+          await configuration.callback.unstable__afterChange(
+            context,
+            args,
+            returned
+          );
         return { deleted };
       }
 
@@ -97,6 +115,15 @@ export const StoreImplementation = defineMutationImplementation({
           args.value as any
         );
         returned = { doc };
+        if (
+          configuration.callback &&
+          configuration.callback.unstable__afterChange
+        )
+          await configuration.callback.unstable__afterChange(
+            context,
+            args,
+            returned
+          );
         return { doc };
       }
 
@@ -106,22 +133,33 @@ export const StoreImplementation = defineMutationImplementation({
         }
         const doc = await selectById(context, table, args.id as GenericId<any>);
         returned = { doc };
+        if (
+          configuration.callback &&
+          configuration.callback.unstable__afterChange
+        )
+          await configuration.callback.unstable__afterChange(
+            context,
+            args,
+            returned
+          );
         return { doc };
       }
 
       case "selectAll": {
         const docs = await selectAll(context, table);
         returned = { docs };
+        if (
+          configuration.callback &&
+          configuration.callback.unstable__afterChange
+        )
+          await configuration.callback.unstable__afterChange(
+            context,
+            args,
+            returned
+          );
         return { docs };
       }
     }
-
-    if (configuration.callback && configuration.callback.unstable__afterChange)
-      await configuration.callback.unstable__afterChange(
-        context,
-        args,
-        returned
-      );
   },
 });
 

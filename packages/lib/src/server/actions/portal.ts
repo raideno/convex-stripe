@@ -80,7 +80,7 @@ export const PortalImplementation = defineActionCallableFunction<
         customer: customerId,
         return_url: returnUrl,
       },
-      options
+      Object.keys(options).length === 0 ? undefined : options
     );
 
     return portal;

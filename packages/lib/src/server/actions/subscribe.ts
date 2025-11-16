@@ -129,7 +129,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
         },
         expand: [...(args.expand || []), "subscription"],
       },
-      options
+      Object.keys(options).length === 0 ? undefined : options
     );
 
     await storeDispatchTyped(

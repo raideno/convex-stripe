@@ -129,7 +129,7 @@ export const PayImplementation = defineActionCallableFunction<
         },
         expand: [...(args.expand || []), "payment_intent"],
       },
-      options
+      Object.keys(options).length === 0 ? undefined : options
     );
 
     await storeDispatchTyped(
