@@ -1,4 +1,4 @@
-import { ReviewStripeToConvex } from "@/schema/review";
+import { ReviewStripeToConvex } from "@/schema/models/review";
 import { storeDispatchTyped } from "@/store";
 
 import { defineWebhookHandler } from "../types";

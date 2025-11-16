@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
-import { CouponStripeToConvex } from "@/schema/coupon";
+import { CouponStripeToConvex } from "@/schema/models/coupon";
 import { storeDispatchTyped } from "@/store";
 
 export const CouponsSyncImplementation = defineActionImplementation({

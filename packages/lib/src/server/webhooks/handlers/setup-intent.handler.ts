@@ -1,4 +1,4 @@
-import { SetupIntentStripeToConvex } from "@/schema/setup-intent";
+import { SetupIntentStripeToConvex } from "@/schema/models/setup-intent";
 import { storeDispatchTyped } from "@/store";
 
 import { defineWebhookHandler } from "../types";

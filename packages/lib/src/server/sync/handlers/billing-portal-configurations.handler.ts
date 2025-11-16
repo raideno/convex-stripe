@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
-import { BillingPortalConfigurationStripeToConvex } from "@/schema/billing-portal-configuration";
+import { BillingPortalConfigurationStripeToConvex } from "@/schema/models/billing-portal-configuration";
 import { storeDispatchTyped } from "@/store";
 
 export const BillingPortalConfigurationsSyncImplementation =

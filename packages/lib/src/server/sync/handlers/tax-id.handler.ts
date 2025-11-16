@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
-import { TaxIdStripeToConvex } from "@/schema/tax-id";
+import { TaxIdStripeToConvex } from "@/schema/models/tax-id";
 import { storeDispatchTyped } from "@/store";
 
 export const TaxIdsSyncImplementation = defineActionImplementation({

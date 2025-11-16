@@ -1,4 +1,4 @@
-import { BillingPortalConfigurationStripeToConvex } from "@/schema/billing-portal-configuration";
+import { BillingPortalConfigurationStripeToConvex } from "@/schema/models/billing-portal-configuration";
 import { storeDispatchTyped } from "@/store";
 
 import { defineWebhookHandler } from "../types";

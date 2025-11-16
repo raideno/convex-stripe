@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
-import { PriceStripeToConvex } from "@/schema/price";
+import { PriceStripeToConvex } from "@/schema/models/price";
 import { storeDispatchTyped } from "@/store";
 
 export const PricesSyncImplementation = defineActionImplementation({

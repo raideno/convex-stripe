@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
-import { SetupIntentStripeToConvex } from "@/schema/setup-intent";
+import { SetupIntentStripeToConvex } from "@/schema/models/setup-intent";
 import { storeDispatchTyped } from "@/store";
 
 export const SetupIntentsSyncImplementation = defineActionImplementation({

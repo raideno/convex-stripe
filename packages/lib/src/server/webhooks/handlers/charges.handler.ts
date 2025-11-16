@@ -1,4 +1,4 @@
-import { ChargeStripeToConvex } from "@/schema/charge";
+import { ChargeStripeToConvex } from "@/schema/models/charge";
 import { storeDispatchTyped } from "@/store";
 
 import { defineWebhookHandler } from "../types";

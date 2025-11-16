@@ -1,4 +1,4 @@
-import { RefundStripeToConvex } from "@/schema/refund";
+import { RefundStripeToConvex } from "@/schema/models/refund";
 import { storeDispatchTyped } from "@/store";
 
 import { defineWebhookHandler } from "../types";

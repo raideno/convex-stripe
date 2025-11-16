@@ -2,8 +2,8 @@ import Stripe from "stripe";
 
 import { SetupImplementation } from "@/actions/setup";
 import { buildSignedReturnUrl } from "@/redirects";
-import { CheckoutSessionStripeToConvex } from "@/schema/checkout-session";
-import { SubscriptionStripeToConvex } from "@/schema/subscription";
+import { CheckoutSessionStripeToConvex } from "@/schema/models/checkout-session";
+import { SubscriptionStripeToConvex } from "@/schema/models/subscription";
 import { storeDispatchTyped } from "@/store";
 
 import { defineActionCallableFunction } from "../helpers";

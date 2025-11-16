@@ -1,4 +1,4 @@
-import { CheckoutSessionStripeToConvex } from "@/schema/checkout-session";
+import { CheckoutSessionStripeToConvex } from "@/schema/models/checkout-session";
 import { storeDispatchTyped } from "@/store";
 
 import { defineWebhookHandler } from "../types";

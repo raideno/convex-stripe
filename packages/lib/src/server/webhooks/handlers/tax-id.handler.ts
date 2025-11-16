@@ -1,4 +1,4 @@
-import { TaxIdStripeToConvex } from "@/schema/tax-id";
+import { TaxIdStripeToConvex } from "@/schema/models/tax-id";
 import { storeDispatchTyped } from "@/store";
 
 import { defineWebhookHandler } from "../types";

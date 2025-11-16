@@ -1,4 +1,4 @@
-import { PromotionCodeStripeToConvex } from "@/schema/promotion-code";
+import { PromotionCodeStripeToConvex } from "@/schema/models/promotion-code";
 import { storeDispatchTyped } from "@/store";
 
 import { defineWebhookHandler } from "../types";

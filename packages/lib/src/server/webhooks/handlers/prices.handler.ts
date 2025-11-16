@@ -1,4 +1,4 @@
-import { PriceStripeToConvex } from "@/schema/price";
+import { PriceStripeToConvex } from "@/schema/models/price";
 import { storeDispatchTyped } from "@/store";
 
 import { defineWebhookHandler } from "../types";

@@ -1,4 +1,4 @@
-import { CouponStripeToConvex } from "@/schema/coupon";
+import { CouponStripeToConvex } from "@/schema/models/coupon";
 import { storeDispatchTyped } from "@/store";
 
 import { defineWebhookHandler } from "../types";

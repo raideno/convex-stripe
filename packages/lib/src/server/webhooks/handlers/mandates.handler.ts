@@ -1,4 +1,4 @@
-import { MandateStripeToConvex } from "@/schema/mandate";
+import { MandateStripeToConvex } from "@/schema/models/mandate";
 import { storeDispatchTyped } from "@/store";
 
 import { defineWebhookHandler } from "../types";

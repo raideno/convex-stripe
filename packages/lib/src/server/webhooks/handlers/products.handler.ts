@@ -1,4 +1,4 @@
-import { ProductStripeToConvex } from "@/schema/product";
+import { ProductStripeToConvex } from "@/schema/models/product";
 import { storeDispatchTyped } from "@/store";
 
 import { defineWebhookHandler } from "../types";

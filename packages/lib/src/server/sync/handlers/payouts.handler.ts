@@ -2,7 +2,7 @@ import Stripe from "stripe";
 import { v } from "convex/values";
 
 import { defineActionImplementation } from "@/helpers";
-import { PayoutStripeToConvex } from "@/schema/payout";
+import { PayoutStripeToConvex } from "@/schema/models/payout";
 import { storeDispatchTyped } from "@/store";
 
 export const PayoutsSyncImplementation = defineActionImplementation({

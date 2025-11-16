@@ -2,8 +2,8 @@ import Stripe from "stripe";
 
 import { SetupImplementation } from "@/actions/setup";
 import { buildSignedReturnUrl } from "@/redirects";
-import { CheckoutSessionStripeToConvex } from "@/schema/checkout-session";
-import { PaymentIntentStripeToConvex } from "@/schema/payment-intent";
+import { CheckoutSessionStripeToConvex } from "@/schema/models/checkout-session";
+import { PaymentIntentStripeToConvex } from "@/schema/models/payment-intent";
 import { storeDispatchTyped } from "@/store";
 
 import { defineActionCallableFunction } from "../helpers";

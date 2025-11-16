@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
-import { CheckoutSessionStripeToConvex } from "@/schema/checkout-session";
+import { CheckoutSessionStripeToConvex } from "@/schema/models/checkout-session";
 import { storeDispatchTyped } from "@/store";
 
 export const CheckoutSessionsSyncImplementation = defineActionImplementation({

@@ -1,4 +1,4 @@
-import { PaymentIntentStripeToConvex } from "@/schema/payment-intent";
+import { PaymentIntentStripeToConvex } from "@/schema/models/payment-intent";
 import { storeDispatchTyped } from "@/store";
 
 import { defineWebhookHandler } from "../types";

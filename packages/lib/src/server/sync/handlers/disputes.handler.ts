@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
-import { DisputeStripeToConvex } from "@/schema/dispute";
+import { DisputeStripeToConvex } from "@/schema/models/dispute";
 import { storeDispatchTyped } from "@/store";
 
 export const DisputesSyncImplementation = defineActionImplementation({

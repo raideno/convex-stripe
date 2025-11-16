@@ -1,4 +1,4 @@
-import { DisputeStripeToConvex } from "@/schema/dispute";
+import { DisputeStripeToConvex } from "@/schema/models/dispute";
 import { storeDispatchTyped } from "@/store";
 
 import { defineWebhookHandler } from "../types";

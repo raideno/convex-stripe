@@ -1,4 +1,4 @@
-import { PayoutStripeToConvex } from "@/schema/payout";
+import { PayoutStripeToConvex } from "@/schema/models/payout";
 import { storeDispatchTyped } from "@/store";
 
 import { defineWebhookHandler } from "../types";

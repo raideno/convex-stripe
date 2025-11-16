@@ -1,4 +1,4 @@
-import { CreditNoteStripeToConvex } from "@/schema/credit-note";
+import { CreditNoteStripeToConvex } from "@/schema/models/credit-note";
 import { storeDispatchTyped } from "@/store";
 
 import { defineWebhookHandler } from "../types";

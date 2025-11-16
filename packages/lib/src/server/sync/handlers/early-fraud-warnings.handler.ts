@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
-import { EarlyFraudWarningStripeToConvex } from "@/schema/early-fraud-warning";
+import { EarlyFraudWarningStripeToConvex } from "@/schema/models/early-fraud-warning";
 import { storeDispatchTyped } from "@/store";
 
 export const EarlyFraudWarningsSyncImplementation = defineActionImplementation({

@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
-import { RefundStripeToConvex } from "@/schema/refund";
+import { RefundStripeToConvex } from "@/schema/models/refund";
 import { storeDispatchTyped } from "@/store";
 
 export const RefundsSyncImplementation = defineActionImplementation({

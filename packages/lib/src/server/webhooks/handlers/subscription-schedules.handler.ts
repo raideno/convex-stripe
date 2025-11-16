@@ -1,4 +1,4 @@
-import { SubscriptionScheduleStripeToConvex } from "@/schema/subscription-schedule";
+import { SubscriptionScheduleStripeToConvex } from "@/schema/models/subscription-schedule";
 import { storeDispatchTyped } from "@/store";
 
 import { defineWebhookHandler } from "../types";

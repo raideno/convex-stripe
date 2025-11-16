@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
-import { SubscriptionScheduleStripeToConvex } from "@/schema/subscription-schedule";
+import { SubscriptionScheduleStripeToConvex } from "@/schema/models/subscription-schedule";
 import { storeDispatchTyped } from "@/store";
 
 export const SubscriptionSchedulesSyncImplementation =
