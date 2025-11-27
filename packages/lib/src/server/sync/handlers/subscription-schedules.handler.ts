@@ -9,7 +9,7 @@ export const SubscriptionSchedulesSyncImplementation =
   defineActionImplementation({
     args: v.object({}),
     name: "subscriptionSchedules",
-    handler: async (context, args, configuration) => {
+    handler: async (context, args, configuration, options) => {
       if (configuration.sync.stripeSubscriptionSchedules !== true) return;
 
       const stripe = new Stripe(configuration.stripe.secret_key, {
@@ -22,7 +22,8 @@ export const SubscriptionSchedulesSyncImplementation =
           table: "stripeSubscriptionSchedules",
         },
         context,
-        configuration
+        configuration,
+        options
       );
       const localSubscriptionSchedulesById = new Map(
         (localSubscriptionSchedulesRes.docs || []).map((p: any) => [
@@ -52,7 +53,8 @@ export const SubscriptionSchedulesSyncImplementation =
             },
           },
           context,
-          configuration
+          configuration,
+          options
         );
       }
 
@@ -68,7 +70,8 @@ export const SubscriptionSchedulesSyncImplementation =
               idValue: subscriptionScheduleId,
             },
             context,
-            configuration
+            configuration,
+            options
           );
         }
       }

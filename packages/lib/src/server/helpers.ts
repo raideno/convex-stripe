@@ -1,8 +1,4 @@
-import {
-  AnyDataModel,
-  GenericActionCtx,
-  GenericMutationCtx,
-} from "convex/server";
+import { GenericActionCtx, GenericMutationCtx } from "convex/server";
 import { Infer, v, VObject } from "convex/values";
 
 import { Logger } from "@/logger";
@@ -11,7 +7,9 @@ import {
   ArgSchema,
   InferArgs,
   InputConfiguration,
+  InputOptions,
   InternalConfiguration,
+  InternalOptions,
 } from "@/types";
 
 export const DEFAULT_PATH = "/stripe/webhook";
@@ -96,10 +94,18 @@ export const normalizeConfiguration = (
         },
       },
     },
-    debug: false,
-    store: "store",
-    logger: new Logger(config.debug || false),
-    base: config.base || "stripe",
+  };
+};
+
+export const normalizeOptions = (
+  options: Partial<InputOptions>
+): InternalOptions => {
+  return {
+    ...options,
+    store: options.store || "store",
+    debug: options.debug || false,
+    logger: options.logger || new Logger(options.debug || false),
+    base: options.base || "stripe",
   };
 };
 
@@ -112,8 +118,9 @@ export const defineActionCallableFunction = <
   handler: (
     context: GenericActionCtx<StripeDataModel>,
     args: S,
-    options: O,
-    configuration: InternalConfiguration
+    stripeOptions: O,
+    configuration: InternalConfiguration,
+    options: InternalOptions
   ) => R;
 }) => spec;
 
@@ -126,7 +133,8 @@ export const defineActionImplementation = <
   handler: (
     context: GenericActionCtx<StripeDataModel>,
     args: Infer<S>,
-    configuration: InternalConfiguration
+    configuration: InternalConfiguration,
+    options: InternalOptions
   ) => R;
 }) => spec;
 
@@ -136,7 +144,8 @@ export const defineMutationImplementation = <S extends ArgSchema, R>(spec: {
   handler: (
     context: GenericMutationCtx<StripeDataModel>,
     args: InferArgs<S>,
-    configuration: InternalConfiguration
+    configuration: InternalConfiguration,
+    options: InternalOptions
   ) => R;
 }) => spec;
 

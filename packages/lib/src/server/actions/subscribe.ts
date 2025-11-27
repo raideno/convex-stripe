@@ -32,7 +32,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
   Promise<Stripe.Response<Stripe.Checkout.Session>>
 >({
   name: "subscriptionCheckout",
-  handler: async (context, args, options, configuration) => {
+  handler: async (context, args, stripeOptions, configuration, options) => {
     const createStripeCustomerIfMissing =
       args.createStripeCustomerIfMissing ??
       DEFAULT_CREATE_STRIPE_CUSTOMER_IF_MISSING;
@@ -49,7 +49,8 @@ export const SubscribeImplementation = defineActionCallableFunction<
         value: args.entityId,
       },
       context,
-      configuration
+      configuration,
+      options
     );
 
     let customerId = stripeCustomer?.doc?.customerId || null;
@@ -68,7 +69,8 @@ export const SubscribeImplementation = defineActionCallableFunction<
               email: undefined,
               metadata: undefined,
             },
-            configuration
+            configuration,
+            options
           )
         ).customerId;
       }
@@ -129,7 +131,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
         },
         expand: [...(args.expand || []), "subscription"],
       },
-      Object.keys(options).length === 0 ? undefined : options
+      Object.keys(stripeOptions).length === 0 ? undefined : stripeOptions
     );
 
     await storeDispatchTyped(
@@ -144,7 +146,8 @@ export const SubscribeImplementation = defineActionCallableFunction<
         },
       },
       context,
-      configuration
+      configuration,
+      options
     );
 
     const subscription = checkout.subscription;
@@ -167,7 +170,8 @@ export const SubscribeImplementation = defineActionCallableFunction<
           },
         },
         context,
-        configuration
+        configuration,
+        options
       );
     }
 

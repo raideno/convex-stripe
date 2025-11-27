@@ -12,7 +12,7 @@ export const PayReturnImplementation = defineRedirectHandler({
     customerId: v.string(),
     referenceId: v.string(),
   },
-  handle: async (origin, context, data, configuration) => {
+  handle: async (origin, context, data, configuration, options) => {
     const customer = await storeDispatchTyped(
       {
         operation: "selectOne",
@@ -21,7 +21,8 @@ export const PayReturnImplementation = defineRedirectHandler({
         value: data.entityId,
       },
       context,
-      configuration
+      configuration,
+      options
     );
 
     const customerId = customer?.doc?.customerId || null;
@@ -30,10 +31,11 @@ export const PayReturnImplementation = defineRedirectHandler({
       await SubscriptionSyncImplementation.handler(
         context,
         { customerId },
-        configuration
+        configuration,
+        options
       );
     } else {
-      configuration.logger.warn(
+      options.logger.warn(
         "Potential redirect abuse detected. No customerId associated with provided entityId " +
           data.entityId
       );

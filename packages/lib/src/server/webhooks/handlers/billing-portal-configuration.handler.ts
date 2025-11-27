@@ -8,7 +8,7 @@ export default defineWebhookHandler({
     "billing_portal.configuration.created",
     "billing_portal.configuration.updated",
   ],
-  handle: async (event, context, configuration) => {
+  handle: async (event, context, configuration, options) => {
     if (configuration.sync.stripeProducts !== true) return;
 
     const billingPortalConfiguration = event.data.object;
@@ -30,7 +30,8 @@ export default defineWebhookHandler({
             },
           },
           context,
-          configuration
+          configuration,
+          options
         );
         break;
     }

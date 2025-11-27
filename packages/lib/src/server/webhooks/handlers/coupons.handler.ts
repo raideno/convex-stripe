@@ -5,7 +5,7 @@ import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: ["coupon.created", "coupon.updated", "coupon.deleted"],
-  handle: async (event, context, configuration) => {
+  handle: async (event, context, configuration, options) => {
     if (configuration.sync.stripeCoupons !== true) return;
 
     const coupon = event.data.object;
@@ -25,7 +25,8 @@ export default defineWebhookHandler({
             },
           },
           context,
-          configuration
+          configuration,
+          options
         );
         break;
       case "coupon.deleted":
@@ -37,7 +38,8 @@ export default defineWebhookHandler({
             idValue: coupon.id,
           },
           context,
-          configuration
+          configuration,
+          options
         );
         break;
     }

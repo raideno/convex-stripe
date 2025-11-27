@@ -5,7 +5,7 @@ import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: ["promotion_code.created", "promotion_code.updated"],
-  handle: async (event, context, configuration) => {
+  handle: async (event, context, configuration, options) => {
     if (configuration.sync.stripePromotionCodes !== true) return;
 
     const promotionCode = event.data.object;
@@ -25,7 +25,8 @@ export default defineWebhookHandler({
             },
           },
           context,
-          configuration
+          configuration,
+          options
         );
         break;
     }

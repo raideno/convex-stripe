@@ -5,7 +5,7 @@ import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: ["credit_note.created", "credit_note.updated", "credit_note.voided"],
-  handle: async (event, context, configuration) => {
+  handle: async (event, context, configuration, options) => {
     if (configuration.sync.stripeCreditNotes !== true) return;
 
     const creditNote = event.data.object;
@@ -26,7 +26,8 @@ export default defineWebhookHandler({
             },
           },
           context,
-          configuration
+          configuration,
+          options
         );
         break;
     }

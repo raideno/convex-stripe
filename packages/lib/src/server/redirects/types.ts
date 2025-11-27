@@ -1,7 +1,12 @@
 import { GenericActionCtx } from "convex/server";
 
 import { StripeDataModel } from "@/schema";
-import { ArgSchema, InferArgs, InternalConfiguration } from "@/types";
+import {
+  ArgSchema,
+  InferArgs,
+  InternalConfiguration,
+  InternalOptions,
+} from "@/types";
 
 export type RedirectHandler<
   TOrigins extends readonly string[],
@@ -13,7 +18,8 @@ export type RedirectHandler<
     origin: TOrigins[number],
     context: GenericActionCtx<StripeDataModel>,
     data: InferArgs<S>,
-    configuration: InternalConfiguration
+    configuration: InternalConfiguration,
+    options: InternalOptions
   ) => Promise<void>;
 };
 

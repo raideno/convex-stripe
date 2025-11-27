@@ -8,7 +8,7 @@ import { storeDispatchTyped } from "@/store";
 export const CheckoutSessionsSyncImplementation = defineActionImplementation({
   args: v.object({}),
   name: "checkoutSessions",
-  handler: async (context, args, configuration) => {
+  handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeCheckoutSessions !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
@@ -21,7 +21,8 @@ export const CheckoutSessionsSyncImplementation = defineActionImplementation({
         table: "stripeCheckoutSessions",
       },
       context,
-      configuration
+      configuration,
+      options
     );
     const localCheckoutSessionsById = new Map(
       (localCheckoutSessionsRes.docs || []).map((p: any) => [
@@ -51,7 +52,8 @@ export const CheckoutSessionsSyncImplementation = defineActionImplementation({
           },
         },
         context,
-        configuration
+        configuration,
+        options
       );
     }
 
@@ -65,7 +67,8 @@ export const CheckoutSessionsSyncImplementation = defineActionImplementation({
             idValue: checkoutSessionId,
           },
           context,
-          configuration
+          configuration,
+          options
         );
       }
     }

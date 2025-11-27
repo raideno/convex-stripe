@@ -5,7 +5,7 @@ import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: ["mandate.updated"],
-  handle: async (event, context, configuration) => {
+  handle: async (event, context, configuration, options) => {
     if (configuration.sync.stripeMandates !== true) return;
 
     const mandate = event.data.object;
@@ -24,7 +24,8 @@ export default defineWebhookHandler({
             },
           },
           context,
-          configuration
+          configuration,
+          options
         );
         break;
     }

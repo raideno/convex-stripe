@@ -2,14 +2,15 @@ import { GenericActionCtx } from "convex/server";
 import Stripe from "stripe";
 
 import { StripeDataModel } from "@/schema";
-import { InternalConfiguration } from "@/types";
+import { InternalConfiguration, InternalOptions } from "@/types";
 
 export type WebhookHandler<TEvents extends Stripe.Event.Type> = {
   events: readonly TEvents[];
   handle: (
     event_: Extract<Stripe.Event, { type: TEvents }>,
     context: GenericActionCtx<StripeDataModel>,
-    configuration: InternalConfiguration
+    configuration: InternalConfiguration,
+    options: InternalOptions
   ) => Promise<void>;
 };
 

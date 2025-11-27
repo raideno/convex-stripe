@@ -2,7 +2,7 @@ import { GenericActionCtx } from "convex/server";
 import Stripe from "stripe";
 
 import { StripeDataModel } from "@/schema";
-import { InternalConfiguration } from "@/types";
+import { InternalConfiguration, InternalOptions } from "@/types";
 
 import { WebhookHandler } from "./types";
 
@@ -32,6 +32,7 @@ if (
 
 export const webhookImplementation = async (
   configuration: InternalConfiguration,
+  options: InternalOptions,
   context: GenericActionCtx<StripeDataModel>,
   request: Request,
   stripe_?: Stripe
@@ -56,15 +57,15 @@ export const webhookImplementation = async (
     configuration.stripe.webhook_secret
   );
 
-  configuration.logger.debug(`[STRIPE HOOK](RECEIVED): ${event.type}`);
+  options.logger.debug(`[STRIPE HOOK](RECEIVED): ${event.type}`);
 
   for (const handler of WEBHOOK_HANDLERS) {
     if (handler.events.includes(event.type)) {
       try {
-        await handler.handle(event, context, configuration);
-        configuration.logger.debug(`[STRIPE HOOK](HANDLED): ${event.type}`);
+        await handler.handle(event, context, configuration, options);
+        options.logger.debug(`[STRIPE HOOK](HANDLED): ${event.type}`);
       } catch (error) {
-        configuration.logger.error(`[STRIPE HOOK](Error): ${error}`);
+        options.logger.error(`[STRIPE HOOK](Error): ${error}`);
       }
     }
   }

@@ -22,7 +22,7 @@ export default defineWebhookHandler({
     "invoice.voided",
     "invoice.will_be_due",
   ],
-  handle: async (event, context, configuration) => {
+  handle: async (event, context, configuration, options) => {
     if (configuration.sync.stripeInvoices !== true) return;
 
     const invoice = event.data.object;
@@ -64,7 +64,8 @@ export default defineWebhookHandler({
             },
           },
           context,
-          configuration
+          configuration,
+          options
         );
         break;
     }

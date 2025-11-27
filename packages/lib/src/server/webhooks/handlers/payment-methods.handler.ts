@@ -10,7 +10,7 @@ export default defineWebhookHandler({
     "payment_method.detached",
     "payment_method.updated",
   ],
-  handle: async (event, context, configuration) => {
+  handle: async (event, context, configuration, options) => {
     if (configuration.sync.stripePaymentMethods !== true) return;
 
     const paymentMethod = event.data.object;
@@ -32,7 +32,8 @@ export default defineWebhookHandler({
             },
           },
           context,
-          configuration
+          configuration,
+          options
         );
         break;
     }

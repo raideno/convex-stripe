@@ -14,7 +14,7 @@ export default defineWebhookHandler({
     "payment_intent.requires_action",
     "payment_intent.succeeded",
   ],
-  handle: async (event, context, configuration) => {
+  handle: async (event, context, configuration, options) => {
     if (configuration.sync.stripePaymentIntents !== true) return;
 
     const paymentIntent = event.data.object;
@@ -40,7 +40,8 @@ export default defineWebhookHandler({
             },
           },
           context,
-          configuration
+          configuration,
+          options
         );
         break;
     }

@@ -24,23 +24,39 @@ export const SyncImplementation = defineActionImplementation({
       webhook: syncWebhook = DEFAULT_SYNC_WEBHOOK,
       portal: syncPortal = DEFAULT_SYNC_PORTAL,
     },
-    configuration
+    configuration,
+    options
   ) => {
     try {
       if (syncData)
-        await SyncDataImplementation.handler(context, {}, configuration);
+        await SyncDataImplementation.handler(
+          context,
+          {},
+          configuration,
+          options
+        );
     } catch (error) {
       console.error("Failed to sync data:", error);
     }
     try {
       if (syncWebhook)
-        await SyncWebhookImplementation.handler(context, {}, configuration);
+        await SyncWebhookImplementation.handler(
+          context,
+          {},
+          configuration,
+          options
+        );
     } catch (error) {
       console.error("Failed to sync webhook:", error);
     }
     try {
       if (syncPortal)
-        await SyncPortalImplementation.handler(context, {}, configuration);
+        await SyncPortalImplementation.handler(
+          context,
+          {},
+          configuration,
+          options
+        );
     } catch (error) {
       console.error("Failed to sync portal:", error);
     }

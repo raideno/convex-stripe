@@ -8,7 +8,7 @@ import { storeDispatchTyped } from "@/store";
 export const SubscriptionsSyncImplementation = defineActionImplementation({
   args: v.object({}),
   name: "subscriptions",
-  handler: async (context, args, configuration) => {
+  handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeSubscriptions !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
@@ -34,7 +34,7 @@ export const SubscriptionsSyncImplementation = defineActionImplementation({
           : null;
 
       if (!entityId) {
-        configuration.logger.warn(
+        options.logger.warn(
           `Subscription (${subscription.id}) don't have any entityId associated with it. This can be due to the subscription being created outside of convex-stripe's checkout flow.`
         );
       }
@@ -52,14 +52,16 @@ export const SubscriptionsSyncImplementation = defineActionImplementation({
           },
         },
         context,
-        configuration
+        configuration,
+        options
       );
     }
 
     const localSubsResponse = await storeDispatchTyped(
       { operation: "selectAll", table: "stripeSubscriptions" },
       context,
-      configuration
+      configuration,
+      options
     );
     const hasSub = new Set<string>(
       subscriptions.map((s) =>
@@ -81,7 +83,8 @@ export const SubscriptionsSyncImplementation = defineActionImplementation({
             },
           },
           context,
-          configuration
+          configuration,
+          options
         );
       }
     }

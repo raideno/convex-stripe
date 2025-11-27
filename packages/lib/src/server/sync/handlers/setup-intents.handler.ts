@@ -8,7 +8,7 @@ import { storeDispatchTyped } from "@/store";
 export const SetupIntentsSyncImplementation = defineActionImplementation({
   args: v.object({}),
   name: "setupIntents",
-  handler: async (context, args, configuration) => {
+  handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeSetupIntents !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
@@ -21,7 +21,8 @@ export const SetupIntentsSyncImplementation = defineActionImplementation({
         table: "stripeSetupIntents",
       },
       context,
-      configuration
+      configuration,
+      options
     );
     const localSetupIntentsById = new Map(
       (localSetupIntentsRes.docs || []).map((p: any) => [p.setupIntentId, p])
@@ -48,7 +49,8 @@ export const SetupIntentsSyncImplementation = defineActionImplementation({
           },
         },
         context,
-        configuration
+        configuration,
+        options
       );
     }
 
@@ -62,7 +64,8 @@ export const SetupIntentsSyncImplementation = defineActionImplementation({
             idValue: setupIntent,
           },
           context,
-          configuration
+          configuration,
+          options
         );
       }
     }

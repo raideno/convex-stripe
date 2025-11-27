@@ -9,7 +9,7 @@ export default defineWebhookHandler({
     "customer.tax_id.deleted",
     "customer.tax_id.updated",
   ],
-  handle: async (event, context, configuration) => {
+  handle: async (event, context, configuration, options) => {
     if (configuration.sync.stripeTaxIds !== true) return;
 
     const taxId = event.data.object;
@@ -35,7 +35,8 @@ export default defineWebhookHandler({
             },
           },
           context,
-          configuration
+          configuration,
+          options
         );
         break;
     }

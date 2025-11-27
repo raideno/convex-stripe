@@ -13,7 +13,7 @@ export default defineWebhookHandler({
     "charge.succeeded",
     "charge.updated",
   ],
-  handle: async (event, context, configuration) => {
+  handle: async (event, context, configuration, options) => {
     if (configuration.sync.stripeCharges !== true) return;
 
     const charge = event.data.object;
@@ -38,7 +38,8 @@ export default defineWebhookHandler({
             },
           },
           context,
-          configuration
+          configuration,
+          options
         );
         break;
     }

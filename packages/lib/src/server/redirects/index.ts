@@ -1,7 +1,7 @@
 import { GenericActionCtx } from "convex/server";
 
 import { StripeDataModel } from "@/schema";
-import { InferArgs, InternalConfiguration } from "@/types";
+import { InferArgs, InternalConfiguration, InternalOptions } from "@/types";
 
 import { defineRedirectHandler, RedirectHandler } from "./types";
 
@@ -206,6 +206,7 @@ export type ReturnOrigin = (typeof RETURN_ORIGINS)[number];
 
 export const redirectImplementation = async (
   configuration: InternalConfiguration,
+  options: InternalOptions,
   context: GenericActionCtx<StripeDataModel>,
   request: Request
 ) => {
@@ -265,12 +266,11 @@ export const redirectImplementation = async (
           origin as never,
           context,
           decoded.data as never,
-          configuration
+          configuration,
+          options
         );
       } catch (error) {
-        configuration.logger.error(
-          `[STRIPE RETURN ${origin}](Error): ${error}`
-        );
+        options.logger.error(`[STRIPE RETURN ${origin}](Error): ${error}`);
       }
       return new Response(null, {
         status: 302,

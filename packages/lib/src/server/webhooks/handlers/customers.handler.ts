@@ -5,7 +5,7 @@ import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: ["customer.created", "customer.updated", "customer.deleted"],
-  handle: async (event, context, configuration) => {
+  handle: async (event, context, configuration, options) => {
     if (configuration.sync.stripeCustomers !== true) return;
 
     const customer = event.data.object;
@@ -15,7 +15,7 @@ export default defineWebhookHandler({
       case "customer.created":
       case "customer.updated":
         if (!entityId)
-          configuration.logger.warn(
+          options.logger.warn(
             "No entityId associated with newly created customer. Skipping..."
           );
         else
@@ -32,7 +32,8 @@ export default defineWebhookHandler({
               },
             },
             context,
-            configuration
+            configuration,
+            options
           );
         break;
       case "customer.deleted":
@@ -44,7 +45,8 @@ export default defineWebhookHandler({
             idValue: customer.id,
           },
           context,
-          configuration
+          configuration,
+          options
         );
         break;
     }

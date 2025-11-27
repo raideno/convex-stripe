@@ -8,7 +8,7 @@ import { storeDispatchTyped } from "@/store";
 export const CreditNotesSyncImplementation = defineActionImplementation({
   args: v.object({}),
   name: "creditNotes",
-  handler: async (context, args, configuration) => {
+  handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeCreditNotes !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
@@ -21,7 +21,8 @@ export const CreditNotesSyncImplementation = defineActionImplementation({
         table: "stripeCreditNotes",
       },
       context,
-      configuration
+      configuration,
+      options
     );
     const localCreditNotesById = new Map(
       (localCreditNotesRes.docs || []).map((p: any) => [p.creditNoteId, p])
@@ -48,7 +49,8 @@ export const CreditNotesSyncImplementation = defineActionImplementation({
           },
         },
         context,
-        configuration
+        configuration,
+        options
       );
     }
 
@@ -62,7 +64,8 @@ export const CreditNotesSyncImplementation = defineActionImplementation({
             idValue: creditNoteId,
           },
           context,
-          configuration
+          configuration,
+          options
         );
       }
     }

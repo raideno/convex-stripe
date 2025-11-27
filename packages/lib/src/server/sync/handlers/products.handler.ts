@@ -8,7 +8,7 @@ import { storeDispatchTyped } from "@/store";
 export const ProductsSyncImplementation = defineActionImplementation({
   args: v.object({}),
   name: "products",
-  handler: async (context, args, configuration) => {
+  handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeProducts !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
@@ -21,7 +21,8 @@ export const ProductsSyncImplementation = defineActionImplementation({
         table: "stripeProducts",
       },
       context,
-      configuration
+      configuration,
+      options
     );
     const localProductsById = new Map(
       (localProductsResponse.docs || []).map((p) => [p.productId, p])
@@ -53,7 +54,8 @@ export const ProductsSyncImplementation = defineActionImplementation({
           },
         },
         context,
-        configuration
+        configuration,
+        options
       );
     }
 
@@ -67,7 +69,8 @@ export const ProductsSyncImplementation = defineActionImplementation({
             idValue: productId,
           },
           context,
-          configuration
+          configuration,
+          options
         );
       }
     }

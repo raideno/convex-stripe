@@ -12,7 +12,7 @@ export const SetupImplementation = defineActionImplementation({
     email: v.optional(v.string()),
     metadata: v.optional(v.record(v.string(), v.any())),
   }),
-  handler: async (context, args, configuration) => {
+  handler: async (context, args, configuration, options) => {
     const stripe = new Stripe(configuration.stripe.secret_key, {
       apiVersion: "2025-08-27.basil",
     });
@@ -27,7 +27,8 @@ export const SetupImplementation = defineActionImplementation({
         value: args.entityId,
       },
       context,
-      configuration
+      configuration,
+      options
     );
 
     let customerId = stripeCustomer?.doc?.customerId || null;
@@ -91,7 +92,8 @@ export const SetupImplementation = defineActionImplementation({
           },
         },
         context,
-        configuration
+        configuration,
+        options
       );
 
       customerId = customer.id;

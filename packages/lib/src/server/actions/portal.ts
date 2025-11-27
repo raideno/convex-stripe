@@ -18,7 +18,7 @@ export const PortalImplementation = defineActionCallableFunction<
   Promise<Stripe.Response<Stripe.BillingPortal.Session>>
 >({
   name: "portal",
-  handler: async (context, args, options, configuration) => {
+  handler: async (context, args, stripeOptions, configuration, options) => {
     const createStripeCustomerIfMissing =
       args.createStripeCustomerIfMissing ??
       DEFAULT_CREATE_STRIPE_CUSTOMER_IF_MISSING;
@@ -35,7 +35,8 @@ export const PortalImplementation = defineActionCallableFunction<
         value: args.entityId,
       },
       context,
-      configuration
+      configuration,
+      options
     );
 
     let customerId = stripeCustomer?.doc?.customerId || null;
@@ -54,7 +55,8 @@ export const PortalImplementation = defineActionCallableFunction<
               email: undefined,
               metadata: undefined,
             },
-            configuration
+            configuration,
+            options
           )
         ).customerId;
       }
@@ -80,7 +82,7 @@ export const PortalImplementation = defineActionCallableFunction<
         customer: customerId,
         return_url: returnUrl,
       },
-      Object.keys(options).length === 0 ? undefined : options
+      Object.keys(stripeOptions).length === 0 ? undefined : stripeOptions
     );
 
     return portal;

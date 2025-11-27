@@ -13,7 +13,7 @@ export default defineWebhookHandler({
     "subscription_schedule.released",
     "subscription_schedule.updated",
   ],
-  handle: async (event, context, configuration) => {
+  handle: async (event, context, configuration, options) => {
     if (configuration.sync.stripeSubscriptionSchedules !== true) return;
 
     const subscriptionSchedule = event.data.object;
@@ -38,7 +38,8 @@ export default defineWebhookHandler({
             },
           },
           context,
-          configuration
+          configuration,
+          options
         );
         break;
     }

@@ -15,14 +15,19 @@ import {
   SetupImplementation,
   SubscribeImplementation,
 } from "./actions";
-import { normalizeConfiguration } from "./helpers";
+import { normalizeConfiguration, normalizeOptions } from "./helpers";
 import { redirectImplementation } from "./redirects";
 import { StripeDataModel } from "./schema";
 import { StoreImplementation } from "./store";
 import { SyncImplementation } from "./sync";
 import { webhookImplementation } from "./webhooks";
 
-import type { InputConfiguration, InternalConfiguration } from "./types";
+import type {
+  InputConfiguration,
+  InputOptions,
+  InternalConfiguration,
+  InternalOptions,
+} from "./types";
 
 export { stripeTables } from "./schema";
 
@@ -30,7 +35,10 @@ export { Logger } from "./logger";
 
 export { InputConfiguration };
 
-const buildHttp = (configuration: InternalConfiguration) => ({
+const buildHttp = (
+  configuration: InternalConfiguration,
+  options: InternalOptions
+) => ({
   webhook: {
     path: "/stripe/webhook",
     method: "POST" as const as RoutableMethod,
@@ -41,6 +49,7 @@ const buildHttp = (configuration: InternalConfiguration) => ({
     ) => {
       return webhookImplementation(
         configuration,
+        options,
         context as unknown as GenericActionCtx<StripeDataModel>,
         request,
         stripe
@@ -56,6 +65,7 @@ const buildHttp = (configuration: InternalConfiguration) => ({
     ) => {
       return redirectImplementation(
         configuration,
+        options,
         context as unknown as GenericActionCtx<StripeDataModel>,
         request
       );
@@ -63,9 +73,18 @@ const buildHttp = (configuration: InternalConfiguration) => ({
   } as const,
 });
 
-export const internalConvexStripe = (configuration_: InputConfiguration) => {
-  const configuration = normalizeConfiguration(configuration_);
-  const http_ = buildHttp(configuration);
+export const internalConvexStripe = (
+  configuration_: InputConfiguration,
+  options_?: InputOptions
+) => {
+  const ConvexStripeInternalConfiguration =
+    normalizeConfiguration(configuration_);
+  const ConvexStripeInternalOptions = normalizeOptions(options_ || {});
+
+  const http_ = buildHttp(
+    ConvexStripeInternalConfiguration,
+    ConvexStripeInternalOptions
+  );
 
   return {
     stripe: {
@@ -96,7 +115,8 @@ export const internalConvexStripe = (configuration_: InputConfiguration) => {
           context as unknown as GenericActionCtx<StripeDataModel>,
           args,
           options,
-          configuration
+          ConvexStripeInternalConfiguration,
+          ConvexStripeInternalOptions
         ),
       subscribe: (
         context: GenericActionCtx<any>,
@@ -107,7 +127,8 @@ export const internalConvexStripe = (configuration_: InputConfiguration) => {
           context as unknown as GenericActionCtx<StripeDataModel>,
           args,
           options,
-          configuration
+          ConvexStripeInternalConfiguration,
+          ConvexStripeInternalOptions
         ),
       pay: (
         context: GenericActionCtx<any>,
@@ -118,23 +139,39 @@ export const internalConvexStripe = (configuration_: InputConfiguration) => {
           context as unknown as GenericActionCtx<StripeDataModel>,
           args,
           options,
-          configuration
+          ConvexStripeInternalConfiguration,
+          ConvexStripeInternalOptions
         ),
     },
     store: internalMutationGeneric({
       args: StoreImplementation.args,
       handler: async (context, args) =>
-        StoreImplementation.handler(context, args, configuration),
+        StoreImplementation.handler(
+          context,
+          args,
+          ConvexStripeInternalConfiguration,
+          ConvexStripeInternalOptions
+        ),
     }),
     sync: internalActionGeneric({
       args: SyncImplementation.args,
       handler: (context, args) =>
-        SyncImplementation.handler(context, args, configuration),
+        SyncImplementation.handler(
+          context,
+          args,
+          ConvexStripeInternalConfiguration,
+          ConvexStripeInternalOptions
+        ),
     }),
     setup: internalActionGeneric({
       args: SetupImplementation.args,
       handler: (context, args) =>
-        SetupImplementation.handler(context, args, configuration),
+        SetupImplementation.handler(
+          context,
+          args,
+          ConvexStripeInternalConfiguration,
+          ConvexStripeInternalOptions
+        ),
     }),
   };
 };

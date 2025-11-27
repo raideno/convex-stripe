@@ -11,7 +11,7 @@ export default defineWebhookHandler({
     "setup_intent.setup_failed",
     "setup_intent.succeeded",
   ],
-  handle: async (event, context, configuration) => {
+  handle: async (event, context, configuration, options) => {
     if (configuration.sync.stripeSetupIntents !== true) return;
 
     const setupIntent = event.data.object;
@@ -39,7 +39,8 @@ export default defineWebhookHandler({
             },
           },
           context,
-          configuration
+          configuration,
+          options
         );
         break;
     }

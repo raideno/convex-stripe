@@ -9,7 +9,7 @@ export const SubscriptionSyncImplementation = defineActionImplementation({
     customerId: v.string(),
   }),
   name: "syncSubscription",
-  handler: async (context, args, configuration) => {
+  handler: async (context, args, configuration, options) => {
     const stripe = new Stripe(configuration.stripe.secret_key, {
       apiVersion: "2025-08-27.basil",
     });
@@ -38,7 +38,8 @@ export const SubscriptionSyncImplementation = defineActionImplementation({
           },
         },
         context,
-        configuration
+        configuration,
+        options
       );
 
       return null;
@@ -59,7 +60,8 @@ export const SubscriptionSyncImplementation = defineActionImplementation({
         },
       },
       context,
-      configuration
+      configuration,
+      options
     );
 
     return subscription;

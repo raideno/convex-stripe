@@ -8,7 +8,7 @@ import { storeDispatchTyped } from "@/store";
 export const EarlyFraudWarningsSyncImplementation = defineActionImplementation({
   args: v.object({}),
   name: "early_fraud_warnings",
-  handler: async (context, args, configuration) => {
+  handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeEarlyFraudWarnings !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
@@ -21,7 +21,8 @@ export const EarlyFraudWarningsSyncImplementation = defineActionImplementation({
         table: "stripeEarlyFraudWarnings",
       },
       context,
-      configuration
+      configuration,
+      options
     );
     const localEarlyFraudWarningsById = new Map(
       (localEarlyFraudWarningsRes.docs || []).map((p: any) => [
@@ -51,7 +52,8 @@ export const EarlyFraudWarningsSyncImplementation = defineActionImplementation({
           },
         },
         context,
-        configuration
+        configuration,
+        options
       );
     }
 
@@ -67,7 +69,8 @@ export const EarlyFraudWarningsSyncImplementation = defineActionImplementation({
             idValue: early_fraud_warningId,
           },
           context,
-          configuration
+          configuration,
+          options
         );
       }
     }

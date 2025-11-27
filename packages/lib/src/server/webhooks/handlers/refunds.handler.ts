@@ -10,7 +10,7 @@ export default defineWebhookHandler({
     "refund.updated",
     "charge.refund.updated",
   ],
-  handle: async (event, context, configuration) => {
+  handle: async (event, context, configuration, options) => {
     if (configuration.sync.stripeRefunds !== true) return;
 
     const refund = event.data.object;
@@ -31,7 +31,8 @@ export default defineWebhookHandler({
             },
           },
           context,
-          configuration
+          configuration,
+          options
         );
         break;
     }

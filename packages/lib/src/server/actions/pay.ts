@@ -31,7 +31,7 @@ export const PayImplementation = defineActionCallableFunction<
   Promise<Stripe.Response<Stripe.Checkout.Session>>
 >({
   name: "pay",
-  handler: async (context, args, options, configuration) => {
+  handler: async (context, args, stripeOptions, configuration, options) => {
     const createStripeCustomerIfMissing =
       args.createStripeCustomerIfMissing ??
       DEFAULT_CREATE_STRIPE_CUSTOMER_IF_MISSING;
@@ -48,7 +48,8 @@ export const PayImplementation = defineActionCallableFunction<
         value: args.entityId,
       },
       context,
-      configuration
+      configuration,
+      options
     );
 
     let customerId = stripeCustomer?.doc?.customerId || null;
@@ -67,7 +68,8 @@ export const PayImplementation = defineActionCallableFunction<
               email: undefined,
               metadata: undefined,
             },
-            configuration
+            configuration,
+            options
           )
         ).customerId;
       }
@@ -129,7 +131,7 @@ export const PayImplementation = defineActionCallableFunction<
         },
         expand: [...(args.expand || []), "payment_intent"],
       },
-      Object.keys(options).length === 0 ? undefined : options
+      Object.keys(stripeOptions).length === 0 ? undefined : stripeOptions
     );
 
     await storeDispatchTyped(
@@ -144,7 +146,8 @@ export const PayImplementation = defineActionCallableFunction<
         },
       },
       context,
-      configuration
+      configuration,
+      options
     );
 
     const paymentIntent = checkout.payment_intent;
@@ -166,7 +169,8 @@ export const PayImplementation = defineActionCallableFunction<
           },
         },
         context,
-        configuration
+        configuration,
+        options
       );
     }
 

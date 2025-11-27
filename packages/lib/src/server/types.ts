@@ -7,6 +7,13 @@ import { stripeTables } from "@/schema";
 
 import { StoreImplementation } from "./store";
 
+export interface InternalOptions {
+  store: string;
+  debug: boolean;
+  logger: Logger;
+  base: string;
+}
+
 export interface InternalConfiguration {
   stripe: {
     secret_key: string;
@@ -29,17 +36,9 @@ export interface InternalConfiguration {
     ) => Promise<void>;
   };
 
-  store: string;
-
-  redirectTtlMs: number;
-
   sync: Partial<Record<keyof typeof stripeTables, boolean>>;
 
-  debug: boolean;
-
-  logger: Logger;
-
-  base: string;
+  redirectTtlMs: number;
 }
 
 export type WithOptional<T, K extends keyof T = never> = Omit<T, K> &
@@ -47,14 +46,12 @@ export type WithOptional<T, K extends keyof T = never> = Omit<T, K> &
 
 export type InputConfiguration = WithOptional<
   InternalConfiguration,
-  | "base"
-  | "portal"
-  | "store"
-  | "debug"
-  | "logger"
-  | "sync"
-  | "redirectTtlMs"
-  | "webhook"
+  "portal" | "sync" | "redirectTtlMs" | "webhook"
+>;
+
+export type InputOptions = WithOptional<
+  InternalOptions,
+  "store" | "debug" | "logger" | "base"
 >;
 
 export type ArgSchema = Record<

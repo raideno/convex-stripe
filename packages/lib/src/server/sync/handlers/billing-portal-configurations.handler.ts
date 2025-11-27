@@ -9,7 +9,7 @@ export const BillingPortalConfigurationsSyncImplementation =
   defineActionImplementation({
     args: v.object({}),
     name: "billingPortalConfigurations",
-    handler: async (context, args, configuration) => {
+    handler: async (context, args, configuration, options) => {
       if (configuration.sync.stripeBillingPortalConfigurations !== true) return;
 
       const stripe = new Stripe(configuration.stripe.secret_key, {
@@ -22,7 +22,8 @@ export const BillingPortalConfigurationsSyncImplementation =
           table: "stripeBillingPortalConfigurations",
         },
         context,
-        configuration
+        configuration,
+        options
       );
       const localBillingPortalConfigurationsById = new Map(
         (localBillingPortalConfigurationsRes.docs || []).map((p) => [
@@ -55,7 +56,8 @@ export const BillingPortalConfigurationsSyncImplementation =
             },
           },
           context,
-          configuration
+          configuration,
+          options
         );
       }
 
@@ -73,7 +75,8 @@ export const BillingPortalConfigurationsSyncImplementation =
               idValue: billingPortalConfigurationId,
             },
             context,
-            configuration
+            configuration,
+            options
           );
         }
       }

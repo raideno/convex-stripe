@@ -8,7 +8,7 @@ import { storeDispatchTyped } from "@/store";
 export const PaymentIntentsSyncImplementation = defineActionImplementation({
   args: v.object({}),
   name: "paymentIntents",
-  handler: async (context, args, configuration) => {
+  handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripePaymentIntents !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
@@ -21,7 +21,8 @@ export const PaymentIntentsSyncImplementation = defineActionImplementation({
         table: "stripePaymentIntents",
       },
       context,
-      configuration
+      configuration,
+      options
     );
     const localPaymentIntentsById = new Map(
       (localPaymentIntentsRes.docs || []).map((p: any) => [
@@ -51,7 +52,8 @@ export const PaymentIntentsSyncImplementation = defineActionImplementation({
           },
         },
         context,
-        configuration
+        configuration,
+        options
       );
     }
 
@@ -65,7 +67,8 @@ export const PaymentIntentsSyncImplementation = defineActionImplementation({
             idValue: paymentIntentId,
           },
           context,
-          configuration
+          configuration,
+          options
         );
       }
     }

@@ -8,7 +8,7 @@ import { storeDispatchTyped } from "@/store";
 export const TaxIdsSyncImplementation = defineActionImplementation({
   args: v.object({}),
   name: "taxIds",
-  handler: async (context, args, configuration) => {
+  handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeTaxIds !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
@@ -21,7 +21,8 @@ export const TaxIdsSyncImplementation = defineActionImplementation({
         table: "stripeTaxIds",
       },
       context,
-      configuration
+      configuration,
+      options
     );
     const localTaxIdsById = new Map(
       (localTaxIdsRes.docs || []).map((p: any) => [p.taxIdId, p])
@@ -48,7 +49,8 @@ export const TaxIdsSyncImplementation = defineActionImplementation({
           },
         },
         context,
-        configuration
+        configuration,
+        options
       );
     }
 
@@ -62,7 +64,8 @@ export const TaxIdsSyncImplementation = defineActionImplementation({
             idValue: taxIdId,
           },
           context,
-          configuration
+          configuration,
+          options
         );
       }
     }

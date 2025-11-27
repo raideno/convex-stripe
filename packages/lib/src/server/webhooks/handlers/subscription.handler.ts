@@ -23,7 +23,7 @@ export default defineWebhookHandler({
     "payment_intent.payment_failed",
     "payment_intent.canceled",
   ],
-  handle: async (event, context, configuration) => {
+  handle: async (event, context, configuration, options) => {
     if (configuration.sync.stripeSubscriptions !== true) return;
 
     const customerId =
@@ -37,7 +37,8 @@ export default defineWebhookHandler({
     await SubscriptionSyncImplementation.handler(
       context,
       { customerId },
-      configuration
+      configuration,
+      options
     );
   },
 });

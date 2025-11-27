@@ -1,10 +1,10 @@
-import { anyApi, GenericActionCtx } from "convex/server";
+import { GenericActionCtx } from "convex/server";
 import { GenericId, v } from "convex/values";
 
 import { defineMutationImplementation } from "@/helpers";
-import { StripeDataModel, stripeTables } from "@/schema";
+import { StripeDataModel } from "@/schema";
 
-import { InternalConfiguration } from "../types";
+import { InternalConfiguration, InternalOptions } from "../types";
 import { StoreDispatchArgs, StoreResultFor } from "./types";
 
 import {
@@ -67,11 +67,15 @@ export const StoreImplementation = defineMutationImplementation({
           configuration.callback &&
           configuration.callback.unstable__afterChange
         )
-          await configuration.callback.unstable__afterChange(
-            context,
-            args,
-            returned
-          );
+          try {
+            await configuration.callback.unstable__afterChange(
+              context,
+              args,
+              returned
+            );
+          } catch (error) {
+            console.error("[unstable_afterChange]:", error);
+          }
         return { id };
       }
 
@@ -93,11 +97,15 @@ export const StoreImplementation = defineMutationImplementation({
           configuration.callback &&
           configuration.callback.unstable__afterChange
         )
-          await configuration.callback.unstable__afterChange(
-            context,
-            args,
-            returned
-          );
+          try {
+            await configuration.callback.unstable__afterChange(
+              context,
+              args,
+              returned
+            );
+          } catch (error) {
+            console.error("[unstable_afterChange]:", error);
+          }
         return { deleted };
       }
 
@@ -119,11 +127,15 @@ export const StoreImplementation = defineMutationImplementation({
           configuration.callback &&
           configuration.callback.unstable__afterChange
         )
-          await configuration.callback.unstable__afterChange(
-            context,
-            args,
-            returned
-          );
+          try {
+            await configuration.callback.unstable__afterChange(
+              context,
+              args,
+              returned
+            );
+          } catch (error) {
+            console.error("[unstable_afterChange]:", error);
+          }
         return { doc };
       }
 
@@ -137,11 +149,15 @@ export const StoreImplementation = defineMutationImplementation({
           configuration.callback &&
           configuration.callback.unstable__afterChange
         )
-          await configuration.callback.unstable__afterChange(
-            context,
-            args,
-            returned
-          );
+          try {
+            await configuration.callback.unstable__afterChange(
+              context,
+              args,
+              returned
+            );
+          } catch (error) {
+            console.error("[unstable_afterChange]:", error);
+          }
         return { doc };
       }
 
@@ -152,11 +168,15 @@ export const StoreImplementation = defineMutationImplementation({
           configuration.callback &&
           configuration.callback.unstable__afterChange
         )
-          await configuration.callback.unstable__afterChange(
-            context,
-            args,
-            returned
-          );
+          try {
+            await configuration.callback.unstable__afterChange(
+              context,
+              args,
+              returned
+            );
+          } catch (error) {
+            console.error("[unstable_afterChange]:", error);
+          }
         return { docs };
       }
     }
@@ -168,10 +188,11 @@ export async function storeDispatchTyped<
 >(
   args: A,
   context: GenericActionCtx<StripeDataModel>,
-  configuration: InternalConfiguration
+  configuration: InternalConfiguration,
+  options: InternalOptions
 ): Promise<StoreResultFor<StripeDataModel, A>> {
   return (await context.runMutation(
-    `${configuration.base}:${configuration.store}` as any,
+    `${options.base}:${options.store}` as any,
     args
   )) as StoreResultFor<StripeDataModel, A>;
 }

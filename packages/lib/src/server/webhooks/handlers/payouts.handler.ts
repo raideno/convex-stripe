@@ -12,7 +12,7 @@ export default defineWebhookHandler({
     "payout.reconciliation_completed",
     "payout.updated",
   ],
-  handle: async (event, context, configuration) => {
+  handle: async (event, context, configuration, option) => {
     if (configuration.sync.stripePayouts !== true) return;
 
     const payout = event.data.object;
@@ -36,7 +36,8 @@ export default defineWebhookHandler({
             },
           },
           context,
-          configuration
+          configuration,
+          option
         );
         break;
     }

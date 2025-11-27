@@ -5,7 +5,7 @@ import { defineWebhookHandler } from "../types";
 
 export default defineWebhookHandler({
   events: ["product.created", "product.updated", "product.deleted"],
-  handle: async (event, context, configuration) => {
+  handle: async (event, context, configuration, options) => {
     if (configuration.sync.stripeProducts !== true) return;
 
     const product = event.data.object;
@@ -25,7 +25,8 @@ export default defineWebhookHandler({
             },
           },
           context,
-          configuration
+          configuration,
+          options
         );
         break;
       // TODO: careful here as the deletion is just a soft delete in Stripe
@@ -39,7 +40,8 @@ export default defineWebhookHandler({
             idValue: product.id,
           },
           context,
-          configuration
+          configuration,
+          options
         );
         break;
     }

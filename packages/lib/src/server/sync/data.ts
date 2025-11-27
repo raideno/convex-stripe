@@ -31,14 +31,14 @@ if (
 export const SyncDataImplementation = defineActionImplementation({
   args: v.object({}),
   name: "sync",
-  handler: async (context, args, configuration) => {
+  handler: async (context, args, configuration, options) => {
     await Promise.all(
       SYNC_HANDLERS.map(async (handler) => {
         try {
-          await handler.handler(context, {}, configuration);
+          await handler.handler(context, {}, configuration, options);
           console.info(`[STRIPE SYNC ${handler.name}](Success)`);
         } catch (error) {
-          configuration.logger.error(
+          options.logger.error(
             `[STRIPE SYNC ${handler.name}](Error): ${error}`
           );
         }
