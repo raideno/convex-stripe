@@ -62,7 +62,7 @@ export default defineConfig({
           clerk: localIconLoader(import.meta.url, "./assets/clerk.svg.txt"),
           "better-auth": localIconLoader(
             import.meta.url,
-            "./assets/better-auth.svg.txt"
+            "./assets/better-auth.svg.txt",
           ),
         },
       }) as Plugin,

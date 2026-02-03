@@ -25,10 +25,23 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci --force
-      - run: npm run build --workspace docs
+
+      - name: build documentation
+        run: npm run build --workspace docs
+
+      - name: Build demo
+        run: npm run build --workspace demo
+
+      - name: Combine documentation and demo
+        run: |
+          mkdir -p ./dist
+          cp -r ./packages/docs/.vitepress/dist/* ./dist/
+          mkdir -p ./dist/demo
+          cp -r ./packages/demo/dist/* ./dist/demo/
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ./packages/docs/.vitepress/dist
+          path: ./dist
   deploy:
     needs: build
     runs-on: ubuntu-latest
