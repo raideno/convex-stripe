@@ -65,7 +65,7 @@ export default defineSchema({
 ```ts [convex/stripe.ts]
 import { internalConvexStripe } from "@raideno/convex-stripe/server";
 
-export const { stripe, store, sync, setup } = internalConvexStripe({
+export const { stripe, store, sync, createEntity } = internalConvexStripe({
   stripe: {
     secret_key: process.env.STRIPE_SECRET_KEY!,
     webhook_secret: process.env.STRIPE_WEBHOOK_SECRET!,
@@ -73,7 +73,7 @@ export const { stripe, store, sync, setup } = internalConvexStripe({
 });
 ```
 
-> **Note:** All exposed actions (store, sync, setup) are **internal**. Meaning they can only be called from other convex functions, you can wrap them in public actions when needed.  
+> **Note:** All exposed actions (store, sync, createEntity) are **internal**. Meaning they can only be called from other convex functions, you can wrap them in public actions when needed.  
 > **Important:** `store` must always be exported, as it is used internally.
 
 ### 5. Register HTTP routes
@@ -95,7 +95,7 @@ export default http;
 
 Ideally you want to create a stripe customer the moment a new entity (user, organization, etc) is created.
 
-An `entityId` refers to something you are billing. It can be a user, organization or any other thing. With each entity must be associated a stripe customer and the stripe customer can be created using the [`setup` action](#setup-action).
+An `entityId` refers to something you are billing. It can be a user, organization or any other thing. With each entity must be associated a stripe customer and the stripe customer can be created using the [`createEntity` action](#createentity-action).
 
 Below are with different auth providers examples where the user is the entity we are billing.
 
@@ -114,7 +114,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [Password],
   callbacks: {
     afterUserCreatedOrUpdated: async (context, args) => {
-      await context.scheduler.runAfter(0, internal.stripe.setup, {
+      await context.scheduler.runAfter(0, internal.stripe.createEntity, {
         entityId: args.userId,
         email: args.profile.email,
       });
@@ -170,7 +170,7 @@ You can query these tables at any time to:
 - Etc.
 
 
-### `setup` Action
+### `createEntity` Action
 
 Creates or updates a Stripe customer for a given entity (user or organization). Will call [`stripe.customers.create`](https://docs.stripe.com/api/customers/create) under the hood.
 
@@ -180,11 +180,11 @@ This should be called whenever a new entity is created in your app, or when you 
 import { v } from "convex/values";
 import { action, internal } from "./_generated/api";
 
-export const setupCustomer = action({
+export const createCustomer = action({
   args: { entityId: v.string(), email: v.optional(v.string()) },
   handler: async (context, args) => {
     // Add your own auth/authorization logic here
-    const response = await context.runAction(internal.stripe.setup, {
+    const response = await context.runAction(internal.stripe.createEntity, {
       entityId: args.entityId,
       email: args.email, // optional, but recommended for Stripe
       metadata: {
@@ -203,7 +203,7 @@ export const setupCustomer = action({
 - `entityId` is your app’s internal ID (user/org).
 - `customerId` is stripe's internal ID.
 - `email` is optional, but recommended so the Stripe customer has a contact email.
-- If the entity already has a Stripe customer, setup will return the existing one instead of creating a duplicate.
+- If the entity already has a Stripe customer, `createEntity` will return the existing one instead of creating a duplicate.
 - Typically, you’ll call this automatically in your user/org creation flow (see [Configuration - 6](#configuration)).
 
 
@@ -326,7 +326,7 @@ export const pay = action({
 
 ## Best Practices
 
-- Always create a Stripe customer (`setup`) when a new entity is created.  
+- Always create a Stripe customer (`createEntity`) when a new entity is created.  
 - Use `metadata` or `marketing_features` on products to store feature flags or limits.  
 - Run `sync` when you first configure the extension to sync already existing stripe resources.  
 - Never expose internal actions directly to clients, wrap them in public actions with proper authorization.

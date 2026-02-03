@@ -9,6 +9,7 @@ export async function upsert<TableName extends keyof StripeDataModel>(
   idField: keyof StripeDataModel[TableName]["document"] & string,
   data: WithoutSystemFields<StripeDataModel[TableName]["document"]>
 ): Promise<GenericId<TableName>> {
+  // TODO: very unoptimized, use indexes
   const existing = await context.db
     .query(table)
     .filter((q) => q.eq(q.field(idField), (data as any)[idField]))

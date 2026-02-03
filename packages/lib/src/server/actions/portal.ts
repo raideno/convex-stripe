@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 
-import { SetupImplementation } from "@/actions/setup";
+import { CreateEntityImplementation } from "@/actions/setup";
 import { buildSignedReturnUrl } from "@/redirects";
 import { storeDispatchTyped } from "@/store";
 
@@ -36,7 +36,7 @@ export const PortalImplementation = defineActionCallableFunction<
       },
       context,
       configuration,
-      options
+      options,
     );
 
     let customerId = stripeCustomer?.doc?.customerId || null;
@@ -44,11 +44,11 @@ export const PortalImplementation = defineActionCallableFunction<
     if (!customerId) {
       if (!createStripeCustomerIfMissing) {
         throw new Error(
-          `No Stripe customer ID found for this entityId: ${args.entityId}`
+          `No Stripe customer ID found for this entityId: ${args.entityId}`,
         );
       } else {
         customerId = (
-          await SetupImplementation.handler(
+          await CreateEntityImplementation.handler(
             context,
             {
               entityId: args.entityId,
@@ -56,7 +56,7 @@ export const PortalImplementation = defineActionCallableFunction<
               metadata: undefined,
             },
             configuration,
-            options
+            options,
           )
         ).customerId;
       }
@@ -82,7 +82,7 @@ export const PortalImplementation = defineActionCallableFunction<
         customer: customerId,
         return_url: returnUrl,
       },
-      Object.keys(stripeOptions).length === 0 ? undefined : stripeOptions
+      Object.keys(stripeOptions).length === 0 ? undefined : stripeOptions,
     );
 
     return portal;

@@ -5,8 +5,8 @@ import { storeDispatchTyped } from "@/store";
 
 import { defineActionImplementation } from "../helpers";
 
-export const SetupImplementation = defineActionImplementation({
-  name: "setup",
+export const CreateEntityImplementation = defineActionImplementation({
+  name: "createEntity",
   args: v.object({
     entityId: v.string(),
     email: v.optional(v.string()),
@@ -28,7 +28,7 @@ export const SetupImplementation = defineActionImplementation({
       },
       context,
       configuration,
-      options
+      options,
     );
 
     let customerId = stripeCustomer?.doc?.customerId || null;
@@ -93,7 +93,7 @@ export const SetupImplementation = defineActionImplementation({
         },
         context,
         configuration,
-        options
+        options,
       );
 
       customerId = customer.id;

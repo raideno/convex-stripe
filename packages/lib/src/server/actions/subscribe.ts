@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 
-import { SetupImplementation } from "@/actions/setup";
+import { CreateEntityImplementation } from "@/actions/setup";
 import { buildSignedReturnUrl } from "@/redirects";
 import { CheckoutSessionStripeToConvex } from "@/schema/models/checkout-session";
 import { SubscriptionStripeToConvex } from "@/schema/models/subscription";
@@ -50,7 +50,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
       },
       context,
       configuration,
-      options
+      options,
     );
 
     let customerId = stripeCustomer?.doc?.customerId || null;
@@ -58,11 +58,11 @@ export const SubscribeImplementation = defineActionCallableFunction<
     if (!customerId) {
       if (!createStripeCustomerIfMissing) {
         throw new Error(
-          `No Stripe customer ID found for this entityId: ${args.entityId}`
+          `No Stripe customer ID found for this entityId: ${args.entityId}`,
         );
       } else {
         customerId = (
-          await SetupImplementation.handler(
+          await CreateEntityImplementation.handler(
             context,
             {
               entityId: args.entityId,
@@ -70,7 +70,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
               metadata: undefined,
             },
             configuration,
-            options
+            options,
           )
         ).customerId;
       }
@@ -131,7 +131,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
         },
         expand: [...(args.expand || []), "subscription"],
       },
-      Object.keys(stripeOptions).length === 0 ? undefined : stripeOptions
+      Object.keys(stripeOptions).length === 0 ? undefined : stripeOptions,
     );
 
     await storeDispatchTyped(
@@ -147,7 +147,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
       },
       context,
       configuration,
-      options
+      options,
     );
 
     const subscription = checkout.subscription;
@@ -171,7 +171,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
         },
         context,
         configuration,
-        options
+        options,
       );
     }
 

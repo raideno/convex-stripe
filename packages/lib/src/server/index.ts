@@ -12,7 +12,7 @@ import Stripe from "stripe";
 import {
   PayImplementation,
   PortalImplementation,
-  SetupImplementation,
+  CreateEntityImplementation,
   SubscribeImplementation,
 } from "./actions";
 import { normalizeConfiguration, normalizeOptions } from "./helpers";
@@ -37,7 +37,7 @@ export { InputConfiguration };
 
 const buildHttp = (
   configuration: InternalConfiguration,
-  options: InternalOptions
+  options: InternalOptions,
 ) => ({
   webhook: {
     path: "/stripe/webhook",
@@ -45,14 +45,14 @@ const buildHttp = (
     handler: (
       context: GenericActionCtx<GenericDataModel>,
       request: Request,
-      stripe?: Stripe
+      stripe?: Stripe,
     ) => {
       return webhookImplementation(
         configuration,
         options,
         context as unknown as GenericActionCtx<StripeDataModel>,
         request,
-        stripe
+        stripe,
       );
     },
   },
@@ -61,13 +61,13 @@ const buildHttp = (
     method: "GET" as const as RoutableMethod,
     handler: (
       context: GenericActionCtx<GenericDataModel>,
-      request: Request
+      request: Request,
     ) => {
       return redirectImplementation(
         configuration,
         options,
         context as unknown as GenericActionCtx<StripeDataModel>,
-        request
+        request,
       );
     },
   } as const,
@@ -75,7 +75,7 @@ const buildHttp = (
 
 export const internalConvexStripe = (
   configuration_: InputConfiguration,
-  options_?: InputOptions
+  options_?: InputOptions,
 ) => {
   const ConvexStripeInternalConfiguration =
     normalizeConfiguration(configuration_);
@@ -83,7 +83,7 @@ export const internalConvexStripe = (
 
   const http_ = buildHttp(
     ConvexStripeInternalConfiguration,
-    ConvexStripeInternalOptions
+    ConvexStripeInternalOptions,
   );
 
   return {
@@ -109,38 +109,40 @@ export const internalConvexStripe = (
       portal: (
         context: GenericActionCtx<any>,
         args: Parameters<(typeof PortalImplementation)["handler"]>[1],
-        options: Parameters<(typeof PortalImplementation)["handler"]>[2] = {}
+        options: Parameters<(typeof PortalImplementation)["handler"]>[2] = {},
       ) =>
         PortalImplementation.handler(
           context as unknown as GenericActionCtx<StripeDataModel>,
           args,
           options,
           ConvexStripeInternalConfiguration,
-          ConvexStripeInternalOptions
+          ConvexStripeInternalOptions,
         ),
       subscribe: (
         context: GenericActionCtx<any>,
         args: Parameters<(typeof SubscribeImplementation)["handler"]>[1],
-        options: Parameters<(typeof SubscribeImplementation)["handler"]>[2] = {}
+        options: Parameters<
+          (typeof SubscribeImplementation)["handler"]
+        >[2] = {},
       ) =>
         SubscribeImplementation.handler(
           context as unknown as GenericActionCtx<StripeDataModel>,
           args,
           options,
           ConvexStripeInternalConfiguration,
-          ConvexStripeInternalOptions
+          ConvexStripeInternalOptions,
         ),
       pay: (
         context: GenericActionCtx<any>,
         args: Parameters<(typeof PayImplementation)["handler"]>[1],
-        options: Parameters<(typeof PayImplementation)["handler"]>[2] = {}
+        options: Parameters<(typeof PayImplementation)["handler"]>[2] = {},
       ) =>
         PayImplementation.handler(
           context as unknown as GenericActionCtx<StripeDataModel>,
           args,
           options,
           ConvexStripeInternalConfiguration,
-          ConvexStripeInternalOptions
+          ConvexStripeInternalOptions,
         ),
     },
     store: internalMutationGeneric({
@@ -150,7 +152,7 @@ export const internalConvexStripe = (
           context,
           args,
           ConvexStripeInternalConfiguration,
-          ConvexStripeInternalOptions
+          ConvexStripeInternalOptions,
         ),
     }),
     sync: internalActionGeneric({
@@ -160,17 +162,17 @@ export const internalConvexStripe = (
           context,
           args,
           ConvexStripeInternalConfiguration,
-          ConvexStripeInternalOptions
+          ConvexStripeInternalOptions,
         ),
     }),
-    setup: internalActionGeneric({
-      args: SetupImplementation.args,
+    createEntity: internalActionGeneric({
+      args: CreateEntityImplementation.args,
       handler: (context, args) =>
-        SetupImplementation.handler(
+        CreateEntityImplementation.handler(
           context,
           args,
           ConvexStripeInternalConfiguration,
-          ConvexStripeInternalOptions
+          ConvexStripeInternalOptions,
         ),
     }),
   };

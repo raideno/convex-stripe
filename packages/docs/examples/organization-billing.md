@@ -1,6 +1,6 @@
 # Organization Billing
 
-If you bill organizations instead of users, call `setup` when creating an organization:
+If you bill organizations instead of users, call `createEntity` when creating an organization:
 
 ```ts [convex/organizations.ts]
 import { v } from "convex/values";
@@ -20,7 +20,7 @@ export const createOrganization = query({
       ownerId: userId,
     });
 
-    await context.scheduler.runAfter(0, internal.stripe.setup, {
+    await context.scheduler.runAfter(0, internal.stripe.createEntity, {
       entityId: orgId,
     });
 

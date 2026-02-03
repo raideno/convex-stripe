@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 
-import { SetupImplementation } from "@/actions/setup";
+import { CreateEntityImplementation } from "@/actions/setup";
 import { buildSignedReturnUrl } from "@/redirects";
 import { CheckoutSessionStripeToConvex } from "@/schema/models/checkout-session";
 import { PaymentIntentStripeToConvex } from "@/schema/models/payment-intent";
@@ -49,7 +49,7 @@ export const PayImplementation = defineActionCallableFunction<
       },
       context,
       configuration,
-      options
+      options,
     );
 
     let customerId = stripeCustomer?.doc?.customerId || null;
@@ -57,11 +57,11 @@ export const PayImplementation = defineActionCallableFunction<
     if (!customerId) {
       if (!createStripeCustomerIfMissing) {
         throw new Error(
-          `No Stripe customer ID found for this entityId: ${args.entityId}`
+          `No Stripe customer ID found for this entityId: ${args.entityId}`,
         );
       } else {
         customerId = (
-          await SetupImplementation.handler(
+          await CreateEntityImplementation.handler(
             context,
             {
               entityId: args.entityId,
@@ -69,7 +69,7 @@ export const PayImplementation = defineActionCallableFunction<
               metadata: undefined,
             },
             configuration,
-            options
+            options,
           )
         ).customerId;
       }
@@ -131,7 +131,7 @@ export const PayImplementation = defineActionCallableFunction<
         },
         expand: [...(args.expand || []), "payment_intent"],
       },
-      Object.keys(stripeOptions).length === 0 ? undefined : stripeOptions
+      Object.keys(stripeOptions).length === 0 ? undefined : stripeOptions,
     );
 
     await storeDispatchTyped(
@@ -147,7 +147,7 @@ export const PayImplementation = defineActionCallableFunction<
       },
       context,
       configuration,
-      options
+      options,
     );
 
     const paymentIntent = checkout.payment_intent;
@@ -170,7 +170,7 @@ export const PayImplementation = defineActionCallableFunction<
         },
         context,
         configuration,
-        options
+        options,
       );
     }
 

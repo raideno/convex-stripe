@@ -61,7 +61,7 @@ export const subscribe = action({
   },
   handler: async (
     context,
-    args
+    args,
   ): Promise<{
     url: string | null;
   }> => {
@@ -91,7 +91,7 @@ export const payments = query({
     const checkouts = await context.db
       .query("stripeCheckoutSessions")
       .filter((query) =>
-        query.eq(query.field("stripe.metadata.entityId"), userId)
+        query.eq(query.field("stripe.metadata.entityId"), userId),
       )
       .collect();
 
@@ -104,7 +104,8 @@ export const payments = query({
       ...payment,
       checkout:
         checkouts.find(
-          (checkout) => checkout.checkoutSessionId === payment.checkoutSessionId
+          (checkout) =>
+            checkout.checkoutSessionId === payment.checkoutSessionId,
         ) || null,
     }));
 
@@ -121,7 +122,7 @@ export const products = query({
     return products.map((product) => ({
       ...product,
       prices: prices.filter(
-        (price) => price.stripe.productId === product.productId
+        (price) => price.stripe.productId === product.productId,
       ),
     }));
   },
@@ -153,7 +154,7 @@ export const subscription = query({
 export const portal = action({
   args: v.object({}),
   handler: async (
-    context
+    context,
   ): Promise<{
     url: string | null;
   }> => {
