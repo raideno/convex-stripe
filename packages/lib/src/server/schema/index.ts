@@ -2,6 +2,7 @@ import {
   DataModelFromSchemaDefinition,
   defineSchema,
   defineTable,
+  DocumentByName,
 } from "convex/server";
 import { v } from "convex/values";
 

@@ -10,8 +10,9 @@ export async function selectOne<
   context: GenericMutationCtx<StripeDataModel>,
   table: TableName,
   field: Field,
-  value: Schema[Field]
+  value: Schema[Field],
 ): Promise<Schema | null> {
+  // TODO: highly ineffective
   return await context.db
     .query(table)
     .filter((q) => q.eq(q.field(field), value))

@@ -27,13 +27,22 @@ import type {
   InputOptions,
   InternalConfiguration,
   InternalOptions,
+  CallbackEvent,
+  CallbackAfterChange,
 } from "./types";
 
 export { stripeTables } from "./schema";
 
 export { Logger } from "./logger";
 
-export { InputConfiguration };
+export {
+  InputConfiguration,
+  InputOptions,
+  InternalConfiguration,
+  InternalOptions,
+  CallbackEvent,
+  CallbackAfterChange,
+};
 
 const buildHttp = (
   configuration: InternalConfiguration,

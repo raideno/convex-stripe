@@ -1,9 +1,9 @@
-import { GenericMutationCtx } from "convex/server";
+import { DocumentByName, GenericMutationCtx } from "convex/server";
 import { Infer, Validator } from "convex/values";
 import Stripe from "stripe";
 
 import { Logger } from "@/logger";
-import { stripeTables } from "@/schema";
+import { StripeDataModel, stripeTables } from "@/schema";
 
 import { StoreImplementation } from "./store";
 
@@ -13,6 +13,22 @@ export interface InternalOptions {
   logger: Logger;
   base: string;
 }
+
+export type CallbackEvent = {
+  [K in keyof StripeDataModel]: {
+    table: K;
+    // TODO: put them back when StoreImplementation is mature enough
+    // NOTE: only before is passed when deleting, only after is passed when inserting, both are passed when updating
+    // before?: DocumentByName<StripeDataModel, K>;
+    // after?: DocumentByName<StripeDataModel, K>;
+  };
+}[keyof StripeDataModel];
+
+export type CallbackAfterChange = (
+  context: GenericMutationCtx<any>,
+  operation: "upsert" | "delete",
+  event: CallbackEvent,
+) => Promise<void>;
 
 export interface InternalConfiguration {
   stripe: {
@@ -29,11 +45,7 @@ export interface InternalConfiguration {
   portal: Stripe.BillingPortal.ConfigurationCreateParams;
 
   callback?: {
-    unstable__afterChange?: (
-      context: GenericMutationCtx<any>,
-      args: InferArgs<(typeof StoreImplementation)["args"]>,
-      returned: any,
-    ) => Promise<void>;
+    unstable__afterChange?: CallbackAfterChange;
   };
 
   detached: boolean;

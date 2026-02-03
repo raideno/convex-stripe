@@ -9,8 +9,9 @@ export async function deleteById<
   context: GenericMutationCtx<StripeDataModel>,
   table: TableName,
   idField: keyof Schema & string,
-  idValue: Schema[typeof idField]
+  idValue: Schema[typeof idField],
 ): Promise<boolean> {
+  // TODO: highly ineffective
   const existing = await context.db
     .query(table)
     .filter((q) => q.eq(q.field(idField), idValue))

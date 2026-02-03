@@ -40,8 +40,12 @@ export const StoreImplementation = defineMutationImplementation({
     }
 
     const table = args.table as keyof StripeDataModel;
+    const idField =
+      args.idField as keyof StripeDataModel[typeof table]["document"];
+    const idValue =
+      args.idValue as StripeDataModel[typeof table]["document"][typeof idField];
 
-    let returned:
+    let returned_:
       | { id: GenericId<any> }
       | { deleted: boolean }
       | { doc: any | null }
@@ -56,13 +60,8 @@ export const StoreImplementation = defineMutationImplementation({
         if (args.data == null) {
           throw new Error('Missing "data" for upsert');
         }
-        const id = await upsert(
-          context,
-          table,
-          args.idField as any,
-          args.data as any
-        );
-        returned = { id };
+        const id = await upsert(context, table, idField, idValue);
+        returned_ = { id };
         if (
           configuration.callback &&
           configuration.callback.unstable__afterChange
@@ -70,11 +69,13 @@ export const StoreImplementation = defineMutationImplementation({
           try {
             await configuration.callback.unstable__afterChange(
               context,
-              args,
-              returned
+              "upsert",
+              {
+                table: table,
+              },
             );
           } catch (error) {
-            console.error("[unstable_afterChange]:", error);
+            console.error("[unstable__afterChange]:", error);
           }
         return { id };
       }
@@ -86,13 +87,8 @@ export const StoreImplementation = defineMutationImplementation({
         if (typeof args.idValue === "undefined") {
           throw new Error('Missing "idValue" for deleteById');
         }
-        const deleted = await deleteById(
-          context,
-          table,
-          args.idField as any,
-          args.idValue as any
-        );
-        returned = { deleted };
+        const deleted = await deleteById(context, table, idField, idValue);
+        returned_ = { deleted };
         if (
           configuration.callback &&
           configuration.callback.unstable__afterChange
@@ -100,11 +96,13 @@ export const StoreImplementation = defineMutationImplementation({
           try {
             await configuration.callback.unstable__afterChange(
               context,
-              args,
-              returned
+              "delete",
+              {
+                table: table,
+              },
             );
           } catch (error) {
-            console.error("[unstable_afterChange]:", error);
+            console.error("[unstable__afterChange]:", error);
           }
         return { deleted };
       }
@@ -116,26 +114,8 @@ export const StoreImplementation = defineMutationImplementation({
         if (typeof args.value === "undefined") {
           throw new Error('Missing "value" for selectOne');
         }
-        const doc = await selectOne(
-          context,
-          table,
-          args.field as any,
-          args.value as any
-        );
-        returned = { doc };
-        if (
-          configuration.callback &&
-          configuration.callback.unstable__afterChange
-        )
-          try {
-            await configuration.callback.unstable__afterChange(
-              context,
-              args,
-              returned
-            );
-          } catch (error) {
-            console.error("[unstable_afterChange]:", error);
-          }
+        const doc = await selectOne(context, table, idField, idValue);
+        returned_ = { doc };
         return { doc };
       }
 
@@ -144,39 +124,13 @@ export const StoreImplementation = defineMutationImplementation({
           throw new Error('Missing "id" for selectById');
         }
         const doc = await selectById(context, table, args.id as GenericId<any>);
-        returned = { doc };
-        if (
-          configuration.callback &&
-          configuration.callback.unstable__afterChange
-        )
-          try {
-            await configuration.callback.unstable__afterChange(
-              context,
-              args,
-              returned
-            );
-          } catch (error) {
-            console.error("[unstable_afterChange]:", error);
-          }
+        returned_ = { doc };
         return { doc };
       }
 
       case "selectAll": {
         const docs = await selectAll(context, table);
-        returned = { docs };
-        if (
-          configuration.callback &&
-          configuration.callback.unstable__afterChange
-        )
-          try {
-            await configuration.callback.unstable__afterChange(
-              context,
-              args,
-              returned
-            );
-          } catch (error) {
-            console.error("[unstable_afterChange]:", error);
-          }
+        returned_ = { docs };
         return { docs };
       }
     }
@@ -189,10 +143,10 @@ export async function storeDispatchTyped<
   args: A,
   context: GenericActionCtx<StripeDataModel>,
   configuration: InternalConfiguration,
-  options: InternalOptions
+  options: InternalOptions,
 ): Promise<StoreResultFor<StripeDataModel, A>> {
   return (await context.runMutation(
     `${options.base}:${options.store}` as any,
-    args
+    args,
   )) as StoreResultFor<StripeDataModel, A>;
 }
