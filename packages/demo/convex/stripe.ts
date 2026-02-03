@@ -6,7 +6,7 @@ import { internal } from "./_generated/api";
 import { action, internalMutation, query } from "./_generated/server";
 import configuration from "./stripe.config";
 
-export const { stripe, store, sync, setup } =
+export const { stripe, store, sync, createEntity } =
   internalConvexStripe(configuration);
 
 export const createInternalPaymentRecord = internalMutation({
