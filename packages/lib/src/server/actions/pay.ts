@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 
-import { CreateEntityImplementation } from "@/actions/setup";
+import { CreateEntityImplementation } from "@/actions/create-entity";
 import { buildSignedReturnUrl } from "@/redirects";
 import { CheckoutSessionStripeToConvex } from "@/schema/models/checkout-session";
 import { PaymentIntentStripeToConvex } from "@/schema/models/payment-intent";
