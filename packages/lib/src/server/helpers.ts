@@ -16,6 +16,9 @@ export const DEFAULT_PATH = "/stripe/webhook";
 export const DEFAULT_DESCRIPTION = "Convex Stripe Webhook Endpoint";
 export const DEFAULT_METADATA = {};
 export const DEFAULT_DETACHED = false;
+export const DEFAULT_CATALOG_METADATA_KEY = "convex_stripe_key";
+export const DEFAULT_CATALOG_BEHAVIOR_ON_EXISTING = "update";
+export const DEFAULT_CATALOG_BEHAVIOR_ON_MISSING_KEY = "create";
 
 export const normalizeConfiguration = (
   config: InputConfiguration,
@@ -24,6 +27,19 @@ export const normalizeConfiguration = (
     ...config,
     redirectTtlMs: 15 * 60 * 1000,
     detached: DEFAULT_DETACHED,
+    catalog: {
+      products: config.catalog?.products || [],
+      prices: config.catalog?.prices || [],
+      metadataKey: config.catalog?.metadataKey || DEFAULT_CATALOG_METADATA_KEY,
+      behavior: {
+        onExisting:
+          config.catalog?.behavior?.onExisting ||
+          DEFAULT_CATALOG_BEHAVIOR_ON_EXISTING,
+        onMissingKey:
+          config.catalog?.behavior?.onMissingKey ||
+          DEFAULT_CATALOG_BEHAVIOR_ON_MISSING_KEY,
+      },
+    },
     sync: {
       stripeCoupons: true,
       stripeCustomers: true,

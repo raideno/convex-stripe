@@ -8,25 +8,25 @@ import { defineRedirectHandler, RedirectHandler } from "./types";
 const HANDLERS_MODULES = Object.values(
   import.meta.glob("./handlers/*.handler.ts", {
     eager: true,
-  })
+  }),
 ) as unknown as Array<Record<string, ReturnType<typeof defineRedirectHandler>>>;
 
 if (HANDLERS_MODULES.some((handler) => Object.keys(handler).length > 1))
   throw new Error(
-    "Each redirect handler file should only have one export / default export"
+    "Each redirect handler file should only have one export / default export",
   );
 
 export const REDIRECT_HANDLERS = HANDLERS_MODULES.map(
-  (exports) => Object.values(exports)[0]
+  (exports) => Object.values(exports)[0],
 );
 
 if (
   REDIRECT_HANDLERS.some(
-    (handler) => !["origins", "data", "handle"].every((key) => key in handler)
+    (handler) => !["origins", "data", "handle"].every((key) => key in handler),
   )
 )
   throw new Error(
-    "Each redirect handler file should export a valid implementation"
+    "Each redirect handler file should export a valid implementation",
   );
 
 const originToHandlers = new Map<string, number>();
@@ -34,7 +34,7 @@ REDIRECT_HANDLERS.forEach((handler, handlerIndex) => {
   handler.origins.forEach((origin) => {
     if (originToHandlers.has(origin)) {
       throw new Error(
-        `Origin "${origin}" is used by multiple handlers (handler indices: ${originToHandlers.get(origin)}, ${handlerIndex})`
+        `Origin "${origin}" is used by multiple handlers (handler indices: ${originToHandlers.get(origin)}, ${handlerIndex})`,
       );
     }
     originToHandlers.set(origin, handlerIndex);
@@ -75,7 +75,7 @@ export function fromBase64Url(input: string): Uint8Array {
 
 export async function signData(
   secret: string,
-  data: string
+  data: string,
 ): Promise<ArrayBuffer> {
   const encoder = new TextEncoder();
   const keyData = encoder.encode(secret);
@@ -86,7 +86,7 @@ export async function signData(
     keyData,
     { name: "HMAC", hash: "SHA-256" },
     false,
-    ["sign"]
+    ["sign"],
   );
 
   return await crypto.subtle.sign("HMAC", key, messageData);
@@ -94,7 +94,7 @@ export async function signData(
 
 export async function timingSafeEqual(
   a: ArrayBufferLike,
-  b: ArrayBufferLike
+  b: ArrayBufferLike,
 ): Promise<boolean> {
   if (a.byteLength !== b.byteLength) {
     return false;
@@ -121,6 +121,8 @@ export interface ReturnPayload<T> {
 export async function buildSignedReturnUrl<O extends ReturnOrigin>({
   configuration,
   origin,
+  // TODO: add a failure url for when we throw an error due to link expiration, etc
+  // user will be redirected there with a ?reason=<reason> query parameter
   targetUrl,
   data,
 }: {
@@ -178,7 +180,7 @@ export async function decodeSignedPayload<O extends ReturnOrigin>({
     const decodedBytes = fromBase64Url(data);
     const decoder = new TextDecoder();
     const decodedPayload = JSON.parse(
-      decoder.decode(decodedBytes)
+      decoder.decode(decodedBytes),
     ) as ReturnPayload<ReturnDataMap[O]>;
 
     return { data: decodedPayload };
@@ -199,7 +201,7 @@ type ReturnDataMap = {
 };
 
 export const RETURN_ORIGINS = REDIRECT_HANDLERS.map(
-  (handler) => handler.origins
+  (handler) => handler.origins,
 ).flat();
 
 export type ReturnOrigin = (typeof RETURN_ORIGINS)[number];
@@ -208,7 +210,7 @@ export const redirectImplementation = async (
   configuration: InternalConfiguration,
   options: InternalOptions,
   context: GenericActionCtx<StripeDataModel>,
-  request: Request
+  request: Request,
 ) => {
   const url = new URL(request.url);
 
@@ -267,7 +269,7 @@ export const redirectImplementation = async (
           context,
           decoded.data as never,
           configuration,
-          options
+          options,
         );
       } catch (error) {
         options.logger.error(`[STRIPE RETURN ${origin}](Error): ${error}`);

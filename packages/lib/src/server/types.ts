@@ -36,6 +36,16 @@ export interface InternalConfiguration {
     webhook_secret: string;
   };
 
+  catalog: {
+    products: Stripe.ProductCreateParams[];
+    prices: Stripe.PriceCreateParams[];
+    behavior: {
+      onExisting: "update" | "archive_and_recreate" | "skip" | "error";
+      onMissingKey: "create" | "error";
+    };
+    metadataKey: string;
+  };
+
   webhook: {
     metadata: Record<string, string>;
     description: string;
@@ -60,7 +70,7 @@ export type WithOptional<T, K extends keyof T = never> = Omit<T, K> &
 
 export type InputConfiguration = WithOptional<
   InternalConfiguration,
-  "portal" | "sync" | "redirectTtlMs" | "webhook" | "detached"
+  "portal" | "sync" | "redirectTtlMs" | "webhook" | "detached" | "catalog"
 >;
 
 export type InputOptions = WithOptional<
