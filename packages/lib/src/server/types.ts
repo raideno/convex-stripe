@@ -32,9 +32,11 @@ export interface InternalConfiguration {
     unstable__afterChange?: (
       context: GenericMutationCtx<any>,
       args: InferArgs<(typeof StoreImplementation)["args"]>,
-      returned: any
+      returned: any,
     ) => Promise<void>;
   };
+
+  detached: boolean;
 
   sync: Partial<Record<keyof typeof stripeTables, boolean>>;
 
@@ -46,7 +48,7 @@ export type WithOptional<T, K extends keyof T = never> = Omit<T, K> &
 
 export type InputConfiguration = WithOptional<
   InternalConfiguration,
-  "portal" | "sync" | "redirectTtlMs" | "webhook"
+  "portal" | "sync" | "redirectTtlMs" | "webhook" | "detached"
 >;
 
 export type InputOptions = WithOptional<

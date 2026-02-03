@@ -14,27 +14,29 @@ export default defineWebhookHandler({
     switch (event.type) {
       case "customer.created":
       case "customer.updated":
-        if (!entityId)
+        if (!entityId) {
           options.logger.warn(
-            "No entityId associated with newly created customer. Skipping..."
+            "No entityId associated with newly created customer. Skipping...",
           );
-        else
-          await storeDispatchTyped(
-            {
-              operation: "upsert",
-              table: "stripeCustomers",
-              idField: "entityId",
-              data: {
-                customerId: customer.id,
-                entityId: entityId,
-                stripe: CustomerStripeToConvex(customer),
-                lastSyncedAt: Date.now(),
-              },
+          if (!configuration.detached) return;
+        }
+
+        await storeDispatchTyped(
+          {
+            operation: "upsert",
+            table: "stripeCustomers",
+            idField: "entityId",
+            data: {
+              customerId: customer.id,
+              entityId: entityId,
+              stripe: CustomerStripeToConvex(customer),
+              lastSyncedAt: Date.now(),
             },
-            context,
-            configuration,
-            options
-          );
+          },
+          context,
+          configuration,
+          options,
+        );
         break;
       case "customer.deleted":
         await storeDispatchTyped(
@@ -46,7 +48,7 @@ export default defineWebhookHandler({
           },
           context,
           configuration,
-          options
+          options,
         );
         break;
     }

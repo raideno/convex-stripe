@@ -48,7 +48,7 @@ export const stripeTables = {
     .index("byCurrency", ["stripe.currency"]),
   stripeCustomers: defineTable({
     customerId: v.string(),
-    entityId: v.string(),
+    entityId: v.optional(v.string()),
     stripe: v.object(CustomerSchema),
     lastSyncedAt: v.number(),
   })

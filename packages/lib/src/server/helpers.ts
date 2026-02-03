@@ -15,13 +15,15 @@ import {
 export const DEFAULT_PATH = "/stripe/webhook";
 export const DEFAULT_DESCRIPTION = "Convex Stripe Webhook Endpoint";
 export const DEFAULT_METADATA = {};
+export const DEFAULT_DETACHED = false;
 
 export const normalizeConfiguration = (
-  config: InputConfiguration
+  config: InputConfiguration,
 ): InternalConfiguration => {
   return {
     ...config,
     redirectTtlMs: 15 * 60 * 1000,
+    detached: DEFAULT_DETACHED,
     sync: {
       stripeCoupons: true,
       stripeCustomers: true,
@@ -98,7 +100,7 @@ export const normalizeConfiguration = (
 };
 
 export const normalizeOptions = (
-  options: Partial<InputOptions>
+  options: Partial<InputOptions>,
 ): InternalOptions => {
   return {
     ...options,
@@ -120,7 +122,7 @@ export const defineActionCallableFunction = <
     args: S,
     stripeOptions: O,
     configuration: InternalConfiguration,
-    options: InternalOptions
+    options: InternalOptions,
   ) => R;
 }) => spec;
 
@@ -134,7 +136,7 @@ export const defineActionImplementation = <
     context: GenericActionCtx<StripeDataModel>,
     args: Infer<S>,
     configuration: InternalConfiguration,
-    options: InternalOptions
+    options: InternalOptions,
   ) => R;
 }) => spec;
 
@@ -145,7 +147,7 @@ export const defineMutationImplementation = <S extends ArgSchema, R>(spec: {
     context: GenericMutationCtx<StripeDataModel>,
     args: InferArgs<S>,
     configuration: InternalConfiguration,
-    options: InternalOptions
+    options: InternalOptions,
   ) => R;
 }) => spec;
 

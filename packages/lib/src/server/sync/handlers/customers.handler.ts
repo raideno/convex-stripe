@@ -22,10 +22,10 @@ export const CustomersSyncImplementation = defineActionImplementation({
       },
       context,
       configuration,
-      options
+      options,
     );
     const localCustomersById = new Map(
-      (localCustomersRes.docs || []).map((p: any) => [p.customerId, p])
+      (localCustomersRes.docs || []).map((p: any) => [p.customerId, p]),
     );
 
     const customers = await stripe.customers
@@ -41,7 +41,7 @@ export const CustomersSyncImplementation = defineActionImplementation({
 
       if (!entityId) {
         console.warn(`Customer ${customer.id} is missing entityId in metadata`);
-        continue;
+        if (!configuration.detached) continue;
       }
 
       await storeDispatchTyped(
@@ -51,14 +51,14 @@ export const CustomersSyncImplementation = defineActionImplementation({
           idField: "customerId",
           data: {
             customerId: customer.id,
-            entityId: customer.metadata.entityId,
+            entityId: entityId,
             stripe: CustomerStripeToConvex(customer),
             lastSyncedAt: Date.now(),
           },
         },
         context,
         configuration,
-        options
+        options,
       );
     }
 
@@ -73,7 +73,7 @@ export const CustomersSyncImplementation = defineActionImplementation({
           },
           context,
           configuration,
-          options
+          options,
         );
       }
     }
