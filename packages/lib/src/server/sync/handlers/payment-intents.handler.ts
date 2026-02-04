@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { PaymentIntentStripeToConvex } from "@/schema/models/payment-intent";
 import { storeDispatchTyped } from "@/store";
 
@@ -22,13 +23,13 @@ export const PaymentIntentsSyncImplementation = defineActionImplementation({
       },
       context,
       configuration,
-      options
+      options,
     );
     const localPaymentIntentsById = new Map(
       (localPaymentIntentsRes.docs || []).map((p: any) => [
         p.paymentIntentId,
         p,
-      ])
+      ]),
     );
 
     const paymentIntents = await stripe.paymentIntents
@@ -44,6 +45,7 @@ export const PaymentIntentsSyncImplementation = defineActionImplementation({
         {
           operation: "upsert",
           table: "stripePaymentIntents",
+          indexName: BY_STRIPE_ID_INDEX_NAME,
           idField: "paymentIntentId",
           data: {
             paymentIntentId: paymentIntent.id,
@@ -53,7 +55,7 @@ export const PaymentIntentsSyncImplementation = defineActionImplementation({
         },
         context,
         configuration,
-        options
+        options,
       );
     }
 
@@ -63,12 +65,13 @@ export const PaymentIntentsSyncImplementation = defineActionImplementation({
           {
             operation: "deleteById",
             table: "stripePaymentIntents",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "paymentIntentId",
             idValue: paymentIntentId,
           },
           context,
           configuration,
-          options
+          options,
         );
       }
     }

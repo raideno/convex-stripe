@@ -1,3 +1,4 @@
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { PromotionCodeStripeToConvex } from "@/schema/models/promotion-code";
 import { storeDispatchTyped } from "@/store";
 
@@ -17,6 +18,7 @@ export default defineWebhookHandler({
           {
             operation: "upsert",
             table: "stripePromotionCodes",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "promotionCodeId",
             data: {
               promotionCodeId: promotionCode.id,
@@ -26,7 +28,7 @@ export default defineWebhookHandler({
           },
           context,
           configuration,
-          options
+          options,
         );
         break;
     }

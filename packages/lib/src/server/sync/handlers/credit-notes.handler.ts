@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { CreditNoteStripeToConvex } from "@/schema/models/credit-note";
 import { storeDispatchTyped } from "@/store";
 
@@ -22,10 +23,10 @@ export const CreditNotesSyncImplementation = defineActionImplementation({
       },
       context,
       configuration,
-      options
+      options,
     );
     const localCreditNotesById = new Map(
-      (localCreditNotesRes.docs || []).map((p: any) => [p.creditNoteId, p])
+      (localCreditNotesRes.docs || []).map((p: any) => [p.creditNoteId, p]),
     );
 
     const creditNotes = await stripe.creditNotes
@@ -41,6 +42,7 @@ export const CreditNotesSyncImplementation = defineActionImplementation({
         {
           operation: "upsert",
           table: "stripeCreditNotes",
+          indexName: BY_STRIPE_ID_INDEX_NAME,
           idField: "creditNoteId",
           data: {
             creditNoteId: creditNote.id,
@@ -50,7 +52,7 @@ export const CreditNotesSyncImplementation = defineActionImplementation({
         },
         context,
         configuration,
-        options
+        options,
       );
     }
 
@@ -60,12 +62,13 @@ export const CreditNotesSyncImplementation = defineActionImplementation({
           {
             operation: "deleteById",
             table: "stripeCreditNotes",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "creditNoteId",
             idValue: creditNoteId,
           },
           context,
           configuration,
-          options
+          options,
         );
       }
     }

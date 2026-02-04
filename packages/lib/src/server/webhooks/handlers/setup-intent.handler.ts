@@ -1,3 +1,4 @@
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { SetupIntentStripeToConvex } from "@/schema/models/setup-intent";
 import { storeDispatchTyped } from "@/store";
 
@@ -31,6 +32,7 @@ export default defineWebhookHandler({
           {
             operation: "upsert",
             table: "stripeSetupIntents",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "setupIntentId",
             data: {
               setupIntentId: setupIntent.id,
@@ -40,7 +42,7 @@ export default defineWebhookHandler({
           },
           context,
           configuration,
-          options
+          options,
         );
         break;
     }

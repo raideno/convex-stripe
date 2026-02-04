@@ -15,12 +15,13 @@ export const PortalReturnImplementation = defineRedirectHandler({
       {
         operation: "selectOne",
         table: "stripeCustomers",
+        indexName: "byEntityId",
         field: "entityId",
         value: data.entityId,
       },
       context,
       configuration,
-      options
+      options,
     );
 
     const customerId = customer?.doc?.customerId || null;
@@ -30,12 +31,12 @@ export const PortalReturnImplementation = defineRedirectHandler({
         context,
         { customerId },
         configuration,
-        options
+        options,
       );
     } else {
       options.logger.warn(
         "Potential redirect abuse detected. No customerId associated with provided entityId " +
-          data.entityId
+          data.entityId,
       );
     }
   },

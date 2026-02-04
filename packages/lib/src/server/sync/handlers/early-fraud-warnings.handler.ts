@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { EarlyFraudWarningStripeToConvex } from "@/schema/models/early-fraud-warning";
 import { storeDispatchTyped } from "@/store";
 
@@ -22,13 +23,13 @@ export const EarlyFraudWarningsSyncImplementation = defineActionImplementation({
       },
       context,
       configuration,
-      options
+      options,
     );
     const localEarlyFraudWarningsById = new Map(
       (localEarlyFraudWarningsRes.docs || []).map((p: any) => [
         p.early_fraud_warningId,
         p,
-      ])
+      ]),
     );
 
     const early_fraud_warnings = await stripe.radar.earlyFraudWarnings
@@ -44,6 +45,7 @@ export const EarlyFraudWarningsSyncImplementation = defineActionImplementation({
         {
           operation: "upsert",
           table: "stripeEarlyFraudWarnings",
+          indexName: BY_STRIPE_ID_INDEX_NAME,
           idField: "earlyFraudWarningId",
           data: {
             earlyFraudWarningId: early_fraud_warning.id,
@@ -53,7 +55,7 @@ export const EarlyFraudWarningsSyncImplementation = defineActionImplementation({
         },
         context,
         configuration,
-        options
+        options,
       );
     }
 
@@ -65,12 +67,13 @@ export const EarlyFraudWarningsSyncImplementation = defineActionImplementation({
           {
             operation: "deleteById",
             table: "stripeEarlyFraudWarnings",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "earlyFraudWarningId",
             idValue: early_fraud_warningId,
           },
           context,
           configuration,
-          options
+          options,
         );
       }
     }

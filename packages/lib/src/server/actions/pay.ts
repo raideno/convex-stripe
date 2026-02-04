@@ -2,6 +2,7 @@ import Stripe from "stripe";
 
 import { CreateEntityImplementation } from "@/actions/create-entity";
 import { buildSignedReturnUrl } from "@/redirects";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { CheckoutSessionStripeToConvex } from "@/schema/models/checkout-session";
 import { PaymentIntentStripeToConvex } from "@/schema/models/payment-intent";
 import { storeDispatchTyped } from "@/store";
@@ -44,6 +45,7 @@ export const PayImplementation = defineActionCallableFunction<
       {
         operation: "selectOne",
         table: "stripeCustomers",
+        indexName: "byEntityId",
         field: "entityId",
         value: args.entityId,
       },
@@ -138,6 +140,7 @@ export const PayImplementation = defineActionCallableFunction<
       {
         operation: "upsert",
         table: "stripeCheckoutSessions",
+        indexName: BY_STRIPE_ID_INDEX_NAME,
         idField: "checkoutSessionId",
         data: {
           checkoutSessionId: checkout.id,
@@ -161,6 +164,7 @@ export const PayImplementation = defineActionCallableFunction<
         {
           operation: "upsert",
           table: "stripePaymentIntents",
+          indexName: BY_STRIPE_ID_INDEX_NAME,
           idField: "paymentIntentId",
           data: {
             paymentIntentId: paymentIntent.id,

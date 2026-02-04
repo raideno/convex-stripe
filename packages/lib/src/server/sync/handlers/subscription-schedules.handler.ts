@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { SubscriptionScheduleStripeToConvex } from "@/schema/models/subscription-schedule";
 import { storeDispatchTyped } from "@/store";
 
@@ -23,13 +24,13 @@ export const SubscriptionSchedulesSyncImplementation =
         },
         context,
         configuration,
-        options
+        options,
       );
       const localSubscriptionSchedulesById = new Map(
         (localSubscriptionSchedulesRes.docs || []).map((p: any) => [
           p.subscriptionScheduleId,
           p,
-        ])
+        ]),
       );
 
       const subscriptionSchedules = await stripe.subscriptionSchedules
@@ -46,6 +47,7 @@ export const SubscriptionSchedulesSyncImplementation =
             operation: "upsert",
             table: "stripeSubscriptionSchedules",
             idField: "subscriptionScheduleId",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             data: {
               subscriptionScheduleId: subscriptionSchedule.id,
               stripe: SubscriptionScheduleStripeToConvex(subscriptionSchedule),
@@ -54,7 +56,7 @@ export const SubscriptionSchedulesSyncImplementation =
           },
           context,
           configuration,
-          options
+          options,
         );
       }
 
@@ -67,11 +69,12 @@ export const SubscriptionSchedulesSyncImplementation =
               operation: "deleteById",
               table: "stripeSubscriptionSchedules",
               idField: "subscriptionScheduleId",
+              indexName: BY_STRIPE_ID_INDEX_NAME,
               idValue: subscriptionScheduleId,
             },
             context,
             configuration,
-            options
+            options,
           );
         }
       }

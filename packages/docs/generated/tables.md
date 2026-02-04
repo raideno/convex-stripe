@@ -9,8 +9,7 @@ Stores Stripe stripeProducts.
 
 
 Indexes:
-- `byActive`: `stripe.active`
-- `byName`: `stripe.name`
+- `byStripeId`: `productId`
 
 ## `stripePrices`
 Stores Stripe stripePrices.
@@ -23,10 +22,7 @@ Stores Stripe stripePrices.
 
 
 Indexes:
-- `byPriceId`: `priceId`
-- `byActive`: `stripe.active`
-- `byRecurringInterval`: `stripe.recurring.interval`
-- `byCurrency`: `stripe.currency`
+- `byStripeId`: `priceId`
 
 ## `stripeCustomers`
 Stores Stripe stripeCustomers.
@@ -40,7 +36,7 @@ Stores Stripe stripeCustomers.
 
 
 Indexes:
-- `byCustomerId`: `customerId`
+- `byStripeId`: `customerId`
 - `byEntityId`: `entityId`
 
 ## `stripeSubscriptions`
@@ -55,7 +51,7 @@ Stores Stripe stripeSubscriptions.
 
 
 Indexes:
-- `bySubscriptionId`: `subscriptionId`
+- `byStripeId`: `subscriptionId`
 - `byCustomerId`: `customerId`
 
 ## `stripeCoupons`
@@ -69,7 +65,7 @@ Stores Stripe stripeCoupons.
 
 
 Indexes:
-- `byCouponId`: `couponId`
+- `byStripeId`: `couponId`
 
 ## `stripePromotionCodes`
 Stores Stripe stripePromotionCodes.
@@ -82,7 +78,7 @@ Stores Stripe stripePromotionCodes.
 
 
 Indexes:
-- `byPromotionCodeId`: `promotionCodeId`
+- `byStripeId`: `promotionCodeId`
 
 ## `stripePayouts`
 Stores Stripe stripePayouts.
@@ -95,7 +91,7 @@ Stores Stripe stripePayouts.
 
 
 Indexes:
-- `byPayoutId`: `payoutId`
+- `byStripeId`: `payoutId`
 
 ## `stripeRefunds`
 Stores Stripe stripeRefunds.
@@ -108,7 +104,7 @@ Stores Stripe stripeRefunds.
 
 
 Indexes:
-- `byRefundId`: `refundId`
+- `byStripeId`: `refundId`
 
 ## `stripePaymentIntents`
 Stores Stripe stripePaymentIntents.
@@ -121,7 +117,7 @@ Stores Stripe stripePaymentIntents.
 
 
 Indexes:
-- `byPaymentIntentId`: `paymentIntentId`
+- `byStripeId`: `paymentIntentId`
 
 ## `stripeCheckoutSessions`
 Stores Stripe stripeCheckoutSessions.
@@ -134,7 +130,7 @@ Stores Stripe stripeCheckoutSessions.
 
 
 Indexes:
-- `byCheckoutSessionId`: `checkoutSessionId`
+- `byStripeId`: `checkoutSessionId`
 
 ## `stripeInvoices`
 Stores Stripe stripeInvoices.
@@ -147,7 +143,7 @@ Stores Stripe stripeInvoices.
 
 
 Indexes:
-- `byInvoiceId`: `invoiceId`
+- `byStripeId`: `invoiceId`
 
 ## `stripeReviews`
 Stores Stripe stripeReviews.
@@ -160,7 +156,7 @@ Stores Stripe stripeReviews.
 
 
 Indexes:
-- `reviewId`: `reviewId`
+- `byStripeId`: `reviewId`
 
 ## `stripePlans`
 Stores Stripe stripePlans.
@@ -173,7 +169,7 @@ Stores Stripe stripePlans.
 
 
 Indexes:
-- `byPlanId`: `planId`
+- `byStripeId`: `planId`
 
 ## `stripeDisputes`
 Stores Stripe stripeDisputes.
@@ -186,7 +182,7 @@ Stores Stripe stripeDisputes.
 
 
 Indexes:
-- `byDisputeId`: `disputeId`
+- `byStripeId`: `disputeId`
 
 ## `stripeEarlyFraudWarnings`
 Stores Stripe stripeEarlyFraudWarnings.
@@ -199,7 +195,7 @@ Stores Stripe stripeEarlyFraudWarnings.
 
 
 Indexes:
-- `byEarlyFraudWarningId`: `earlyFraudWarningId`
+- `byStripeId`: `earlyFraudWarningId`
 
 ## `stripeTaxIds`
 Stores Stripe stripeTaxIds.
@@ -212,7 +208,7 @@ Stores Stripe stripeTaxIds.
 
 
 Indexes:
-- `byTaxIdId`: `taxIdId`
+- `byStripeId`: `taxIdId`
 
 ## `stripeSetupIntents`
 Stores Stripe stripeSetupIntents.
@@ -225,7 +221,7 @@ Stores Stripe stripeSetupIntents.
 
 
 Indexes:
-- `bySetupIntentId`: `setupIntentId`
+- `byStripeId`: `setupIntentId`
 
 ## `stripeCreditNotes`
 Stores Stripe stripeCreditNotes.
@@ -238,7 +234,7 @@ Stores Stripe stripeCreditNotes.
 
 
 Indexes:
-- `byCreditNoteId`: `creditNoteId`
+- `byStripeId`: `creditNoteId`
 
 ## `stripeCharges`
 Stores Stripe stripeCharges.
@@ -251,7 +247,7 @@ Stores Stripe stripeCharges.
 
 
 Indexes:
-- `byChargeId`: `chargeId`
+- `byStripeId`: `chargeId`
 
 ## `stripePaymentMethods`
 Stores Stripe stripePaymentMethods.
@@ -264,7 +260,7 @@ Stores Stripe stripePaymentMethods.
 
 
 Indexes:
-- `byPaymentMethodId`: `paymentMethodId`
+- `byStripeId`: `paymentMethodId`
 
 ## `stripeSubscriptionSchedules`
 Stores Stripe stripeSubscriptionSchedules.
@@ -277,7 +273,7 @@ Stores Stripe stripeSubscriptionSchedules.
 
 
 Indexes:
-- `bySubscriptionScheduleId`: `subscriptionScheduleId`
+- `byStripeId`: `subscriptionScheduleId`
 
 ## `stripeMandates`
 Stores Stripe stripeMandates.
@@ -290,7 +286,7 @@ Stores Stripe stripeMandates.
 
 
 Indexes:
-- `byMandateId`: `mandateId`
+- `byStripeId`: `mandateId`
 
 ## `stripeBillingPortalConfigurations`
 Stores Stripe stripeBillingPortalConfigurations.
@@ -303,4 +299,4 @@ Stores Stripe stripeBillingPortalConfigurations.
 
 
 Indexes:
-- `byBillingPortalConfigurationId`: `billingPortalConfigurationId`
+- `byStripeId`: `billingPortalConfigurationId`

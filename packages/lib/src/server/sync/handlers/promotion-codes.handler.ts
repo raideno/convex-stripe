@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { PromotionCodeStripeToConvex } from "@/schema/models/promotion-code";
 import { storeDispatchTyped } from "@/store";
 
@@ -22,13 +23,13 @@ export const PromotionCodesSyncImplementation = defineActionImplementation({
       },
       context,
       configuration,
-      options
+      options,
     );
     const localPromotionCodesById = new Map(
       (localPromotionCodesRes.docs || []).map((p: any) => [
         p.promotionCodeId,
         p,
-      ])
+      ]),
     );
 
     const promotionCodes = await stripe.promotionCodes
@@ -44,6 +45,7 @@ export const PromotionCodesSyncImplementation = defineActionImplementation({
         {
           operation: "upsert",
           table: "stripePromotionCodes",
+          indexName: BY_STRIPE_ID_INDEX_NAME,
           idField: "promotionCodeId",
           data: {
             promotionCodeId: promotionCode.id,
@@ -53,7 +55,7 @@ export const PromotionCodesSyncImplementation = defineActionImplementation({
         },
         context,
         configuration,
-        options
+        options,
       );
     }
 
@@ -63,12 +65,13 @@ export const PromotionCodesSyncImplementation = defineActionImplementation({
           {
             operation: "deleteById",
             table: "stripePromotionCodes",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "promotionCodeId",
             idValue: promotionCodeId,
           },
           context,
           configuration,
-          options
+          options,
         );
       }
     }

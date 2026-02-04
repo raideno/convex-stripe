@@ -29,6 +29,7 @@ export const SubscriptionSyncImplementation = defineActionImplementation({
         {
           operation: "upsert",
           table: "stripeSubscriptions",
+          indexName: "byCustomerId",
           idField: "customerId",
           data: {
             subscriptionId: null,
@@ -39,7 +40,7 @@ export const SubscriptionSyncImplementation = defineActionImplementation({
         },
         context,
         configuration,
-        options
+        options,
       );
 
       return null;
@@ -51,6 +52,7 @@ export const SubscriptionSyncImplementation = defineActionImplementation({
       {
         operation: "upsert",
         table: "stripeSubscriptions",
+        indexName: "byCustomerId",
         idField: "customerId",
         data: {
           subscriptionId: subscription.id,
@@ -61,7 +63,7 @@ export const SubscriptionSyncImplementation = defineActionImplementation({
       },
       context,
       configuration,
-      options
+      options,
     );
 
     return subscription;

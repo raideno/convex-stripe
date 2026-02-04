@@ -1,18 +1,39 @@
-import { GenericMutationCtx, WithoutSystemFields } from "convex/server";
+import {
+  FieldTypeFromFieldPath,
+  GenericMutationCtx,
+  IndexTiebreakerField,
+  WithoutSystemFields,
+} from "convex/server";
 import { GenericId } from "convex/values";
 
 import { StripeDataModel } from "../../schema";
 
-export async function upsert<TableName extends keyof StripeDataModel>(
+type StripeIndexFieldPath<
+  TableName extends keyof StripeDataModel,
+  IndexName extends keyof StripeDataModel[TableName]["indexes"] & string,
+> = Exclude<
+  StripeDataModel[TableName]["indexes"][IndexName][number],
+  IndexTiebreakerField
+>;
+
+export async function upsert<
+  TableName extends keyof StripeDataModel,
+  IndexName extends keyof StripeDataModel[TableName]["indexes"] & string,
+  IndexField extends StripeIndexFieldPath<TableName, IndexName>,
+>(
   context: GenericMutationCtx<StripeDataModel>,
   table: TableName,
-  idField: keyof StripeDataModel[TableName]["document"] & string,
-  data: WithoutSystemFields<StripeDataModel[TableName]["document"]>
+  indexName: IndexName,
+  idField: IndexField,
+  data: WithoutSystemFields<StripeDataModel[TableName]["document"]> &
+    Record<
+      IndexField,
+      FieldTypeFromFieldPath<StripeDataModel[TableName]["document"], IndexField>
+    >,
 ): Promise<GenericId<TableName>> {
-  // TODO: very unoptimized, use indexes
   const existing = await context.db
     .query(table)
-    .filter((q) => q.eq(q.field(idField), (data as any)[idField]))
+    .withIndex(indexName, (q) => q.eq(idField, data[idField]))
     .unique();
 
   if (existing) {

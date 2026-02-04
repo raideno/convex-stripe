@@ -1,3 +1,4 @@
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { CustomerStripeToConvex } from "@/schema/models/customer";
 import { storeDispatchTyped } from "@/store";
 
@@ -25,6 +26,7 @@ export default defineWebhookHandler({
           {
             operation: "upsert",
             table: "stripeCustomers",
+            indexName: "byEntityId",
             idField: "entityId",
             data: {
               customerId: customer.id,
@@ -43,6 +45,7 @@ export default defineWebhookHandler({
           {
             operation: "deleteById",
             table: "stripeCustomers",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "customerId",
             idValue: customer.id,
           },

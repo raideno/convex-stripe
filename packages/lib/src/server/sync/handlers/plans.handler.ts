@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { PlanStripeToConvex } from "@/schema/models/plan";
 import { storeDispatchTyped } from "@/store";
 
@@ -22,10 +23,10 @@ export const PlansSyncImplementation = defineActionImplementation({
       },
       context,
       configuration,
-      options
+      options,
     );
     const localPlansById = new Map(
-      (localPlansRes.docs || []).map((p: any) => [p.planId, p])
+      (localPlansRes.docs || []).map((p: any) => [p.planId, p]),
     );
 
     const plans = await stripe.plans
@@ -41,6 +42,7 @@ export const PlansSyncImplementation = defineActionImplementation({
         {
           operation: "upsert",
           table: "stripePlans",
+          indexName: BY_STRIPE_ID_INDEX_NAME,
           idField: "planId",
           data: {
             planId: plan.id,
@@ -50,7 +52,7 @@ export const PlansSyncImplementation = defineActionImplementation({
         },
         context,
         configuration,
-        options
+        options,
       );
     }
 
@@ -60,12 +62,13 @@ export const PlansSyncImplementation = defineActionImplementation({
           {
             operation: "deleteById",
             table: "stripePlans",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "planId",
             idValue: planId,
           },
           context,
           configuration,
-          options
+          options,
         );
       }
     }

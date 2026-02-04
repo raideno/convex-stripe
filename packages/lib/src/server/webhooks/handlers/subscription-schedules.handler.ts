@@ -1,3 +1,4 @@
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { SubscriptionScheduleStripeToConvex } from "@/schema/models/subscription-schedule";
 import { storeDispatchTyped } from "@/store";
 
@@ -30,6 +31,7 @@ export default defineWebhookHandler({
           {
             operation: "upsert",
             table: "stripeSubscriptionSchedules",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "subscriptionScheduleId",
             data: {
               subscriptionScheduleId: subscriptionSchedule.id,
@@ -39,7 +41,7 @@ export default defineWebhookHandler({
           },
           context,
           configuration,
-          options
+          options,
         );
         break;
     }

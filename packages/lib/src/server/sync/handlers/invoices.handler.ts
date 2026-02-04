@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { InvoiceStripeToConvex } from "@/schema/models/invoice";
 import { storeDispatchTyped } from "@/store";
 
@@ -22,10 +23,10 @@ export const InvoicesSyncImplementation = defineActionImplementation({
       },
       context,
       configuration,
-      options
+      options,
     );
     const localInvoicesById = new Map(
-      (localInvoicesRes.docs || []).map((p: any) => [p.invoiceId, p])
+      (localInvoicesRes.docs || []).map((p: any) => [p.invoiceId, p]),
     );
 
     const invoices = await stripe.invoices
@@ -47,6 +48,7 @@ export const InvoicesSyncImplementation = defineActionImplementation({
           operation: "upsert",
           table: "stripeInvoices",
           idField: "invoiceId",
+          indexName: BY_STRIPE_ID_INDEX_NAME,
           data: {
             invoiceId: invoice.id,
             stripe: InvoiceStripeToConvex({
@@ -58,7 +60,7 @@ export const InvoicesSyncImplementation = defineActionImplementation({
         },
         context,
         configuration,
-        options
+        options,
       );
     }
 
@@ -68,12 +70,13 @@ export const InvoicesSyncImplementation = defineActionImplementation({
           {
             operation: "deleteById",
             table: "stripeInvoices",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "invoiceId",
             idValue: invoiceId,
           },
           context,
           configuration,
-          options
+          options,
         );
       }
     }

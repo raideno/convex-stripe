@@ -1,3 +1,4 @@
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { MandateStripeToConvex } from "@/schema/models/mandate";
 import { storeDispatchTyped } from "@/store";
 
@@ -16,6 +17,7 @@ export default defineWebhookHandler({
           {
             operation: "upsert",
             table: "stripeMandates",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "mandateId",
             data: {
               mandateId: mandate.id,
@@ -25,7 +27,7 @@ export default defineWebhookHandler({
           },
           context,
           configuration,
-          options
+          options,
         );
         break;
     }

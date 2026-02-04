@@ -2,6 +2,7 @@ import Stripe from "stripe";
 
 import { CreateEntityImplementation } from "@/actions/create-entity";
 import { buildSignedReturnUrl } from "@/redirects";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { CheckoutSessionStripeToConvex } from "@/schema/models/checkout-session";
 import { SubscriptionStripeToConvex } from "@/schema/models/subscription";
 import { storeDispatchTyped } from "@/store";
@@ -45,6 +46,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
       {
         operation: "selectOne",
         table: "stripeCustomers",
+        indexName: "byEntityId",
         field: "entityId",
         value: args.entityId,
       },
@@ -138,6 +140,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
       {
         operation: "upsert",
         table: "stripeCheckoutSessions",
+        indexName: BY_STRIPE_ID_INDEX_NAME,
         idField: "checkoutSessionId",
         data: {
           checkoutSessionId: checkout.id,
@@ -161,6 +164,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
         {
           operation: "upsert",
           table: "stripeSubscriptions",
+          indexName: BY_STRIPE_ID_INDEX_NAME,
           idField: "subscriptionId",
           data: {
             subscriptionId: subscription.id,

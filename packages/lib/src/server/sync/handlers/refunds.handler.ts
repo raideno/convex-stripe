@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { RefundStripeToConvex } from "@/schema/models/refund";
 import { storeDispatchTyped } from "@/store";
 
@@ -22,10 +23,10 @@ export const RefundsSyncImplementation = defineActionImplementation({
       },
       context,
       configuration,
-      options
+      options,
     );
     const localRefundsById = new Map(
-      (localRefundsRes.docs || []).map((p: any) => [p.refundId, p])
+      (localRefundsRes.docs || []).map((p: any) => [p.refundId, p]),
     );
 
     const refunds = await stripe.refunds
@@ -41,6 +42,7 @@ export const RefundsSyncImplementation = defineActionImplementation({
         {
           operation: "upsert",
           table: "stripeRefunds",
+          indexName: BY_STRIPE_ID_INDEX_NAME,
           idField: "refundId",
           data: {
             refundId: refund.id,
@@ -50,7 +52,7 @@ export const RefundsSyncImplementation = defineActionImplementation({
         },
         context,
         configuration,
-        options
+        options,
       );
     }
 
@@ -60,12 +62,13 @@ export const RefundsSyncImplementation = defineActionImplementation({
           {
             operation: "deleteById",
             table: "stripeRefunds",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "refundId",
             idValue: refundId,
           },
           context,
           configuration,
-          options
+          options,
         );
       }
     }

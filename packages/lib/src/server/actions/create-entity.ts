@@ -23,6 +23,7 @@ export const CreateEntityImplementation = defineActionImplementation({
       {
         operation: "selectOne",
         table: "stripeCustomers",
+        indexName: "byEntityId",
         field: "entityId",
         value: args.entityId,
       },
@@ -48,6 +49,7 @@ export const CreateEntityImplementation = defineActionImplementation({
         {
           operation: "upsert",
           table: "stripeCustomers",
+          indexName: "byEntityId",
           idField: "entityId",
           data: {
             entityId: args.entityId,

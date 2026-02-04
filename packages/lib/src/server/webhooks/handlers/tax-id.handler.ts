@@ -1,3 +1,4 @@
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { TaxIdStripeToConvex } from "@/schema/models/tax-id";
 import { storeDispatchTyped } from "@/store";
 
@@ -27,6 +28,7 @@ export default defineWebhookHandler({
           {
             operation: "upsert",
             table: "stripeTaxIds",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "taxIdId",
             data: {
               taxIdId: taxId.id,
@@ -36,7 +38,7 @@ export default defineWebhookHandler({
           },
           context,
           configuration,
-          options
+          options,
         );
         break;
     }

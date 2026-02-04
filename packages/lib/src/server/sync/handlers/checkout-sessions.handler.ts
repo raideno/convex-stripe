@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import { defineActionImplementation } from "@/helpers";
 import { CheckoutSessionStripeToConvex } from "@/schema/models/checkout-session";
 import { storeDispatchTyped } from "@/store";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 
 export const CheckoutSessionsSyncImplementation = defineActionImplementation({
   args: v.object({}),
@@ -22,13 +23,13 @@ export const CheckoutSessionsSyncImplementation = defineActionImplementation({
       },
       context,
       configuration,
-      options
+      options,
     );
     const localCheckoutSessionsById = new Map(
       (localCheckoutSessionsRes.docs || []).map((p: any) => [
         p.checkoutSessionId,
         p,
-      ])
+      ]),
     );
 
     const checkoutSessions = await stripe.checkout.sessions
@@ -45,6 +46,7 @@ export const CheckoutSessionsSyncImplementation = defineActionImplementation({
           operation: "upsert",
           table: "stripeCheckoutSessions",
           idField: "checkoutSessionId",
+          indexName: BY_STRIPE_ID_INDEX_NAME,
           data: {
             checkoutSessionId: checkoutSession.id,
             stripe: CheckoutSessionStripeToConvex(checkoutSession),
@@ -53,7 +55,7 @@ export const CheckoutSessionsSyncImplementation = defineActionImplementation({
         },
         context,
         configuration,
-        options
+        options,
       );
     }
 
@@ -63,12 +65,13 @@ export const CheckoutSessionsSyncImplementation = defineActionImplementation({
           {
             operation: "deleteById",
             table: "stripeCheckoutSessions",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "checkoutSessionId",
             idValue: checkoutSessionId,
           },
           context,
           configuration,
-          options
+          options,
         );
       }
     }

@@ -1,3 +1,4 @@
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { EarlyFraudWarningStripeToConvex } from "@/schema/models/early-fraud-warning";
 import { storeDispatchTyped } from "@/store";
 
@@ -20,6 +21,7 @@ export default defineWebhookHandler({
           {
             operation: "upsert",
             table: "stripeEarlyFraudWarnings",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "earlyFraudWarningId",
             data: {
               earlyFraudWarningId: earlyFraudWarning.id,
@@ -29,7 +31,7 @@ export default defineWebhookHandler({
           },
           context,
           configuration,
-          options
+          options,
         );
         break;
     }

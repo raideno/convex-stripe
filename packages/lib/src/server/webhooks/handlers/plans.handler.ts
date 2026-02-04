@@ -1,3 +1,4 @@
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { PlanStripeToConvex } from "@/schema/models/plan";
 import { storeDispatchTyped } from "@/store";
 
@@ -18,6 +19,7 @@ export default defineWebhookHandler({
           {
             operation: "upsert",
             table: "stripePlans",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "planId",
             data: {
               planId: plan.id,
@@ -27,7 +29,7 @@ export default defineWebhookHandler({
           },
           context,
           configuration,
-          options
+          options,
         );
         break;
     }

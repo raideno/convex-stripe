@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { BillingPortalConfigurationStripeToConvex } from "@/schema/models/billing-portal-configuration";
 import { storeDispatchTyped } from "@/store";
 
@@ -23,13 +24,13 @@ export const BillingPortalConfigurationsSyncImplementation =
         },
         context,
         configuration,
-        options
+        options,
       );
       const localBillingPortalConfigurationsById = new Map(
         (localBillingPortalConfigurationsRes.docs || []).map((p) => [
           p.billingPortalConfigurationId,
           p,
-        ])
+        ]),
       );
 
       const billingPortalConfigurations =
@@ -47,17 +48,18 @@ export const BillingPortalConfigurationsSyncImplementation =
             operation: "upsert",
             table: "stripeBillingPortalConfigurations",
             idField: "billingPortalConfigurationId",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             data: {
               billingPortalConfigurationId: billingPortalConfiguration.id,
               stripe: BillingPortalConfigurationStripeToConvex(
-                billingPortalConfiguration
+                billingPortalConfiguration,
               ),
               lastSyncedAt: Date.now(),
             },
           },
           context,
           configuration,
-          options
+          options,
         );
       }
 
@@ -71,12 +73,13 @@ export const BillingPortalConfigurationsSyncImplementation =
             {
               operation: "deleteById",
               table: "stripeBillingPortalConfigurations",
+              indexName: BY_STRIPE_ID_INDEX_NAME,
               idField: "billingPortalConfigurationId",
               idValue: billingPortalConfigurationId,
             },
             context,
             configuration,
-            options
+            options,
           );
         }
       }

@@ -1,25 +1,43 @@
-import { GenericMutationCtx } from "convex/server";
+import {
+  FieldTypeFromFieldPath,
+  GenericMutationCtx,
+  IndexTiebreakerField,
+} from "convex/server";
 
-import { StripeDataModel } from "../../schema";
+import { BY_STRIPE_ID_INDEX_NAME, StripeDataModel } from "../../schema";
+
+type StripeIndexFieldPath<
+  TableName extends keyof StripeDataModel,
+  IndexName extends keyof StripeDataModel[TableName]["indexes"] & string,
+> = Exclude<
+  StripeDataModel[TableName]["indexes"][IndexName][number],
+  IndexTiebreakerField
+>;
 
 export async function deleteById<
   TableName extends keyof StripeDataModel,
-  Schema extends StripeDataModel[TableName]["document"],
+  IndexField extends StripeIndexFieldPath<
+    TableName,
+    typeof BY_STRIPE_ID_INDEX_NAME
+  >,
 >(
   context: GenericMutationCtx<StripeDataModel>,
   table: TableName,
-  idField: keyof Schema & string,
-  idValue: Schema[typeof idField],
+  idField: IndexField,
+  idValue: FieldTypeFromFieldPath<
+    StripeDataModel[TableName]["document"],
+    IndexField
+  >,
 ): Promise<boolean> {
-  // TODO: highly ineffective
   const existing = await context.db
     .query(table)
-    .filter((q) => q.eq(q.field(idField), idValue))
+    .withIndex(BY_STRIPE_ID_INDEX_NAME, (q) => q.eq(idField, idValue))
     .unique();
 
   if (existing) {
     await context.db.delete(existing._id);
     return true;
   }
+
   return false;
 }

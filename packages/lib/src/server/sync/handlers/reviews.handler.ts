@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { ReviewStripeToConvex } from "@/schema/models/review";
 import { storeDispatchTyped } from "@/store";
 
@@ -22,10 +23,10 @@ export const ReviewsSyncImplementation = defineActionImplementation({
       },
       context,
       configuration,
-      options
+      options,
     );
     const localReviewsById = new Map(
-      (localReviewsRes.docs || []).map((p: any) => [p.reviewId, p])
+      (localReviewsRes.docs || []).map((p: any) => [p.reviewId, p]),
     );
 
     const reviews = await stripe.reviews
@@ -41,6 +42,7 @@ export const ReviewsSyncImplementation = defineActionImplementation({
         {
           operation: "upsert",
           table: "stripeReviews",
+          indexName: BY_STRIPE_ID_INDEX_NAME,
           idField: "reviewId",
           data: {
             reviewId: review.id,
@@ -50,7 +52,7 @@ export const ReviewsSyncImplementation = defineActionImplementation({
         },
         context,
         configuration,
-        options
+        options,
       );
     }
 
@@ -60,12 +62,13 @@ export const ReviewsSyncImplementation = defineActionImplementation({
           {
             operation: "deleteById",
             table: "stripeReviews",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "reviewId",
             idValue: reviewId,
           },
           context,
           configuration,
-          options
+          options,
         );
       }
     }

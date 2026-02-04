@@ -1,3 +1,4 @@
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { BillingPortalConfigurationStripeToConvex } from "@/schema/models/billing-portal-configuration";
 import { storeDispatchTyped } from "@/store";
 
@@ -20,18 +21,19 @@ export default defineWebhookHandler({
           {
             operation: "upsert",
             table: "stripeBillingPortalConfigurations",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "billingPortalConfigurationId",
             data: {
               billingPortalConfigurationId: billingPortalConfiguration.id,
               stripe: BillingPortalConfigurationStripeToConvex(
-                billingPortalConfiguration
+                billingPortalConfiguration,
               ),
               lastSyncedAt: Date.now(),
             },
           },
           context,
           configuration,
-          options
+          options,
         );
         break;
     }

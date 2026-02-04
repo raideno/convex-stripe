@@ -31,6 +31,7 @@ export const PortalImplementation = defineActionCallableFunction<
       {
         operation: "selectOne",
         table: "stripeCustomers",
+        indexName: "byEntityId",
         field: "entityId",
         value: args.entityId,
       },

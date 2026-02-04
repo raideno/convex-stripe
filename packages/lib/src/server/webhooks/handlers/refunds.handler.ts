@@ -1,3 +1,4 @@
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { RefundStripeToConvex } from "@/schema/models/refund";
 import { storeDispatchTyped } from "@/store";
 
@@ -23,6 +24,7 @@ export default defineWebhookHandler({
           {
             operation: "upsert",
             table: "stripeRefunds",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "refundId",
             data: {
               refundId: refund.id,
@@ -32,7 +34,7 @@ export default defineWebhookHandler({
           },
           context,
           configuration,
-          options
+          options,
         );
         break;
     }

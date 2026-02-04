@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { TaxIdStripeToConvex } from "@/schema/models/tax-id";
 import { storeDispatchTyped } from "@/store";
 
@@ -22,10 +23,10 @@ export const TaxIdsSyncImplementation = defineActionImplementation({
       },
       context,
       configuration,
-      options
+      options,
     );
     const localTaxIdsById = new Map(
-      (localTaxIdsRes.docs || []).map((p: any) => [p.taxIdId, p])
+      (localTaxIdsRes.docs || []).map((p: any) => [p.taxIdId, p]),
     );
 
     const taxIds = await stripe.taxIds
@@ -41,6 +42,7 @@ export const TaxIdsSyncImplementation = defineActionImplementation({
         {
           operation: "upsert",
           table: "stripeTaxIds",
+          indexName: BY_STRIPE_ID_INDEX_NAME,
           idField: "taxIdId",
           data: {
             taxIdId: taxId.id,
@@ -50,7 +52,7 @@ export const TaxIdsSyncImplementation = defineActionImplementation({
         },
         context,
         configuration,
-        options
+        options,
       );
     }
 
@@ -60,12 +62,13 @@ export const TaxIdsSyncImplementation = defineActionImplementation({
           {
             operation: "deleteById",
             table: "stripeTaxIds",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "taxIdId",
             idValue: taxIdId,
           },
           context,
           configuration,
-          options
+          options,
         );
       }
     }

@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import { defineActionImplementation } from "@/helpers";
 import { ChargeStripeToConvex } from "@/schema/models/charge";
 import { storeDispatchTyped } from "@/store";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 
 export const ChargesSyncImplementation = defineActionImplementation({
   args: v.object({}),
@@ -22,10 +23,10 @@ export const ChargesSyncImplementation = defineActionImplementation({
       },
       context,
       configuration,
-      options
+      options,
     );
     const localChargesById = new Map(
-      (localChargesRes.docs || []).map((p: any) => [p.chargeId, p])
+      (localChargesRes.docs || []).map((p: any) => [p.chargeId, p]),
     );
 
     const charges = await stripe.charges
@@ -40,6 +41,7 @@ export const ChargesSyncImplementation = defineActionImplementation({
       await storeDispatchTyped(
         {
           operation: "upsert",
+          indexName: BY_STRIPE_ID_INDEX_NAME,
           table: "stripeCharges",
           idField: "chargeId",
           data: {
@@ -50,7 +52,7 @@ export const ChargesSyncImplementation = defineActionImplementation({
         },
         context,
         configuration,
-        options
+        options,
       );
     }
 
@@ -60,12 +62,13 @@ export const ChargesSyncImplementation = defineActionImplementation({
           {
             operation: "deleteById",
             table: "stripeCharges",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "chargeId",
             idValue: chargeId,
           },
           context,
           configuration,
-          options
+          options,
         );
       }
     }

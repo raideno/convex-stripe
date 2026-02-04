@@ -1,3 +1,4 @@
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { CouponStripeToConvex } from "@/schema/models/coupon";
 import { storeDispatchTyped } from "@/store";
 
@@ -17,6 +18,7 @@ export default defineWebhookHandler({
           {
             operation: "upsert",
             table: "stripeCoupons",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "couponId",
             data: {
               couponId: coupon.id,
@@ -26,7 +28,7 @@ export default defineWebhookHandler({
           },
           context,
           configuration,
-          options
+          options,
         );
         break;
       case "coupon.deleted":
@@ -34,12 +36,13 @@ export default defineWebhookHandler({
           {
             operation: "deleteById",
             table: "stripeCoupons",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "couponId",
             idValue: coupon.id,
           },
           context,
           configuration,
-          options
+          options,
         );
         break;
     }

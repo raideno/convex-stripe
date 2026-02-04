@@ -1,5 +1,6 @@
 import { CheckoutSessionStripeToConvex } from "@/schema/models/checkout-session";
 import { storeDispatchTyped } from "@/store";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 
 import { defineWebhookHandler } from "../types";
 
@@ -24,6 +25,7 @@ export default defineWebhookHandler({
           {
             operation: "upsert",
             table: "stripeCheckoutSessions",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "checkoutSessionId",
             data: {
               checkoutSessionId: checkoutSession.id,
@@ -33,7 +35,7 @@ export default defineWebhookHandler({
           },
           context,
           configuration,
-          options
+          options,
         );
         break;
     }

@@ -1,8 +1,13 @@
-import { GenericActionCtx } from "convex/server";
+import {
+  FieldTypeFromFieldPath,
+  GenericActionCtx,
+  IndexTiebreakerField,
+  WithoutSystemFields,
+} from "convex/server";
 import { GenericId, v } from "convex/values";
 
 import { defineMutationImplementation } from "@/helpers";
-import { StripeDataModel } from "@/schema";
+import { BY_STRIPE_ID_INDEX_NAME, StripeDataModel } from "@/schema";
 
 import { InternalConfiguration, InternalOptions } from "../types";
 import { StoreDispatchArgs, StoreResultFor } from "./types";
@@ -15,11 +20,20 @@ import {
   upsert,
 } from "./operations";
 
+type StripeIndexFieldPath<
+  TableName extends keyof StripeDataModel,
+  IndexName extends keyof StripeDataModel[TableName]["indexes"] & string,
+> = Exclude<
+  StripeDataModel[TableName]["indexes"][IndexName][number],
+  IndexTiebreakerField
+>;
+
 export const StoreImplementation = defineMutationImplementation({
   name: "store",
   args: {
     operation: v.string(),
     table: v.string(),
+    indexName: v.optional(v.string()),
     idField: v.optional(v.string()),
     data: v.optional(v.any()),
     idValue: v.optional(v.any()),
@@ -40,10 +54,6 @@ export const StoreImplementation = defineMutationImplementation({
     }
 
     const table = args.table as keyof StripeDataModel;
-    const idField =
-      args.idField as keyof StripeDataModel[typeof table]["document"];
-    const idValue =
-      args.idValue as StripeDataModel[typeof table]["document"][typeof idField];
 
     let returned_:
       | { id: GenericId<any> }
@@ -54,13 +64,39 @@ export const StoreImplementation = defineMutationImplementation({
 
     switch (args.operation) {
       case "upsert": {
+        if (!args.indexName) {
+          throw new Error('Missing "indexName" for upsert');
+        }
         if (!args.idField) {
           throw new Error('Missing "idField" for upsert');
         }
         if (args.data == null) {
           throw new Error('Missing "data" for upsert');
         }
-        const id = await upsert(context, table, idField, idValue);
+        const upsertIndexName =
+          args.indexName as keyof StripeDataModel[typeof table]["indexes"] &
+            string;
+        const upsertIdField = args.idField as StripeIndexFieldPath<
+          typeof table,
+          typeof upsertIndexName
+        >;
+        const upsertData = args.data as WithoutSystemFields<
+          StripeDataModel[typeof table]["document"]
+        > &
+          Record<
+            typeof upsertIdField,
+            FieldTypeFromFieldPath<
+              StripeDataModel[typeof table]["document"],
+              typeof upsertIdField
+            >
+          >;
+        const id = await upsert(
+          context,
+          table,
+          upsertIndexName,
+          upsertIdField,
+          upsertData,
+        );
         returned_ = { id };
         if (
           configuration.callback &&
@@ -87,7 +123,20 @@ export const StoreImplementation = defineMutationImplementation({
         if (typeof args.idValue === "undefined") {
           throw new Error('Missing "idValue" for deleteById');
         }
-        const deleted = await deleteById(context, table, idField, idValue);
+        const deleteByIdField = args.idField as StripeIndexFieldPath<
+          typeof table,
+          typeof BY_STRIPE_ID_INDEX_NAME
+        >;
+        const deleteByIdValue = args.idValue as FieldTypeFromFieldPath<
+          StripeDataModel[typeof table]["document"],
+          typeof deleteByIdField
+        >;
+        const deleted = await deleteById(
+          context,
+          table,
+          deleteByIdField,
+          deleteByIdValue,
+        );
         returned_ = { deleted };
         if (
           configuration.callback &&
@@ -108,13 +157,33 @@ export const StoreImplementation = defineMutationImplementation({
       }
 
       case "selectOne": {
+        if (!args.indexName) {
+          throw new Error('Missing "indexName" for selectOne');
+        }
         if (!args.field) {
           throw new Error('Missing "field" for selectOne');
         }
         if (typeof args.value === "undefined") {
           throw new Error('Missing "value" for selectOne');
         }
-        const doc = await selectOne(context, table, idField, idValue);
+        const selectOneIndexName =
+          args.indexName as keyof StripeDataModel[typeof table]["indexes"] &
+            string;
+        const selectOneField = args.field as StripeIndexFieldPath<
+          typeof table,
+          typeof selectOneIndexName
+        >;
+        const selectOneValue = args.value as FieldTypeFromFieldPath<
+          StripeDataModel[typeof table]["document"],
+          typeof selectOneField
+        >;
+        const doc = await selectOne(
+          context,
+          table,
+          selectOneIndexName,
+          selectOneField,
+          selectOneValue,
+        );
         returned_ = { doc };
         return { doc };
       }

@@ -1,3 +1,4 @@
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { ProductStripeToConvex } from "@/schema/models/product";
 import { storeDispatchTyped } from "@/store";
 
@@ -17,6 +18,7 @@ export default defineWebhookHandler({
           {
             operation: "upsert",
             table: "stripeProducts",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "productId",
             data: {
               productId: product.id,
@@ -26,7 +28,7 @@ export default defineWebhookHandler({
           },
           context,
           configuration,
-          options
+          options,
         );
         break;
       // TODO: careful here as the deletion is just a soft delete in Stripe
@@ -36,12 +38,13 @@ export default defineWebhookHandler({
           {
             operation: "deleteById",
             table: "stripeProducts",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "productId",
             idValue: product.id,
           },
           context,
           configuration,
-          options
+          options,
         );
         break;
     }

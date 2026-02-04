@@ -1,3 +1,4 @@
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { InvoiceStripeToConvex } from "@/schema/models/invoice";
 import { storeDispatchTyped } from "@/store";
 
@@ -53,6 +54,7 @@ export default defineWebhookHandler({
           {
             operation: "upsert",
             table: "stripeInvoices",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "invoiceId",
             data: {
               invoiceId: invoice.id,
@@ -65,7 +67,7 @@ export default defineWebhookHandler({
           },
           context,
           configuration,
-          options
+          options,
         );
         break;
     }

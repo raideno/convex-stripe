@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { DisputeStripeToConvex } from "@/schema/models/dispute";
 import { storeDispatchTyped } from "@/store";
 
@@ -22,10 +23,10 @@ export const DisputesSyncImplementation = defineActionImplementation({
       },
       context,
       configuration,
-      options
+      options,
     );
     const localDisputesById = new Map(
-      (localDisputesRes.docs || []).map((p: any) => [p.disputeId, p])
+      (localDisputesRes.docs || []).map((p: any) => [p.disputeId, p]),
     );
 
     const disputes = await stripe.disputes
@@ -41,6 +42,7 @@ export const DisputesSyncImplementation = defineActionImplementation({
         {
           operation: "upsert",
           table: "stripeDisputes",
+          indexName: BY_STRIPE_ID_INDEX_NAME,
           idField: "disputeId",
           data: {
             disputeId: dispute.id,
@@ -50,7 +52,7 @@ export const DisputesSyncImplementation = defineActionImplementation({
         },
         context,
         configuration,
-        options
+        options,
       );
     }
 
@@ -60,12 +62,13 @@ export const DisputesSyncImplementation = defineActionImplementation({
           {
             operation: "deleteById",
             table: "stripeDisputes",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "disputeId",
             idValue: disputeId,
           },
           context,
           configuration,
-          options
+          options,
         );
       }
     }

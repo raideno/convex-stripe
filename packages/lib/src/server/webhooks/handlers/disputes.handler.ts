@@ -1,3 +1,4 @@
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { DisputeStripeToConvex } from "@/schema/models/dispute";
 import { storeDispatchTyped } from "@/store";
 
@@ -26,6 +27,7 @@ export default defineWebhookHandler({
           {
             operation: "upsert",
             table: "stripeDisputes",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "disputeId",
             data: {
               disputeId: dispute.id,
@@ -35,7 +37,7 @@ export default defineWebhookHandler({
           },
           context,
           configuration,
-          options
+          options,
         );
         break;
     }

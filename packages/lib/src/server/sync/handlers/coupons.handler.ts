@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { CouponStripeToConvex } from "@/schema/models/coupon";
 import { storeDispatchTyped } from "@/store";
 
@@ -22,10 +23,10 @@ export const CouponsSyncImplementation = defineActionImplementation({
       },
       context,
       configuration,
-      options
+      options,
     );
     const localCouponsById = new Map(
-      (localCouponsRes.docs || []).map((p: any) => [p.couponId, p])
+      (localCouponsRes.docs || []).map((p: any) => [p.couponId, p]),
     );
 
     const coupons = await stripe.coupons
@@ -41,6 +42,7 @@ export const CouponsSyncImplementation = defineActionImplementation({
         {
           operation: "upsert",
           table: "stripeCoupons",
+          indexName: BY_STRIPE_ID_INDEX_NAME,
           idField: "couponId",
           data: {
             couponId: coupon.id,
@@ -50,7 +52,7 @@ export const CouponsSyncImplementation = defineActionImplementation({
         },
         context,
         configuration,
-        options
+        options,
       );
     }
 
@@ -60,12 +62,13 @@ export const CouponsSyncImplementation = defineActionImplementation({
           {
             operation: "deleteById",
             table: "stripeCoupons",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "couponId",
             idValue: couponId,
           },
           context,
           configuration,
-          options
+          options,
         );
       }
     }

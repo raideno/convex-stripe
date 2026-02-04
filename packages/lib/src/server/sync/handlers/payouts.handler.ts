@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import { v } from "convex/values";
 
 import { defineActionImplementation } from "@/helpers";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { PayoutStripeToConvex } from "@/schema/models/payout";
 import { storeDispatchTyped } from "@/store";
 
@@ -22,10 +23,10 @@ export const PayoutsSyncImplementation = defineActionImplementation({
       },
       context,
       configuration,
-      options
+      options,
     );
     const localPayoutsById = new Map(
-      (localPayoutsRes.docs || []).map((p: any) => [p.payoutId, p])
+      (localPayoutsRes.docs || []).map((p: any) => [p.payoutId, p]),
     );
 
     const payouts = await stripe.payouts
@@ -41,6 +42,7 @@ export const PayoutsSyncImplementation = defineActionImplementation({
         {
           operation: "upsert",
           table: "stripePayouts",
+          indexName: BY_STRIPE_ID_INDEX_NAME,
           idField: "payoutId",
           data: {
             payoutId: payout.id,
@@ -50,7 +52,7 @@ export const PayoutsSyncImplementation = defineActionImplementation({
         },
         context,
         configuration,
-        options
+        options,
       );
     }
 
@@ -60,12 +62,13 @@ export const PayoutsSyncImplementation = defineActionImplementation({
           {
             operation: "deleteById",
             table: "stripePayouts",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "payoutId",
             idValue: payoutId,
           },
           context,
           configuration,
-          options
+          options,
         );
       }
     }

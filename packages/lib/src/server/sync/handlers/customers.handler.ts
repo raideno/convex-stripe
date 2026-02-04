@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { CustomerStripeToConvex } from "@/schema/models/customer";
 import { storeDispatchTyped } from "@/store";
 
@@ -48,6 +49,7 @@ export const CustomersSyncImplementation = defineActionImplementation({
         {
           operation: "upsert",
           table: "stripeCustomers",
+          indexName: BY_STRIPE_ID_INDEX_NAME,
           idField: "customerId",
           data: {
             customerId: customer.id,
@@ -68,6 +70,7 @@ export const CustomersSyncImplementation = defineActionImplementation({
           {
             operation: "deleteById",
             table: "stripeCustomers",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "customerId",
             idValue: customerId,
           },

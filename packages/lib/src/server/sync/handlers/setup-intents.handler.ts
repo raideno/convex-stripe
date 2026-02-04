@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
+import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { SetupIntentStripeToConvex } from "@/schema/models/setup-intent";
 import { storeDispatchTyped } from "@/store";
 
@@ -22,10 +23,10 @@ export const SetupIntentsSyncImplementation = defineActionImplementation({
       },
       context,
       configuration,
-      options
+      options,
     );
     const localSetupIntentsById = new Map(
-      (localSetupIntentsRes.docs || []).map((p: any) => [p.setupIntentId, p])
+      (localSetupIntentsRes.docs || []).map((p: any) => [p.setupIntentId, p]),
     );
 
     const setupIntents = await stripe.setupIntents
@@ -41,6 +42,7 @@ export const SetupIntentsSyncImplementation = defineActionImplementation({
         {
           operation: "upsert",
           table: "stripeSetupIntents",
+          indexName: BY_STRIPE_ID_INDEX_NAME,
           idField: "setupIntentId",
           data: {
             setupIntentId: setupIntent.id,
@@ -50,7 +52,7 @@ export const SetupIntentsSyncImplementation = defineActionImplementation({
         },
         context,
         configuration,
-        options
+        options,
       );
     }
 
@@ -60,12 +62,13 @@ export const SetupIntentsSyncImplementation = defineActionImplementation({
           {
             operation: "deleteById",
             table: "stripeSetupIntents",
+            indexName: BY_STRIPE_ID_INDEX_NAME,
             idField: "setupIntentId",
             idValue: setupIntent,
           },
           context,
           configuration,
-          options
+          options,
         );
       }
     }
