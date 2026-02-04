@@ -17,6 +17,7 @@ export const PayImplementation = defineActionCallableFunction<
     entityId: string;
     cancel_url: string;
     success_url: string;
+    failure_url?: string;
     referenceId: string;
     mode: "payment";
   } & Omit<
@@ -85,6 +86,7 @@ export const PayImplementation = defineActionCallableFunction<
         referenceId: args.referenceId,
         customerId: customerId,
       },
+      failureUrl: args.failure_url,
       targetUrl: args.success_url,
     });
     const cancelUrl = await buildSignedReturnUrl({
@@ -95,6 +97,7 @@ export const PayImplementation = defineActionCallableFunction<
         referenceId: args.referenceId,
         customerId: customerId,
       },
+      failureUrl: args.failure_url,
       targetUrl: args.cancel_url,
     });
 

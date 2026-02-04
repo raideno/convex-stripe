@@ -116,18 +116,19 @@ export interface ReturnPayload<T> {
   data?: T;
   exp: number;
   targetUrl: string;
+  failureUrl?: string;
 }
 
 export async function buildSignedReturnUrl<O extends ReturnOrigin>({
   configuration,
   origin,
-  // TODO: add a failure url for when we throw an error due to link expiration, etc
-  // user will be redirected there with a ?reason=<reason> query parameter
+  failureUrl,
   targetUrl,
   data,
 }: {
   configuration: InternalConfiguration;
   origin: O;
+  failureUrl?: string;
   targetUrl: string;
   data: ReturnDataMap[O];
 }): Promise<string> {
@@ -135,6 +136,7 @@ export async function buildSignedReturnUrl<O extends ReturnOrigin>({
     origin,
     data,
     targetUrl,
+    failureUrl,
     exp: Date.now() + configuration.redirectTtlMs,
   };
 
@@ -250,14 +252,38 @@ export const redirectImplementation = async (
   const decoded = response.data!;
 
   if (decoded.origin !== origin) {
+    if (decoded.failureUrl) {
+      const failureUrl = new URL(decoded.failureUrl);
+      failureUrl.searchParams.set("reason", "origin_mismatch");
+      return new Response(null, {
+        status: 302,
+        headers: { Location: failureUrl.toString() },
+      });
+    }
     return new Response("Origin mismatch", { status: 400 });
   }
 
   if (!decoded.exp || Date.now() > decoded.exp) {
+    if (decoded.failureUrl) {
+      const failureUrl = new URL(decoded.failureUrl);
+      failureUrl.searchParams.set("reason", "link_expired");
+      return new Response(null, {
+        status: 302,
+        headers: { Location: failureUrl.toString() },
+      });
+    }
     return new Response("Link expired", { status: 400 });
   }
 
   if (typeof decoded.targetUrl !== "string" || decoded.targetUrl.length === 0) {
+    if (decoded.failureUrl) {
+      const failureUrl = new URL(decoded.failureUrl);
+      failureUrl.searchParams.set("reason", "invalid_target");
+      return new Response(null, {
+        status: 302,
+        headers: { Location: failureUrl.toString() },
+      });
+    }
     return new Response("Invalid target", { status: 400 });
   }
 

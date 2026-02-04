@@ -18,6 +18,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
     priceId: string;
     cancel_url: string;
     success_url: string;
+    failure_url?: string;
     mode: "subscription";
   } & Omit<
     Stripe.Checkout.SessionCreateParams,
@@ -84,6 +85,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
       data: {
         entityId: args.entityId,
       },
+      failureUrl: args.failure_url,
       targetUrl: args.success_url,
     });
     const cancelUrl = await buildSignedReturnUrl({
@@ -92,6 +94,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
       data: {
         entityId: args.entityId,
       },
+      failureUrl: args.failure_url,
       targetUrl: args.cancel_url,
     });
 

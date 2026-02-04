@@ -13,6 +13,7 @@ export const PortalImplementation = defineActionCallableFunction<
     createStripeCustomerIfMissing?: boolean;
     entityId: string;
     return_url: string;
+    failure_url?: string;
   } & Omit<Stripe.BillingPortal.SessionCreateParams, "customer" | "return_url">,
   Stripe.RequestOptions,
   Promise<Stripe.Response<Stripe.BillingPortal.Session>>
@@ -69,6 +70,7 @@ export const PortalImplementation = defineActionCallableFunction<
       data: {
         entityId: args.entityId,
       },
+      failureUrl: args.failure_url,
       targetUrl: args.return_url,
     });
 
