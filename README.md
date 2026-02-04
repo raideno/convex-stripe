@@ -1,6 +1,6 @@
 # Convex Stripe
 
-A demo project is available at [https://convex-stripe-demo.vercel.app/](https://convex-stripe-demo.vercel.app/).
+Documentation: [https://raideno.github.io/convex-stripe](https://raideno.github.io/convex-stripe).
 
 Stripe subscriptions, limits and features for Convex apps.
 Implemented according to the best practices listed in [Stripe Recommendations](https://github.com/t3dotgg/stripe-recommendations).
