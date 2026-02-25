@@ -41,6 +41,9 @@ export const normalizeConfiguration = (
       },
     },
     sync: {
+      stripeAccountLinks: true,
+      stripeAccounts: true,
+      stripeTransfers: true,
       stripeCoupons: true,
       stripeCustomers: true,
       stripePrices: true,

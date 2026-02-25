@@ -84,6 +84,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
       configuration: configuration,
       origin: "subscribe-success",
       data: {
+        accountId: stripeOptions.stripeAccount,
         entityId: args.entityId,
       },
       failureUrl: args.failure_url,
@@ -93,6 +94,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
       configuration: configuration,
       origin: "subscribe-cancel",
       data: {
+        accountId: stripeOptions.stripeAccount,
         entityId: args.entityId,
       },
       failureUrl: args.failure_url,

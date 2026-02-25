@@ -69,6 +69,7 @@ export const PortalImplementation = defineActionCallableFunction<
       configuration: configuration,
       origin: "portal-return",
       data: {
+        accountId: stripeOptions.stripeAccount,
         entityId: args.entityId,
       },
       failureUrl: args.failure_url,

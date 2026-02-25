@@ -83,6 +83,7 @@ export const PayImplementation = defineActionCallableFunction<
       configuration: configuration,
       origin: "pay-success",
       data: {
+        accountId: stripeOptions.stripeAccount,
         entityId: args.entityId,
         referenceId: args.referenceId,
         customerId: customerId,
@@ -94,6 +95,7 @@ export const PayImplementation = defineActionCallableFunction<
       configuration: configuration,
       origin: "pay-cancel",
       data: {
+        accountId: stripeOptions.stripeAccount,
         entityId: args.entityId,
         referenceId: args.referenceId,
         customerId: customerId,

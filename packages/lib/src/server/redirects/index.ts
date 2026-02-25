@@ -119,6 +119,7 @@ export interface ReturnPayload<T> {
   failureUrl?: string;
 }
 
+// TODO: add type safety on the data when origin is specified
 export async function buildSignedReturnUrl<O extends ReturnOrigin>({
   configuration,
   origin,

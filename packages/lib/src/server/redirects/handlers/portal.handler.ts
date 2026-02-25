@@ -2,12 +2,13 @@ import { v } from "convex/values";
 
 import { storeDispatchTyped } from "@/store";
 
-import { SubscriptionSyncImplementation } from "@/sync/handlers/subscription";
+import { SubscriptionSyncImplementation } from "@/sync/helpers/subscription-sync";
 import { defineRedirectHandler } from "@/redirects/types";
 
 export const PortalReturnImplementation = defineRedirectHandler({
   origins: ["portal-return"],
   data: {
+    accountId: v.optional(v.string()),
     entityId: v.string(),
   },
   handle: async (origin, context, data, configuration, options) => {
@@ -29,7 +30,7 @@ export const PortalReturnImplementation = defineRedirectHandler({
     if (customerId) {
       await SubscriptionSyncImplementation.handler(
         context,
-        { customerId },
+        { customerId: customerId, accountId: data.accountId },
         configuration,
         options,
       );
