@@ -59,21 +59,21 @@ export const ReviewsSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [reviewId] of localReviewsById.entries()) {
-      if (!stripeReviewIds.has(reviewId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeReviews",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "reviewId",
-            idValue: reviewId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [reviewId] of localReviewsById.entries()) {
+    //   if (!stripeReviewIds.has(reviewId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeReviews",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "reviewId",
+    //         idValue: reviewId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

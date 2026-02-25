@@ -66,21 +66,21 @@ export const CapabilitiesSyncImplementation = defineActionImplementation({
       }
     }
 
-    for (const [capabilityId] of localCapabilitiesById.entries()) {
-      if (!stripeCapabilityIds.has(capabilityId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeCapabilities",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "capabilityId",
-            idValue: capabilityId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [capabilityId] of localCapabilitiesById.entries()) {
+    //   if (!stripeCapabilityIds.has(capabilityId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeCapabilities",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "capabilityId",
+    //         idValue: capabilityId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

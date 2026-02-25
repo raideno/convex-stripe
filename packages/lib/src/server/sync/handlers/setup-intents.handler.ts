@@ -59,21 +59,21 @@ export const SetupIntentsSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [setupIntent] of localSetupIntentsById.entries()) {
-      if (!stripeSetupIntentIds.has(setupIntent)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeSetupIntents",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "setupIntentId",
-            idValue: setupIntent,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [setupIntent] of localSetupIntentsById.entries()) {
+    //   if (!stripeSetupIntentIds.has(setupIntent)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeSetupIntents",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "setupIntentId",
+    //         idValue: setupIntent,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

@@ -67,21 +67,21 @@ export const CustomersSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [customerId] of localCustomersById.entries()) {
-      if (!stripeCustomerIds.has(customerId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeCustomers",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "customerId",
-            idValue: customerId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [customerId] of localCustomersById.entries()) {
+    //   if (!stripeCustomerIds.has(customerId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeCustomers",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "customerId",
+    //         idValue: customerId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

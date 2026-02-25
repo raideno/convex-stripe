@@ -59,21 +59,21 @@ export const RefundsSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [refundId] of localRefundsById.entries()) {
-      if (!stripeRefundIds.has(refundId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeRefunds",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "refundId",
-            idValue: refundId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [refundId] of localRefundsById.entries()) {
+    //   if (!stripeRefundIds.has(refundId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeRefunds",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "refundId",
+    //         idValue: refundId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

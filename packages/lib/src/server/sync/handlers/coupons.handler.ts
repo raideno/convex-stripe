@@ -59,21 +59,21 @@ export const CouponsSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [couponId] of localCouponsById.entries()) {
-      if (!stripeCouponIds.has(couponId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeCoupons",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "couponId",
-            idValue: couponId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [couponId] of localCouponsById.entries()) {
+    //   if (!stripeCouponIds.has(couponId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeCoupons",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "couponId",
+    //         idValue: couponId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

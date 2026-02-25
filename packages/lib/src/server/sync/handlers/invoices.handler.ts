@@ -67,21 +67,21 @@ export const InvoicesSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [invoiceId] of localInvoicesById.entries()) {
-      if (!stripeInvoiceIds.has(invoiceId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeInvoices",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "invoiceId",
-            idValue: invoiceId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [invoiceId] of localInvoicesById.entries()) {
+    //   if (!stripeInvoiceIds.has(invoiceId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeInvoices",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "invoiceId",
+    //         idValue: invoiceId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

@@ -59,21 +59,21 @@ export const DisputesSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [disputeId] of localDisputesById.entries()) {
-      if (!stripeDisputeIds.has(disputeId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeDisputes",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "disputeId",
-            idValue: disputeId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [disputeId] of localDisputesById.entries()) {
+    //   if (!stripeDisputeIds.has(disputeId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeDisputes",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "disputeId",
+    //         idValue: disputeId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

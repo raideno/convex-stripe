@@ -59,21 +59,21 @@ export const PromotionCodesSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [promotionCodeId] of localPromotionCodesById.entries()) {
-      if (!stripePromotionCodeIds.has(promotionCodeId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripePromotionCodes",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "promotionCodeId",
-            idValue: promotionCodeId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [promotionCodeId] of localPromotionCodesById.entries()) {
+    //   if (!stripePromotionCodeIds.has(promotionCodeId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripePromotionCodes",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "promotionCodeId",
+    //         idValue: promotionCodeId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

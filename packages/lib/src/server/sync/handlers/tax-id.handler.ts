@@ -59,21 +59,21 @@ export const TaxIdsSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [taxIdId] of localTaxIdsById.entries()) {
-      if (!stripeTaxIdIds.has(taxIdId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeTaxIds",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "taxIdId",
-            idValue: taxIdId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [taxIdId] of localTaxIdsById.entries()) {
+    //   if (!stripeTaxIdIds.has(taxIdId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeTaxIds",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "taxIdId",
+    //         idValue: taxIdId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

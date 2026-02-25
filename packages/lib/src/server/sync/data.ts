@@ -64,25 +64,29 @@ export const SyncDataImplementation = defineActionImplementation({
         .list({ limit: 100 })
         .autoPagingToArray({ limit: 10_000 });
 
+      const accountIds = [undefined, ...accounts.map((account) => account.id)];
+
       await Promise.all(
-        accounts.map(async (account) => {
+        // TODO: syncing an accounts is deleting all other resources
+        // thus only last account is being really considered, remove the deletion of the resources
+        accountIds.map(async (accountId) => {
           await Promise.all(
             SYNC_HANDLERS.map(async (handler) => {
               try {
                 await handler.handler(
                   context,
                   {
-                    accountId: account.id,
+                    accountId: accountId,
                   },
                   configuration,
                   options,
                 );
                 console.info(
-                  `[STRIPE SYNC ${handler.name} for account ${account.id}](Success)`,
+                  `[STRIPE SYNC ${handler.name} for account ${accountId}](Success)`,
                 );
               } catch (error) {
                 options.logger.error(
-                  `[STRIPE SYNC ${handler.name} for account ${account.id}](Error): ${error}`,
+                  `[STRIPE SYNC ${handler.name} for account ${accountId}](Error): ${error}`,
                 );
               }
             }),

@@ -62,21 +62,21 @@ export const PricesSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [priceId] of localPricesById.entries()) {
-      if (!stripePriceIds.has(priceId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripePrices",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "priceId",
-            idValue: priceId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [priceId] of localPricesById.entries()) {
+    //   if (!stripePriceIds.has(priceId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripePrices",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "priceId",
+    //         idValue: priceId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

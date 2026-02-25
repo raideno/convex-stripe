@@ -64,21 +64,21 @@ export const ProductsSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [productId, doc] of localProductsById.entries()) {
-      if (!stripeProductIds.has(productId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeProducts",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "productId",
-            idValue: productId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [productId, doc] of localProductsById.entries()) {
+    //   if (!stripeProductIds.has(productId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeProducts",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "productId",
+    //         idValue: productId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

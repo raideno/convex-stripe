@@ -67,21 +67,21 @@ export const AccountsSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [accountId] of localAccountById.entries()) {
-      if (!stripeAccountIds.has(accountId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeAccounts",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "accountId",
-            idValue: accountId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [accountId] of localAccountById.entries()) {
+    //   if (!stripeAccountIds.has(accountId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeAccounts",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "accountId",
+    //         idValue: accountId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

@@ -63,23 +63,23 @@ export const SubscriptionSchedulesSyncImplementation =
         );
       }
 
-      for (const [
-        subscriptionScheduleId,
-      ] of localSubscriptionSchedulesById.entries()) {
-        if (!stripeSubscriptionScheduleIds.has(subscriptionScheduleId)) {
-          await storeDispatchTyped(
-            {
-              operation: "deleteById",
-              table: "stripeSubscriptionSchedules",
-              idField: "subscriptionScheduleId",
-              indexName: BY_STRIPE_ID_INDEX_NAME,
-              idValue: subscriptionScheduleId,
-            },
-            context,
-            configuration,
-            options,
-          );
-        }
-      }
+      // for (const [
+      //   subscriptionScheduleId,
+      // ] of localSubscriptionSchedulesById.entries()) {
+      //   if (!stripeSubscriptionScheduleIds.has(subscriptionScheduleId)) {
+      //     await storeDispatchTyped(
+      //       {
+      //         operation: "deleteById",
+      //         table: "stripeSubscriptionSchedules",
+      //         idField: "subscriptionScheduleId",
+      //         indexName: BY_STRIPE_ID_INDEX_NAME,
+      //         idValue: subscriptionScheduleId,
+      //       },
+      //       context,
+      //       configuration,
+      //       options,
+      //     );
+      //   }
+      // }
     },
   });

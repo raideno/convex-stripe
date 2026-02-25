@@ -75,26 +75,26 @@ export const SubscriptionsSyncImplementation = defineActionImplementation({
         typeof s.customer === "string" ? s.customer : s.customer.id,
       ),
     );
-    for (const sub of localSubsResponse.docs || []) {
-      if (!hasSub.has(sub.customerId)) {
-        await storeDispatchTyped(
-          {
-            operation: "upsert",
-            table: "stripeSubscriptions",
-            indexName: "byCustomerId",
-            idField: "customerId",
-            data: {
-              customerId: sub.customerId,
-              subscriptionId: null,
-              stripe: null,
-              lastSyncedAt: Date.now(),
-            },
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const sub of localSubsResponse.docs || []) {
+    //   if (!hasSub.has(sub.customerId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "upsert",
+    //         table: "stripeSubscriptions",
+    //         indexName: "byCustomerId",
+    //         idField: "customerId",
+    //         data: {
+    //           customerId: sub.customerId,
+    //           subscriptionId: null,
+    //           stripe: null,
+    //           lastSyncedAt: Date.now(),
+    //         },
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

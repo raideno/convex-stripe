@@ -59,21 +59,21 @@ export const CreditNotesSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [creditNoteId] of localCreditNotesById.entries()) {
-      if (!stripeCreditNoteIds.has(creditNoteId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeCreditNotes",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "creditNoteId",
-            idValue: creditNoteId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [creditNoteId] of localCreditNotesById.entries()) {
+    //   if (!stripeCreditNoteIds.has(creditNoteId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeCreditNotes",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "creditNoteId",
+    //         idValue: creditNoteId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

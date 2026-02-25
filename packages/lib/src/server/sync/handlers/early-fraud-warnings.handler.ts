@@ -62,23 +62,23 @@ export const EarlyFraudWarningsSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [
-      early_fraud_warningId,
-    ] of localEarlyFraudWarningsById.entries()) {
-      if (!stripeEarlyFraudWarningIds.has(early_fraud_warningId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeEarlyFraudWarnings",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "earlyFraudWarningId",
-            idValue: early_fraud_warningId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [
+    //   early_fraud_warningId,
+    // ] of localEarlyFraudWarningsById.entries()) {
+    //   if (!stripeEarlyFraudWarningIds.has(early_fraud_warningId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeEarlyFraudWarnings",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "earlyFraudWarningId",
+    //         idValue: early_fraud_warningId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

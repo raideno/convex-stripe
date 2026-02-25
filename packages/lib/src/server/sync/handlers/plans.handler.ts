@@ -62,21 +62,21 @@ export const PlansSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [planId] of localPlansById.entries()) {
-      if (!stripePlanIds.has(planId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripePlans",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "planId",
-            idValue: planId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [planId] of localPlansById.entries()) {
+    //   if (!stripePlanIds.has(planId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripePlans",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "planId",
+    //         idValue: planId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

@@ -59,21 +59,21 @@ export const PayoutsSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [payoutId] of localPayoutsById.entries()) {
-      if (!stripePayoutIds.has(payoutId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripePayouts",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "payoutId",
-            idValue: payoutId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [payoutId] of localPayoutsById.entries()) {
+    //   if (!stripePayoutIds.has(payoutId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripePayouts",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "payoutId",
+    //         idValue: payoutId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

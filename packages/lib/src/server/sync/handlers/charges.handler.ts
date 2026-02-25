@@ -59,21 +59,21 @@ export const ChargesSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [chargeId] of localChargesById.entries()) {
-      if (!stripeChargeIds.has(chargeId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeCharges",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "chargeId",
-            idValue: chargeId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [chargeId] of localChargesById.entries()) {
+    //   if (!stripeChargeIds.has(chargeId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeCharges",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "chargeId",
+    //         idValue: chargeId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

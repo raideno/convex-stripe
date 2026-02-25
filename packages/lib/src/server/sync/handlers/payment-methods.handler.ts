@@ -59,21 +59,21 @@ export const PaymentMethodsSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [paymentMethodId] of localPaymentMethodsById.entries()) {
-      if (!stripePaymentMethodIds.has(paymentMethodId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripePaymentMethods",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "paymentMethodId",
-            idValue: paymentMethodId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [paymentMethodId] of localPaymentMethodsById.entries()) {
+    //   if (!stripePaymentMethodIds.has(paymentMethodId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripePaymentMethods",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "paymentMethodId",
+    //         idValue: paymentMethodId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

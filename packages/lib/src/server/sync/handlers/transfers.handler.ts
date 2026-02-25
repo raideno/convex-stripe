@@ -59,21 +59,21 @@ export const TransfersSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [transferId] of localTransfersById.entries()) {
-      if (!stripeTransferIds.has(transferId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeTransfers",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "transferId",
-            idValue: transferId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [transferId] of localTransfersById.entries()) {
+    //   if (!stripeTransferIds.has(transferId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeTransfers",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "transferId",
+    //         idValue: transferId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

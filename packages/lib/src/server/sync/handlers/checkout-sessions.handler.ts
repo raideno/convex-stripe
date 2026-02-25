@@ -62,21 +62,21 @@ export const CheckoutSessionsSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [checkoutSessionId] of localCheckoutSessionsById.entries()) {
-      if (!stripeCheckoutSessionIds.has(checkoutSessionId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeCheckoutSessions",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "checkoutSessionId",
-            idValue: checkoutSessionId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [checkoutSessionId] of localCheckoutSessionsById.entries()) {
+    //   if (!stripeCheckoutSessionIds.has(checkoutSessionId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeCheckoutSessions",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "checkoutSessionId",
+    //         idValue: checkoutSessionId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

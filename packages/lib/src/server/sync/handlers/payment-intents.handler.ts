@@ -59,21 +59,21 @@ export const PaymentIntentsSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [paymentIntentId] of localPaymentIntentsById.entries()) {
-      if (!stripePaymentIntentIds.has(paymentIntentId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripePaymentIntents",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "paymentIntentId",
-            idValue: paymentIntentId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [paymentIntentId] of localPaymentIntentsById.entries()) {
+    //   if (!stripePaymentIntentIds.has(paymentIntentId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripePaymentIntents",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "paymentIntentId",
+    //         idValue: paymentIntentId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });
