@@ -1,5 +1,6 @@
 | Table                             | Default | Purpose                                |
 | :-------------------------------- | :------ | :------------------------------------- |
+| stripeAccounts                    | `true`  | Sync stripeAccounts                    |
 | stripeProducts                    | `true`  | Sync stripeProducts                    |
 | stripePrices                      | `true`  | Sync stripePrices                      |
 | stripeCustomers                   | `true`  | Sync stripeCustomers                   |
@@ -23,3 +24,5 @@
 | stripeSubscriptionSchedules       | `true`  | Sync stripeSubscriptionSchedules       |
 | stripeMandates                    | `true`  | Sync stripeMandates                    |
 | stripeBillingPortalConfigurations | `true`  | Sync stripeBillingPortalConfigurations |
+| stripeTransfers                   | `true`  | Sync stripeTransfers                   |
+| stripeCapabilities                | `true`  | Sync stripeCapabilities                |

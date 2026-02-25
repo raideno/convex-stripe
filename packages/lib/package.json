@@ -1,6 +1,6 @@
 {
   "name": "@raideno/convex-stripe",
-  "version": "0.2.0-beta.0",
+  "version": "0.2.0-beta.1",
   "description": "Easy stripe billing for convex apps.",
   "keywords": [
     "billing",
@@ -21,7 +21,7 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "homepage": "https://raideno.github.io/convex-stripe",
+  "homepage": "https://github.com/raideno/convex-stripe",
   "bugs": "https://github.com/raideno/convex-stripe/issues",
   "repository": {
     "type": "git",

@@ -1,3 +1,4 @@
+	stripeAccounts?: boolean;
 	stripeProducts?: boolean;
 	stripePrices?: boolean;
 	stripeCustomers?: boolean;
@@ -21,3 +22,5 @@
 	stripeSubscriptionSchedules?: boolean;
 	stripeMandates?: boolean;
 	stripeBillingPortalConfigurations?: boolean;
+	stripeTransfers?: boolean;
+	stripeCapabilities?: boolean;

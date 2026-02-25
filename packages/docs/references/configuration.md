@@ -8,7 +8,8 @@ Some fields are optional and defaults will be applied automatically.
 export type InputConfiguration = {
   stripe: {
     secret_key: string;
-    webhook_secret: string;
+    account_webhook_secret: string;
+    connect_webhook_secret?: string;
   };
 
   /** Which tables to sync */
@@ -32,10 +33,11 @@ export type InputConfiguration = {
 ### `stripe` (**required**)
 Configuration for authenticating with Stripe.
 
-| Key              | Type     | Description                                                                         | Required |
-| ---------------- | -------- | ----------------------------------------------------------------------------------- | -------- |
-| `secret_key`     | `string` | Stripe **secret key** (starts with `sk_...`). Used to call Stripe APIs.             | ✅ Yes    |
-| `webhook_secret` | `string` | Stripe **webhook signing secret** (starts with `whsec_...`). Used to verify events. | ✅ Yes    |
+| Key                      | Type     | Description                                                                                 | Required |
+| ------------------------ | -------- | ------------------------------------------------------------------------------------------- | -------- |
+| `secret_key`             | `string` | Stripe **secret key** (starts with `sk_...`). Used to call Stripe APIs.                     | ✅ Yes    |
+| `account_webhook_secret` | `string` | Stripe **webhook signing secret** (starts with `whsec_...`). Used to verify account events. | ✅ Yes    |
+| `connect_webhook_secret` | `string` | Stripe **webhook signing secret** (starts with `whsec_...`). Used to verify connect events. | ❌ No     |
 
 ### `sync` (optional)
 Controls which Convex tables get synced from Stripe.
@@ -69,7 +71,7 @@ import { internalConvexStripe } from "@raideno/convex-stripe/server";
 export const { stripe, store, sync, createEntity } = internalConvexStripe({
   stripe: {
     secret_key: process.env.STRIPE_SECRET_KEY!,
-    webhook_secret: process.env.STRIPE_WEBHOOK_SECRET!,
+    account_webhook_secret: process.env.STRIPE_ACCOUNT_WEBHOOK_SECRET!,
   },
   // optional
   debug: true,
