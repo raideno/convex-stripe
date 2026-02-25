@@ -19,7 +19,7 @@ export default defineWebhookHandler({
           options.logger.warn(
             "No entityId associated with newly created customer. Skipping...",
           );
-          if (!configuration.detached) return;
+          if (!configuration.detached) "";
         }
 
         await storeDispatchTyped(

@@ -44,7 +44,7 @@ export const CustomersSyncImplementation = defineActionImplementation({
 
       if (!entityId) {
         console.warn(`Customer ${customer.id} is missing entityId in metadata`);
-        if (!configuration.detached) continue;
+        if (!configuration.detached) "";
       }
 
       await storeDispatchTyped(
