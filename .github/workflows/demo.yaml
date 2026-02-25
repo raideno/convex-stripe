@@ -32,7 +32,10 @@ jobs:
       - run: npm ci --force
 
       - name: build demo
-        run: cd ./packages/demo && npx convex deploy --cmd 'npm run build'
+        working-directory: ./packages/demo
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+        run: npx convex deploy --cmd "npm run build"
 
       - name: move demo build
         run: |
