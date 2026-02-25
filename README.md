@@ -1,9 +1,6 @@
 # Convex Stripe
 
-A demo project is available at [https://convex-stripe-demo.vercel.app/](https://convex-stripe-demo.vercel.app/).
-
 Stripe [syncing](./references/tables.md), subscriptions, [checkouts](#-checkout-action) and stripe connect for Convex apps. Implemented according to the best practices listed in [Theo's Stripe Recommendations](https://github.com/t3dotgg/stripe-recommendations).
-
 
 ## Installation
 
@@ -337,7 +334,6 @@ export const pay = action({
 
 - [Convex Documentation](https://docs.convex.dev)  
 - [Stripe Documentation](https://stripe.com/docs)  
-- [Demo App](https://convex-stripe-demo.vercel.app/)  
 - [GitHub Repository](https://github.com/raideno/convex-stripe)
 - [Theo's Stripe Recommendations](https://github.com/t3dotgg/stripe-recommendations)
 

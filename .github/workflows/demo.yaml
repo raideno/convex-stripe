@@ -16,33 +16,34 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  build_and_deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
+
       - run: npm ci --force
 
       - name: build demo
-        run: npm run build --workspace demo
+        run: cd ./packages/demo && npx convex deploy --cmd 'npm run build'
 
       - name: move demo build
         run: |
           mkdir -p ./dist
           cp -r ./packages/demo/dist/* ./dist/
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: upload pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
+
       - id: deployment
+        name: deploy to github pages
         uses: actions/deploy-pages@v4

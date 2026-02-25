@@ -6,7 +6,7 @@ import path from "node:path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  base: "/convex-stripe/demo/",
+  base: "/convex-stripe/",
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
