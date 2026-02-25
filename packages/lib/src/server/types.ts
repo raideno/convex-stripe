@@ -31,7 +31,8 @@ export type CallbackAfterChange = (
 export interface InternalConfiguration {
   stripe: {
     secret_key: string;
-    webhook_secret: string;
+    account_webhook_secret: string;
+    connect_webhook_secret?: string;
   };
 
   catalog: {
@@ -44,6 +45,7 @@ export interface InternalConfiguration {
     metadataKey: string;
   };
 
+  // TODO: move catalog, account_webhook, sync (tables) and portal to the same group and call it sync
   webhook: {
     metadata: Record<string, string>;
     description: string;

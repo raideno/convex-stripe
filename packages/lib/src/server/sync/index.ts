@@ -2,20 +2,23 @@ import { v } from "convex/values";
 
 import { defineActionImplementation } from "@/helpers";
 
+import { SyncAccountWebhookImplementation } from "@/sync/account-webhook";
+import { SyncConnectWebhookImplementation } from "@/sync/connect-webhook";
 import { SyncDataImplementation } from "@/sync/data";
 import { SyncPlansAndPricesImplementation } from "@/sync/plans-and-prices";
 import { SyncPortalImplementation } from "@/sync/portal";
-import { SyncWebhookImplementation } from "@/sync/webhook";
 
 const DEFAULT_SYNC_DATA = true;
-const DEFAULT_SYNC_WEBHOOK = false;
+const DEFAULT_SYNC_ACCOUNT_WEBHOOK = false;
+const DEFAULT_SYNC_CONNECT_WEBHOOK = false;
 const DEFAULT_SYNC_PORTAL = false;
 const DEFAULT_SYNC_CATALOG = false;
 
 export const SyncImplementation = defineActionImplementation({
   args: v.object({
     data: v.optional(v.boolean()),
-    webhook: v.optional(v.boolean()),
+    accountWebhook: v.optional(v.boolean()),
+    connectWebhook: v.optional(v.boolean()),
     portal: v.optional(v.boolean()),
     unstable_catalog: v.optional(v.boolean()),
   }),
@@ -24,7 +27,8 @@ export const SyncImplementation = defineActionImplementation({
     context,
     {
       data: syncData = DEFAULT_SYNC_DATA,
-      webhook: syncWebhook = DEFAULT_SYNC_WEBHOOK,
+      accountWebhook: syncAccountWebhook = DEFAULT_SYNC_ACCOUNT_WEBHOOK,
+      connectWebhook: syncConnectWebhook = DEFAULT_SYNC_CONNECT_WEBHOOK,
       portal: syncPortal = DEFAULT_SYNC_PORTAL,
       unstable_catalog: syncCatalog = DEFAULT_SYNC_CATALOG,
     },
@@ -54,8 +58,19 @@ export const SyncImplementation = defineActionImplementation({
       console.error("Failed to sync data:", error);
     }
     try {
-      if (syncWebhook)
-        await SyncWebhookImplementation.handler(
+      if (syncAccountWebhook)
+        await SyncAccountWebhookImplementation.handler(
+          context,
+          {},
+          configuration,
+          options,
+        );
+    } catch (error) {
+      console.error("Failed to sync webhook:", error);
+    }
+    try {
+      if (syncConnectWebhook)
+        await SyncConnectWebhookImplementation.handler(
           context,
           {},
           configuration,

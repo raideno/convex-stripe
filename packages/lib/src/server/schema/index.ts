@@ -6,7 +6,6 @@ import {
 import { v } from "convex/values";
 
 import { AccountSchema } from "@/schema/models/account";
-import { AccountLinkSchema } from "@/schema/models/account-link";
 import { BillingPortalConfigurationSchema } from "@/schema/models/billing-portal-configuration";
 import { CapabilitySchema } from "@/schema/models/capability";
 import { ChargeSchema } from "@/schema/models/charge";
@@ -36,13 +35,6 @@ import { TransferSchema } from "@/schema/models/transfer";
 export const BY_STRIPE_ID_INDEX_NAME = "byStripeId" as const;
 
 export const stripeTables = {
-  stripeAccountLinks: defineTable({
-    accountId: v.string(),
-    stripe: v.object(AccountLinkSchema),
-    lastSyncedAt: v.number(),
-  })
-    .index("byAccountId", ["accountId"])
-    .index(BY_STRIPE_ID_INDEX_NAME, ["accountId"]),
   stripeAccounts: defineTable({
     accountId: v.string(),
     entityId: v.optional(v.string()),
@@ -50,8 +42,7 @@ export const stripeTables = {
     lastSyncedAt: v.number(),
   })
     .index(BY_STRIPE_ID_INDEX_NAME, ["accountId"])
-    .index("byEntityId", ["entityId"])
-    .index("byAccountId", ["accountId"]),
+    .index("byEntityId", ["entityId"]),
   stripeProducts: defineTable({
     productId: v.string(),
     stripe: v.object(ProductSchema),

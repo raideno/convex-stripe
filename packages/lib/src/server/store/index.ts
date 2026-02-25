@@ -103,7 +103,8 @@ export const StoreImplementation = defineMutationImplementation({
             await configuration.callback.unstable__afterChange(
               context,
               "upsert",
-              { table },
+              // TODO: remove any
+              { table: table as any },
             );
           } catch (error) {
             console.error("[unstable__afterChange]:", error);
@@ -127,7 +128,8 @@ export const StoreImplementation = defineMutationImplementation({
             await configuration.callback.unstable__afterChange(
               context,
               "insert",
-              { table },
+              // TODO: remove any
+              { table: table as any },
             );
           } catch (error) {
             console.error("[unstable__afterChange]:", error);
@@ -173,7 +175,8 @@ export const StoreImplementation = defineMutationImplementation({
             await configuration.callback.unstable__afterChange(
               context,
               "delete",
-              { table },
+              // TODO: remove any
+              { table: table as any },
             );
           } catch (error) {
             console.error("[unstable__afterChange]:", error);

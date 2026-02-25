@@ -58,11 +58,16 @@ const buildHttp = (
       request: Request,
       stripe?: Stripe,
     ) => {
+      const url = new URL(request.url);
+
+      const connect = url.searchParams.get("connect") === "true";
+
       return webhookImplementation(
         configuration,
         options,
         context as unknown as GenericActionCtx<StripeDataModel>,
         request,
+        connect,
         stripe,
       );
     },
@@ -100,6 +105,9 @@ export const internalConvexStripe = (
   return {
     stripe: {
       http: http_,
+      client: new Stripe(ConvexStripeInternalConfiguration.stripe.secret_key, {
+        apiVersion: "2025-08-27.basil",
+      }),
       addHttpRoutes: (http: HttpRouter, config?: InputConfiguration) => {
         config = normalizeConfiguration(config || configuration_);
         http.route({

@@ -9,25 +9,25 @@ import { WebhookHandler } from "./types";
 const HANDLERS_MODULES = Object.values(
   import.meta.glob("./handlers/*.handler.ts", {
     eager: true,
-  })
+  }),
 ) as unknown as Array<Record<string, WebhookHandler<Stripe.Event.Type>>>;
 
 if (HANDLERS_MODULES.some((handler) => Object.keys(handler).length > 1))
   throw new Error(
-    "Each webhook handler file should only have one export / default export"
+    "Each webhook handler file should only have one export / default export",
   );
 
 export const WEBHOOK_HANDLERS = HANDLERS_MODULES.map(
-  (exports) => Object.values(exports)[0]
+  (exports) => Object.values(exports)[0],
 );
 
 if (
   WEBHOOK_HANDLERS.some(
-    (handler) => !["handle", "events"].every((key) => key in handler)
+    (handler) => !["handle", "events"].every((key) => key in handler),
   )
 )
   throw new Error(
-    "Each webhook handler file should export a valid implementation"
+    "Each webhook handler file should export a valid implementation",
   );
 
 export const webhookImplementation = async (
@@ -35,7 +35,8 @@ export const webhookImplementation = async (
   options: InternalOptions,
   context: GenericActionCtx<StripeDataModel>,
   request: Request,
-  stripe_?: Stripe
+  connect?: boolean,
+  stripe_?: Stripe,
 ) => {
   const body = await request.text();
   const signature = request.headers.get("Stripe-Signature");
@@ -51,10 +52,23 @@ export const webhookImplementation = async (
   if (typeof signature !== "string")
     return new Response("Invalid signature", { status: 400 });
 
+  const secret = connect
+    ? configuration.stripe.connect_webhook_secret
+    : configuration.stripe.account_webhook_secret;
+
+  if (!secret) {
+    options.logger.error(
+      "Received account related webhook but no account_webhook_secret is configured",
+    );
+    return new Response("No account webhook secret configured", {
+      status: 400,
+    });
+  }
+
   const event = await stripe.webhooks.constructEventAsync(
     body,
     signature,
-    configuration.stripe.webhook_secret
+    secret,
   );
 
   options.logger.debug(`[STRIPE HOOK](RECEIVED): ${event.type}`);

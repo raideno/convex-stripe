@@ -44,13 +44,16 @@ export const CreateAccountImplementation = defineActionCallableFunction<
     } else {
       const account = await stripe.accounts.create(
         {
-          ...args,
+          ...{
+            ...args,
+            entityId: undefined,
+          },
           metadata: {
             ...(args.metadata || {}),
             entityId: args.entityId,
           },
         },
-        stripeOptions,
+        Object.keys(stripeOptions).length === 0 ? undefined : stripeOptions,
       );
 
       const data = {

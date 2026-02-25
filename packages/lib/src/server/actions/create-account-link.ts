@@ -2,9 +2,6 @@ import Stripe from "stripe";
 
 import { defineActionCallableFunction } from "@/helpers";
 import { buildSignedReturnUrl } from "@/redirects";
-import { storeDispatchTyped } from "@/store";
-
-import { AccountLinkStripeToConvex } from "@/schema/models/account-link";
 
 export const CreateAccountLinkImplementation = defineActionCallableFunction<
   {
@@ -42,27 +39,14 @@ export const CreateAccountLinkImplementation = defineActionCallableFunction<
 
     const accountLink = await stripe.accountLinks.create(
       {
-        ...args,
+        ...{
+          ...args,
+        },
         account: args.account,
         refresh_url: refreshUrl,
         return_url: returnUrl,
       },
       Object.keys(stripeOptions).length === 0 ? undefined : stripeOptions,
-    );
-
-    await storeDispatchTyped(
-      {
-        operation: "insert",
-        table: "stripeAccountLinks",
-        data: {
-          accountId: args.account,
-          stripe: AccountLinkStripeToConvex(accountLink),
-          lastSyncedAt: Date.now(),
-        },
-      },
-      context,
-      configuration,
-      options,
     );
 
     return accountLink;
