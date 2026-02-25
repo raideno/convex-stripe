@@ -2,7 +2,7 @@ import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { DisputeStripeToConvex } from "@/schema/models/dispute";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "../types";
+import { defineWebhookHandler } from "@/webhooks/types";
 
 export default defineWebhookHandler({
   events: [
@@ -33,6 +33,7 @@ export default defineWebhookHandler({
               disputeId: dispute.id,
               stripe: DisputeStripeToConvex(dispute),
               lastSyncedAt: Date.now(),
+              accountId: event.account,
             },
           },
           context,

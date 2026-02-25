@@ -7,7 +7,9 @@ import { PayoutStripeToConvex } from "@/schema/models/payout";
 import { storeDispatchTyped } from "@/store";
 
 export const PayoutsSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "payouts",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripePayouts !== true) return;
@@ -26,11 +28,11 @@ export const PayoutsSyncImplementation = defineActionImplementation({
       options,
     );
     const localPayoutsById = new Map(
-      (localPayoutsRes.docs || []).map((p: any) => [p.payoutId, p]),
+      (localPayoutsRes.docs || []).map((p) => [p.payoutId, p]),
     );
 
     const payouts = await stripe.payouts
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripePayoutIds = new Set<string>();
@@ -48,6 +50,7 @@ export const PayoutsSyncImplementation = defineActionImplementation({
             payoutId: payout.id,
             stripe: PayoutStripeToConvex(payout),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,
@@ -56,21 +59,21 @@ export const PayoutsSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [payoutId] of localPayoutsById.entries()) {
-      if (!stripePayoutIds.has(payoutId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripePayouts",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "payoutId",
-            idValue: payoutId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [payoutId] of localPayoutsById.entries()) {
+    //   if (!stripePayoutIds.has(payoutId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripePayouts",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "payoutId",
+    //         idValue: payoutId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

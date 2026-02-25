@@ -7,7 +7,9 @@ import { PlanStripeToConvex } from "@/schema/models/plan";
 import { storeDispatchTyped } from "@/store";
 
 export const PlansSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "plans",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripePlans !== true) return;
@@ -26,11 +28,14 @@ export const PlansSyncImplementation = defineActionImplementation({
       options,
     );
     const localPlansById = new Map(
-      (localPlansRes.docs || []).map((p: any) => [p.planId, p]),
+      (localPlansRes.docs || []).map((p) => [p.planId, p]),
     );
 
     const plans = await stripe.plans
-      .list({ limit: 100, expand: ["data.product"] })
+      .list(
+        { limit: 100, expand: ["data.product"] },
+        { stripeAccount: args.accountId },
+      )
       .autoPagingToArray({ limit: 10_000 });
 
     const stripePlanIds = new Set<string>();
@@ -48,6 +53,7 @@ export const PlansSyncImplementation = defineActionImplementation({
             planId: plan.id,
             stripe: PlanStripeToConvex(plan),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,
@@ -56,21 +62,21 @@ export const PlansSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [planId] of localPlansById.entries()) {
-      if (!stripePlanIds.has(planId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripePlans",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "planId",
-            idValue: planId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [planId] of localPlansById.entries()) {
+    //   if (!stripePlanIds.has(planId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripePlans",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "planId",
+    //         idValue: planId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

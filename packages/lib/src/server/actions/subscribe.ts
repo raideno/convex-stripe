@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 
-import { CreateEntityImplementation } from "@/actions/create-entity";
+import { CreateCustomerImplementation } from "@/actions/create-customer";
 import { buildSignedReturnUrl } from "@/redirects";
 import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { CheckoutSessionStripeToConvex } from "@/schema/models/checkout-session";
@@ -65,13 +65,14 @@ export const SubscribeImplementation = defineActionCallableFunction<
         );
       } else {
         customerId = (
-          await CreateEntityImplementation.handler(
+          await CreateCustomerImplementation.handler(
             context,
             {
               entityId: args.entityId,
               email: undefined,
               metadata: undefined,
             },
+            {},
             configuration,
             options,
           )
@@ -83,6 +84,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
       configuration: configuration,
       origin: "subscribe-success",
       data: {
+        accountId: stripeOptions.stripeAccount,
         entityId: args.entityId,
       },
       failureUrl: args.failure_url,
@@ -92,6 +94,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
       configuration: configuration,
       origin: "subscribe-cancel",
       data: {
+        accountId: stripeOptions.stripeAccount,
         entityId: args.entityId,
       },
       failureUrl: args.failure_url,

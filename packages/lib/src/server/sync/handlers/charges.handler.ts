@@ -7,7 +7,9 @@ import { storeDispatchTyped } from "@/store";
 import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 
 export const ChargesSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "charges",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeCharges !== true) return;
@@ -26,11 +28,11 @@ export const ChargesSyncImplementation = defineActionImplementation({
       options,
     );
     const localChargesById = new Map(
-      (localChargesRes.docs || []).map((p: any) => [p.chargeId, p]),
+      (localChargesRes.docs || []).map((p) => [p.chargeId, p]),
     );
 
     const charges = await stripe.charges
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripeChargeIds = new Set<string>();
@@ -48,6 +50,7 @@ export const ChargesSyncImplementation = defineActionImplementation({
             chargeId: charge.id,
             stripe: ChargeStripeToConvex(charge),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,
@@ -56,21 +59,21 @@ export const ChargesSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [chargeId] of localChargesById.entries()) {
-      if (!stripeChargeIds.has(chargeId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeCharges",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "chargeId",
-            idValue: chargeId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [chargeId] of localChargesById.entries()) {
+    //   if (!stripeChargeIds.has(chargeId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeCharges",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "chargeId",
+    //         idValue: chargeId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

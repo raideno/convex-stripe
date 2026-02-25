@@ -2,7 +2,7 @@ import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { CustomerStripeToConvex } from "@/schema/models/customer";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "../types";
+import { defineWebhookHandler } from "@/webhooks/types";
 
 export default defineWebhookHandler({
   events: ["customer.created", "customer.updated", "customer.deleted"],
@@ -10,7 +10,7 @@ export default defineWebhookHandler({
     if (configuration.sync.stripeCustomers !== true) return;
 
     const customer = event.data.object;
-    const entityId = customer.metadata.entityId;
+    const entityId = customer.metadata?.entityId as string | undefined;
 
     switch (event.type) {
       case "customer.created":
@@ -19,7 +19,7 @@ export default defineWebhookHandler({
           options.logger.warn(
             "No entityId associated with newly created customer. Skipping...",
           );
-          if (!configuration.detached) return;
+          if (!configuration.detached) "";
         }
 
         await storeDispatchTyped(
@@ -33,6 +33,7 @@ export default defineWebhookHandler({
               entityId: entityId,
               stripe: CustomerStripeToConvex(customer),
               lastSyncedAt: Date.now(),
+              accountId: event.account,
             },
           },
           context,

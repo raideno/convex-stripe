@@ -31,6 +31,18 @@ export const RETURN_FROM: Record<
       body: "Why you didn't pay ?",
     },
   },
+  "create-account-link-refresh": {
+    success: {
+      title: "Account setup refreshed",
+      body: "Your account setup was refreshed. You can now continue setting up your account.",
+    },
+  },
+  "create-account-link-return": {
+    success: {
+      title: "Account setup successful",
+      body: "Your account setup was successful. You can now start selling products.",
+    },
+  },
 };
 
 export const GenericReturnFromModal = () => {

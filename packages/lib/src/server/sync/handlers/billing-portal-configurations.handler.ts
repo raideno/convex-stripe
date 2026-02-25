@@ -8,7 +8,9 @@ import { storeDispatchTyped } from "@/store";
 
 export const BillingPortalConfigurationsSyncImplementation =
   defineActionImplementation({
-    args: v.object({}),
+    args: v.object({
+      accountId: v.optional(v.string()),
+    }),
     name: "billingPortalConfigurations",
     handler: async (context, args, configuration, options) => {
       if (configuration.sync.stripeBillingPortalConfigurations !== true) return;
@@ -35,7 +37,7 @@ export const BillingPortalConfigurationsSyncImplementation =
 
       const billingPortalConfigurations =
         await stripe.billingPortal.configurations
-          .list({ limit: 100 })
+          .list({ limit: 100 }, { stripeAccount: args.accountId })
           .autoPagingToArray({ limit: 10_000 });
 
       const stripeBillingPortalConfigurationIds = new Set<string>();
@@ -55,6 +57,7 @@ export const BillingPortalConfigurationsSyncImplementation =
                 billingPortalConfiguration,
               ),
               lastSyncedAt: Date.now(),
+              accountId: args.accountId,
             },
           },
           context,
@@ -63,25 +66,25 @@ export const BillingPortalConfigurationsSyncImplementation =
         );
       }
 
-      for (const [
-        billingPortalConfigurationId,
-      ] of localBillingPortalConfigurationsById.entries()) {
-        if (
-          !stripeBillingPortalConfigurationIds.has(billingPortalConfigurationId)
-        ) {
-          await storeDispatchTyped(
-            {
-              operation: "deleteById",
-              table: "stripeBillingPortalConfigurations",
-              indexName: BY_STRIPE_ID_INDEX_NAME,
-              idField: "billingPortalConfigurationId",
-              idValue: billingPortalConfigurationId,
-            },
-            context,
-            configuration,
-            options,
-          );
-        }
-      }
+      // for (const [
+      //   billingPortalConfigurationId,
+      // ] of localBillingPortalConfigurationsById.entries()) {
+      //   if (
+      //     !stripeBillingPortalConfigurationIds.has(billingPortalConfigurationId)
+      //   ) {
+      //     await storeDispatchTyped(
+      //       {
+      //         operation: "deleteById",
+      //         table: "stripeBillingPortalConfigurations",
+      //         indexName: BY_STRIPE_ID_INDEX_NAME,
+      //         idField: "billingPortalConfigurationId",
+      //         idValue: billingPortalConfigurationId,
+      //       },
+      //       context,
+      //       configuration,
+      //       options,
+      //     );
+      //   }
+      // }
     },
   });

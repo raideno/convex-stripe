@@ -2,20 +2,24 @@ import { v } from "convex/values";
 
 import { defineActionImplementation } from "@/helpers";
 
-import { SyncDataImplementation } from "./data";
-import { SyncPortalImplementation } from "./portal";
-import { SyncPlansAndPricesImplementation } from "./plans-and-prices";
-import { SyncWebhookImplementation } from "./webhook";
-
-const DEFAULT_SYNC_DATA = true;
-const DEFAULT_SYNC_WEBHOOK = false;
-const DEFAULT_SYNC_PORTAL = false;
-const DEFAULT_SYNC_CATALOG = false;
+import { SyncCatalogImplementation } from "@/sync/catalog";
+import { SyncDataImplementation } from "@/sync/data";
+import { SyncPortalImplementation } from "@/sync/portal";
+import { SyncAccountWebhookImplementation } from "@/sync/webhooks/account";
+import { SyncConnectWebhookImplementation } from "@/sync/webhooks/connect";
 
 export const SyncImplementation = defineActionImplementation({
   args: v.object({
-    data: v.optional(v.boolean()),
-    webhook: v.optional(v.boolean()),
+    data: v.union(
+      v.boolean(),
+      v.object({ withConnect: v.optional(v.boolean()) }),
+    ),
+    webhooks: v.optional(
+      v.object({
+        account: v.optional(v.boolean()),
+        connect: v.optional(v.boolean()),
+      }),
+    ),
     portal: v.optional(v.boolean()),
     unstable_catalog: v.optional(v.boolean()),
   }),
@@ -23,57 +27,77 @@ export const SyncImplementation = defineActionImplementation({
   handler: async (
     context,
     {
-      data: syncData = DEFAULT_SYNC_DATA,
-      webhook: syncWebhook = DEFAULT_SYNC_WEBHOOK,
-      portal: syncPortal = DEFAULT_SYNC_PORTAL,
-      unstable_catalog: syncCatalog = DEFAULT_SYNC_CATALOG,
+      data,
+      webhooks,
+      // TODO: enable catalog and portal setup for accounts as well, except if enabling it on root enables it on sub accounts too
+      portal,
+      unstable_catalog,
     },
     configuration,
     options,
   ) => {
-    try {
-      if (syncCatalog)
-        await SyncPlansAndPricesImplementation.handler(
-          context,
-          {},
-          configuration,
-          options,
-        );
-    } catch (error) {
-      console.error("Failed to sync catalog:", error);
-    }
-    try {
-      if (syncData)
-        await SyncDataImplementation.handler(
-          context,
-          {},
-          configuration,
-          options,
-        );
-    } catch (error) {
-      console.error("Failed to sync data:", error);
-    }
-    try {
-      if (syncWebhook)
-        await SyncWebhookImplementation.handler(
-          context,
-          {},
-          configuration,
-          options,
-        );
-    } catch (error) {
-      console.error("Failed to sync webhook:", error);
-    }
-    try {
-      if (syncPortal)
-        await SyncPortalImplementation.handler(
-          context,
-          {},
-          configuration,
-          options,
-        );
-    } catch (error) {
-      console.error("Failed to sync portal:", error);
+    const tasks: Array<[boolean, () => Promise<void>, string]> = [
+      [
+        Boolean(unstable_catalog),
+        () =>
+          SyncCatalogImplementation.handler(
+            context,
+            {},
+            configuration,
+            options,
+          ),
+        "catalog",
+      ],
+      [
+        Boolean(data),
+        () =>
+          SyncDataImplementation.handler(
+            context,
+            {
+              withConnect: typeof data === "object" && data.withConnect,
+            },
+            configuration,
+            options,
+          ),
+        "data",
+      ],
+      [
+        Boolean(webhooks?.account),
+        () =>
+          SyncAccountWebhookImplementation.handler(
+            context,
+            {},
+            configuration,
+            options,
+          ),
+        "account webhook",
+      ],
+      [
+        Boolean(webhooks?.connect),
+        () =>
+          SyncConnectWebhookImplementation.handler(
+            context,
+            {},
+            configuration,
+            options,
+          ),
+        "connect webhook",
+      ],
+      [
+        Boolean(portal),
+        () =>
+          SyncPortalImplementation.handler(context, {}, configuration, options),
+        "portal",
+      ],
+    ];
+
+    for (const [enabled, run, name] of tasks) {
+      if (!enabled) continue;
+      try {
+        await run();
+      } catch (error) {
+        console.error(`[sync]: failed ${name}:`, error);
+      }
     }
   },
 });

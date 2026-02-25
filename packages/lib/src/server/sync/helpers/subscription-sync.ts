@@ -2,11 +2,13 @@ import { v } from "convex/values";
 import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
+import { SubscriptionStripeToConvex } from "@/schema/models/subscription";
 import { storeDispatchTyped } from "@/store";
 
 export const SubscriptionSyncImplementation = defineActionImplementation({
   args: v.object({
     customerId: v.string(),
+    accountId: v.optional(v.string()),
   }),
   name: "syncSubscription",
   handler: async (context, args, configuration, options) => {
@@ -16,13 +18,15 @@ export const SubscriptionSyncImplementation = defineActionImplementation({
 
     const customerId = args.customerId;
 
-    // TODO: revisit this
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-      limit: 1,
-      status: "all",
-      expand: ["data.default_payment_method"],
-    });
+    const subscriptions = await stripe.subscriptions.list(
+      {
+        customer: customerId,
+        limit: 1,
+        status: "all",
+        expand: ["data.default_payment_method"],
+      },
+      { stripeAccount: args.accountId },
+    );
 
     if (subscriptions.data.length === 0) {
       await storeDispatchTyped(
@@ -36,6 +40,7 @@ export const SubscriptionSyncImplementation = defineActionImplementation({
             customerId: customerId,
             stripe: null,
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,
@@ -55,9 +60,10 @@ export const SubscriptionSyncImplementation = defineActionImplementation({
         indexName: "byCustomerId",
         idField: "customerId",
         data: {
+          accountId: args.accountId,
           subscriptionId: subscription.id,
           customerId: customerId,
-          stripe: subscription,
+          stripe: SubscriptionStripeToConvex(subscription),
           lastSyncedAt: Date.now(),
         },
       },

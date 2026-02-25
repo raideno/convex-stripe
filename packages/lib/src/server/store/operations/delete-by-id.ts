@@ -16,13 +16,12 @@ type StripeIndexFieldPath<
 
 export async function deleteById<
   TableName extends keyof StripeDataModel,
-  IndexField extends StripeIndexFieldPath<
-    TableName,
-    typeof BY_STRIPE_ID_INDEX_NAME
-  >,
+  IndexName extends keyof StripeDataModel[TableName]["indexes"] & string,
+  IndexField extends StripeIndexFieldPath<TableName, IndexName>,
 >(
   context: GenericMutationCtx<StripeDataModel>,
   table: TableName,
+  indexName: IndexName,
   idField: IndexField,
   idValue: FieldTypeFromFieldPath<
     StripeDataModel[TableName]["document"],
@@ -31,7 +30,7 @@ export async function deleteById<
 ): Promise<boolean> {
   const existing = await context.db
     .query(table)
-    .withIndex(BY_STRIPE_ID_INDEX_NAME, (q) => q.eq(idField, idValue))
+    .withIndex(indexName, (q) => q.eq(idField, idValue))
     .unique();
 
   if (existing) {

@@ -7,7 +7,9 @@ import { PaymentIntentStripeToConvex } from "@/schema/models/payment-intent";
 import { storeDispatchTyped } from "@/store";
 
 export const PaymentIntentsSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "paymentIntents",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripePaymentIntents !== true) return;
@@ -26,14 +28,11 @@ export const PaymentIntentsSyncImplementation = defineActionImplementation({
       options,
     );
     const localPaymentIntentsById = new Map(
-      (localPaymentIntentsRes.docs || []).map((p: any) => [
-        p.paymentIntentId,
-        p,
-      ]),
+      (localPaymentIntentsRes.docs || []).map((p) => [p.paymentIntentId, p]),
     );
 
     const paymentIntents = await stripe.paymentIntents
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripePaymentIntentIds = new Set<string>();
@@ -51,6 +50,7 @@ export const PaymentIntentsSyncImplementation = defineActionImplementation({
             paymentIntentId: paymentIntent.id,
             stripe: PaymentIntentStripeToConvex(paymentIntent),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,
@@ -59,21 +59,21 @@ export const PaymentIntentsSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [paymentIntentId] of localPaymentIntentsById.entries()) {
-      if (!stripePaymentIntentIds.has(paymentIntentId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripePaymentIntents",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "paymentIntentId",
-            idValue: paymentIntentId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [paymentIntentId] of localPaymentIntentsById.entries()) {
+    //   if (!stripePaymentIntentIds.has(paymentIntentId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripePaymentIntents",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "paymentIntentId",
+    //         idValue: paymentIntentId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

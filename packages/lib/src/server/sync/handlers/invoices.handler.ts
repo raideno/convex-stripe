@@ -7,7 +7,9 @@ import { InvoiceStripeToConvex } from "@/schema/models/invoice";
 import { storeDispatchTyped } from "@/store";
 
 export const InvoicesSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "invoices",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeInvoices !== true) return;
@@ -26,11 +28,11 @@ export const InvoicesSyncImplementation = defineActionImplementation({
       options,
     );
     const localInvoicesById = new Map(
-      (localInvoicesRes.docs || []).map((p: any) => [p.invoiceId, p]),
+      (localInvoicesRes.docs || []).map((p) => [p.invoiceId, p]),
     );
 
     const invoices = await stripe.invoices
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripeInvoiceIds = new Set<string>();
@@ -55,6 +57,7 @@ export const InvoicesSyncImplementation = defineActionImplementation({
               id: invoice.id,
               ...invoice,
             }),
+            accountId: args.accountId,
             lastSyncedAt: Date.now(),
           },
         },
@@ -64,21 +67,21 @@ export const InvoicesSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [invoiceId] of localInvoicesById.entries()) {
-      if (!stripeInvoiceIds.has(invoiceId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeInvoices",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "invoiceId",
-            idValue: invoiceId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [invoiceId] of localInvoicesById.entries()) {
+    //   if (!stripeInvoiceIds.has(invoiceId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeInvoices",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "invoiceId",
+    //         idValue: invoiceId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

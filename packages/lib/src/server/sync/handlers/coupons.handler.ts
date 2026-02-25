@@ -7,7 +7,9 @@ import { CouponStripeToConvex } from "@/schema/models/coupon";
 import { storeDispatchTyped } from "@/store";
 
 export const CouponsSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "coupons",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeCoupons !== true) return;
@@ -26,11 +28,11 @@ export const CouponsSyncImplementation = defineActionImplementation({
       options,
     );
     const localCouponsById = new Map(
-      (localCouponsRes.docs || []).map((p: any) => [p.couponId, p]),
+      (localCouponsRes.docs || []).map((p) => [p.couponId, p]),
     );
 
     const coupons = await stripe.coupons
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripeCouponIds = new Set<string>();
@@ -48,6 +50,7 @@ export const CouponsSyncImplementation = defineActionImplementation({
             couponId: coupon.id,
             stripe: CouponStripeToConvex(coupon),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,
@@ -56,21 +59,21 @@ export const CouponsSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [couponId] of localCouponsById.entries()) {
-      if (!stripeCouponIds.has(couponId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeCoupons",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "couponId",
-            idValue: couponId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [couponId] of localCouponsById.entries()) {
+    //   if (!stripeCouponIds.has(couponId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeCoupons",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "couponId",
+    //         idValue: couponId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

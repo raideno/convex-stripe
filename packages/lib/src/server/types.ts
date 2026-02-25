@@ -1,11 +1,9 @@
-import { DocumentByName, GenericMutationCtx } from "convex/server";
+import { GenericMutationCtx } from "convex/server";
 import { Infer, Validator } from "convex/values";
 import Stripe from "stripe";
 
 import { Logger } from "@/logger";
 import { StripeDataModel, stripeTables } from "@/schema";
-
-import { StoreImplementation } from "./store";
 
 export interface InternalOptions {
   store: string;
@@ -26,14 +24,15 @@ export type CallbackEvent = {
 
 export type CallbackAfterChange = (
   context: GenericMutationCtx<any>,
-  operation: "upsert" | "delete",
+  operation: "upsert" | "delete" | "insert",
   event: CallbackEvent,
 ) => Promise<void>;
 
 export interface InternalConfiguration {
   stripe: {
     secret_key: string;
-    webhook_secret: string;
+    account_webhook_secret: string;
+    connect_webhook_secret?: string;
   };
 
   catalog: {
@@ -46,6 +45,7 @@ export interface InternalConfiguration {
     metadataKey: string;
   };
 
+  // TODO: move catalog, account_webhook, sync (tables) and portal to the same group and call it sync
   webhook: {
     metadata: Record<string, string>;
     description: string;

@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 
-import { CreateEntityImplementation } from "@/actions/create-entity";
+import { CreateCustomerImplementation } from "@/actions/create-customer";
 import { buildSignedReturnUrl } from "@/redirects";
 import { storeDispatchTyped } from "@/store";
 
@@ -50,13 +50,14 @@ export const PortalImplementation = defineActionCallableFunction<
         );
       } else {
         customerId = (
-          await CreateEntityImplementation.handler(
+          await CreateCustomerImplementation.handler(
             context,
             {
               entityId: args.entityId,
               email: undefined,
               metadata: undefined,
             },
+            {},
             configuration,
             options,
           )
@@ -68,6 +69,7 @@ export const PortalImplementation = defineActionCallableFunction<
       configuration: configuration,
       origin: "portal-return",
       data: {
+        accountId: stripeOptions.stripeAccount,
         entityId: args.entityId,
       },
       failureUrl: args.failure_url,

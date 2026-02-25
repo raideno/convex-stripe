@@ -24,6 +24,7 @@ export const normalizeConfiguration = (
   config: InputConfiguration,
 ): InternalConfiguration => {
   return {
+    // TODO: should be on the bottom no ?
     ...config,
     redirectTtlMs: 15 * 60 * 1000,
     detached: DEFAULT_DETACHED,
@@ -41,6 +42,9 @@ export const normalizeConfiguration = (
       },
     },
     sync: {
+      stripeAccounts: true,
+      stripeCapabilities: true,
+      stripeTransfers: true,
       stripeCoupons: true,
       stripeCustomers: true,
       stripePrices: true,

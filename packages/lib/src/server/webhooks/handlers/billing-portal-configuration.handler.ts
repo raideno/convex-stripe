@@ -2,7 +2,7 @@ import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { BillingPortalConfigurationStripeToConvex } from "@/schema/models/billing-portal-configuration";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "../types";
+import { defineWebhookHandler } from "@/webhooks/types";
 
 export default defineWebhookHandler({
   events: [
@@ -29,6 +29,7 @@ export default defineWebhookHandler({
                 billingPortalConfiguration,
               ),
               lastSyncedAt: Date.now(),
+              accountId: event.account,
             },
           },
           context,

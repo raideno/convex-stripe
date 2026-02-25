@@ -2,7 +2,7 @@ import { CheckoutSessionStripeToConvex } from "@/schema/models/checkout-session"
 import { storeDispatchTyped } from "@/store";
 import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 
-import { defineWebhookHandler } from "../types";
+import { defineWebhookHandler } from "@/webhooks/types";
 
 export default defineWebhookHandler({
   events: [
@@ -31,6 +31,7 @@ export default defineWebhookHandler({
               checkoutSessionId: checkoutSession.id,
               stripe: CheckoutSessionStripeToConvex(checkoutSession),
               lastSyncedAt: Date.now(),
+              accountId: event.account,
             },
           },
           context,

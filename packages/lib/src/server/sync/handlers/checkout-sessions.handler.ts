@@ -7,7 +7,9 @@ import { storeDispatchTyped } from "@/store";
 import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 
 export const CheckoutSessionsSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "checkoutSessions",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeCheckoutSessions !== true) return;
@@ -26,14 +28,14 @@ export const CheckoutSessionsSyncImplementation = defineActionImplementation({
       options,
     );
     const localCheckoutSessionsById = new Map(
-      (localCheckoutSessionsRes.docs || []).map((p: any) => [
+      (localCheckoutSessionsRes.docs || []).map((p) => [
         p.checkoutSessionId,
         p,
       ]),
     );
 
     const checkoutSessions = await stripe.checkout.sessions
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripeCheckoutSessionIds = new Set<string>();
@@ -51,6 +53,7 @@ export const CheckoutSessionsSyncImplementation = defineActionImplementation({
             checkoutSessionId: checkoutSession.id,
             stripe: CheckoutSessionStripeToConvex(checkoutSession),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,
@@ -59,21 +62,21 @@ export const CheckoutSessionsSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [checkoutSessionId] of localCheckoutSessionsById.entries()) {
-      if (!stripeCheckoutSessionIds.has(checkoutSessionId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeCheckoutSessions",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "checkoutSessionId",
-            idValue: checkoutSessionId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [checkoutSessionId] of localCheckoutSessionsById.entries()) {
+    //   if (!stripeCheckoutSessionIds.has(checkoutSessionId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeCheckoutSessions",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "checkoutSessionId",
+    //         idValue: checkoutSessionId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

@@ -2,7 +2,7 @@ import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { CreditNoteStripeToConvex } from "@/schema/models/credit-note";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "../types";
+import { defineWebhookHandler } from "@/webhooks/types";
 
 export default defineWebhookHandler({
   events: ["credit_note.created", "credit_note.updated", "credit_note.voided"],
@@ -25,6 +25,7 @@ export default defineWebhookHandler({
               creditNoteId: creditNote.id,
               stripe: CreditNoteStripeToConvex(creditNote),
               lastSyncedAt: Date.now(),
+              accountId: event.account,
             },
           },
           context,

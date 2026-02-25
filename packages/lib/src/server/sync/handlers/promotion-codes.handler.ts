@@ -7,7 +7,9 @@ import { PromotionCodeStripeToConvex } from "@/schema/models/promotion-code";
 import { storeDispatchTyped } from "@/store";
 
 export const PromotionCodesSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "promotionCodes",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripePromotionCodes !== true) return;
@@ -26,14 +28,11 @@ export const PromotionCodesSyncImplementation = defineActionImplementation({
       options,
     );
     const localPromotionCodesById = new Map(
-      (localPromotionCodesRes.docs || []).map((p: any) => [
-        p.promotionCodeId,
-        p,
-      ]),
+      (localPromotionCodesRes.docs || []).map((p) => [p.promotionCodeId, p]),
     );
 
     const promotionCodes = await stripe.promotionCodes
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripePromotionCodeIds = new Set<string>();
@@ -51,6 +50,7 @@ export const PromotionCodesSyncImplementation = defineActionImplementation({
             promotionCodeId: promotionCode.id,
             stripe: PromotionCodeStripeToConvex(promotionCode),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,
@@ -59,21 +59,21 @@ export const PromotionCodesSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [promotionCodeId] of localPromotionCodesById.entries()) {
-      if (!stripePromotionCodeIds.has(promotionCodeId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripePromotionCodes",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "promotionCodeId",
-            idValue: promotionCodeId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [promotionCodeId] of localPromotionCodesById.entries()) {
+    //   if (!stripePromotionCodeIds.has(promotionCodeId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripePromotionCodes",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "promotionCodeId",
+    //         idValue: promotionCodeId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

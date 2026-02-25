@@ -7,7 +7,9 @@ import { PriceStripeToConvex } from "@/schema/models/price";
 import { storeDispatchTyped } from "@/store";
 
 export const PricesSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "prices",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripePrices !== true) return;
@@ -26,11 +28,14 @@ export const PricesSyncImplementation = defineActionImplementation({
       options,
     );
     const localPricesById = new Map(
-      (localPricesRes.docs || []).map((p: any) => [p.priceId, p]),
+      (localPricesRes.docs || []).map((p) => [p.priceId, p]),
     );
 
     const prices = await stripe.prices
-      .list({ limit: 100, expand: ["data.product"] })
+      .list(
+        { limit: 100, expand: ["data.product"] },
+        { stripeAccount: args.accountId },
+      )
       .autoPagingToArray({ limit: 10_000 });
 
     const stripePriceIds = new Set<string>();
@@ -48,6 +53,7 @@ export const PricesSyncImplementation = defineActionImplementation({
             priceId: price.id,
             stripe: PriceStripeToConvex(price),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,
@@ -56,21 +62,21 @@ export const PricesSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [priceId] of localPricesById.entries()) {
-      if (!stripePriceIds.has(priceId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripePrices",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "priceId",
-            idValue: priceId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [priceId] of localPricesById.entries()) {
+    //   if (!stripePriceIds.has(priceId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripePrices",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "priceId",
+    //         idValue: priceId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

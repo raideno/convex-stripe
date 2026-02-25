@@ -2,7 +2,7 @@ import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { CouponStripeToConvex } from "@/schema/models/coupon";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "../types";
+import { defineWebhookHandler } from "@/webhooks/types";
 
 export default defineWebhookHandler({
   events: ["coupon.created", "coupon.updated", "coupon.deleted"],
@@ -24,6 +24,7 @@ export default defineWebhookHandler({
               couponId: coupon.id,
               stripe: CouponStripeToConvex(coupon),
               lastSyncedAt: Date.now(),
+              accountId: event.account,
             },
           },
           context,

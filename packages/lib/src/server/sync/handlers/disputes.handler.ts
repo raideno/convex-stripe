@@ -7,7 +7,9 @@ import { DisputeStripeToConvex } from "@/schema/models/dispute";
 import { storeDispatchTyped } from "@/store";
 
 export const DisputesSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "disputes",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeDisputes !== true) return;
@@ -26,11 +28,11 @@ export const DisputesSyncImplementation = defineActionImplementation({
       options,
     );
     const localDisputesById = new Map(
-      (localDisputesRes.docs || []).map((p: any) => [p.disputeId, p]),
+      (localDisputesRes.docs || []).map((p) => [p.disputeId, p]),
     );
 
     const disputes = await stripe.disputes
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripeDisputeIds = new Set<string>();
@@ -48,6 +50,7 @@ export const DisputesSyncImplementation = defineActionImplementation({
             disputeId: dispute.id,
             stripe: DisputeStripeToConvex(dispute),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,
@@ -56,21 +59,21 @@ export const DisputesSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [disputeId] of localDisputesById.entries()) {
-      if (!stripeDisputeIds.has(disputeId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeDisputes",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "disputeId",
-            idValue: disputeId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [disputeId] of localDisputesById.entries()) {
+    //   if (!stripeDisputeIds.has(disputeId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeDisputes",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "disputeId",
+    //         idValue: disputeId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

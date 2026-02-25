@@ -7,7 +7,9 @@ import { TaxIdStripeToConvex } from "@/schema/models/tax-id";
 import { storeDispatchTyped } from "@/store";
 
 export const TaxIdsSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "taxIds",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeTaxIds !== true) return;
@@ -26,11 +28,11 @@ export const TaxIdsSyncImplementation = defineActionImplementation({
       options,
     );
     const localTaxIdsById = new Map(
-      (localTaxIdsRes.docs || []).map((p: any) => [p.taxIdId, p]),
+      (localTaxIdsRes.docs || []).map((p) => [p.taxIdId, p]),
     );
 
     const taxIds = await stripe.taxIds
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripeTaxIdIds = new Set<string>();
@@ -48,6 +50,7 @@ export const TaxIdsSyncImplementation = defineActionImplementation({
             taxIdId: taxId.id,
             stripe: TaxIdStripeToConvex(taxId),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,
@@ -56,21 +59,21 @@ export const TaxIdsSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [taxIdId] of localTaxIdsById.entries()) {
-      if (!stripeTaxIdIds.has(taxIdId)) {
-        await storeDispatchTyped(
-          {
-            operation: "deleteById",
-            table: "stripeTaxIds",
-            indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "taxIdId",
-            idValue: taxIdId,
-          },
-          context,
-          configuration,
-          options,
-        );
-      }
-    }
+    // for (const [taxIdId] of localTaxIdsById.entries()) {
+    //   if (!stripeTaxIdIds.has(taxIdId)) {
+    //     await storeDispatchTyped(
+    //       {
+    //         operation: "deleteById",
+    //         table: "stripeTaxIds",
+    //         indexName: BY_STRIPE_ID_INDEX_NAME,
+    //         idField: "taxIdId",
+    //         idValue: taxIdId,
+    //       },
+    //       context,
+    //       configuration,
+    //       options,
+    //     );
+    //   }
+    // }
   },
 });

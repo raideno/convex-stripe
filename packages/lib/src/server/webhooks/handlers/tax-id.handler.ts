@@ -2,7 +2,7 @@ import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { TaxIdStripeToConvex } from "@/schema/models/tax-id";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "../types";
+import { defineWebhookHandler } from "@/webhooks/types";
 
 export default defineWebhookHandler({
   events: [
@@ -19,11 +19,6 @@ export default defineWebhookHandler({
       case "customer.tax_id.created":
       case "customer.tax_id.deleted":
       case "customer.tax_id.updated":
-        if (taxId.id === undefined) {
-          console.error("Received tax id event with no ID, skipping");
-          return;
-        }
-
         await storeDispatchTyped(
           {
             operation: "upsert",
@@ -34,6 +29,7 @@ export default defineWebhookHandler({
               taxIdId: taxId.id,
               stripe: TaxIdStripeToConvex(taxId),
               lastSyncedAt: Date.now(),
+              accountId: event.account,
             },
           },
           context,

@@ -119,6 +119,7 @@ export interface ReturnPayload<T> {
   failureUrl?: string;
 }
 
+// TODO: add type safety on the data when origin is specified
 export async function buildSignedReturnUrl<O extends ReturnOrigin>({
   configuration,
   origin,
@@ -141,7 +142,10 @@ export async function buildSignedReturnUrl<O extends ReturnOrigin>({
   };
 
   const data_ = toBase64Url(JSON.stringify(payload));
-  const expected = await signData(configuration.stripe.webhook_secret, data_);
+  const expected = await signData(
+    configuration.stripe.account_webhook_secret,
+    data_,
+  );
   const signature = toBase64Url(expected);
 
   const base = `${backendBaseUrl(configuration)}/stripe/return/${origin}`;
@@ -240,7 +244,7 @@ export const redirectImplementation = async (
 
   const response = await decodeSignedPayload({
     origin,
-    secret: configuration.stripe.webhook_secret,
+    secret: configuration.stripe.account_webhook_secret,
     data,
     signature,
   });
