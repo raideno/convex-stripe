@@ -26,7 +26,7 @@ export const DisputesSyncImplementation = defineActionImplementation({
       options,
     );
     const localDisputesById = new Map(
-      (localDisputesRes.docs || []).map((p: any) => [p.disputeId, p]),
+      (localDisputesRes.docs || []).map((p) => [p.disputeId, p]),
     );
 
     const disputes = await stripe.disputes

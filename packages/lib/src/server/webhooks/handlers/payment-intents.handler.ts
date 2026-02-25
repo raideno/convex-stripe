@@ -2,7 +2,7 @@ import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { PaymentIntentStripeToConvex } from "@/schema/models/payment-intent";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "../types";
+import { defineWebhookHandler } from "@/webhooks/types";
 
 export default defineWebhookHandler({
   events: [
@@ -39,6 +39,7 @@ export default defineWebhookHandler({
               paymentIntentId: paymentIntent.id,
               stripe: PaymentIntentStripeToConvex(paymentIntent),
               lastSyncedAt: Date.now(),
+              accountId: event.account,
             },
           },
           context,

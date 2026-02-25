@@ -26,7 +26,7 @@ export const ChargesSyncImplementation = defineActionImplementation({
       options,
     );
     const localChargesById = new Map(
-      (localChargesRes.docs || []).map((p: any) => [p.chargeId, p]),
+      (localChargesRes.docs || []).map((p) => [p.chargeId, p]),
     );
 
     const charges = await stripe.charges

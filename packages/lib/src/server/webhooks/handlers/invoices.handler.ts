@@ -2,7 +2,7 @@ import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { InvoiceStripeToConvex } from "@/schema/models/invoice";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "../types";
+import { defineWebhookHandler } from "@/webhooks/types";
 
 export default defineWebhookHandler({
   events: [
@@ -45,6 +45,7 @@ export default defineWebhookHandler({
       case "invoice.updated":
       case "invoice.voided":
       case "invoice.will_be_due":
+        // TODO: investigate why invoice.id can be undefined
         if (invoice.id === undefined) {
           console.error("Received invoice event with no ID, skipping");
           return;
@@ -62,6 +63,7 @@ export default defineWebhookHandler({
                 id: invoice.id,
                 ...invoice,
               }),
+              accountId: event.account,
               lastSyncedAt: Date.now(),
             },
           },

@@ -2,7 +2,7 @@ import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { PriceStripeToConvex } from "@/schema/models/price";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "../types";
+import { defineWebhookHandler } from "@/webhooks/types";
 
 export default defineWebhookHandler({
   events: ["price.created", "price.updated", "price.deleted"],
@@ -24,6 +24,7 @@ export default defineWebhookHandler({
               priceId: price.id,
               stripe: PriceStripeToConvex(price),
               lastSyncedAt: Date.now(),
+              accountId: event.account,
             },
           },
           context,

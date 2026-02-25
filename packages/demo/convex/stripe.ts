@@ -3,11 +3,28 @@ import { internalConvexStripe } from "@raideno/convex-stripe/server";
 import { v } from "convex/values";
 
 import { internal } from "./_generated/api";
-import { action, internalMutation, query } from "./_generated/server";
+import {
+  action,
+  internalAction,
+  internalMutation,
+  query,
+} from "./_generated/server";
 import configuration from "./stripe.config";
 
-export const { stripe, store, sync, createEntity } =
-  internalConvexStripe(configuration);
+export const { stripe, store, sync } = internalConvexStripe(configuration);
+
+export const createCustomer = internalAction({
+  args: {
+    email: v.optional(v.string()),
+    entityId: v.string(),
+  },
+  handler: async (context, args) => {
+    return stripe.customers.create(context, {
+      email: args.email,
+      entityId: args.entityId,
+    });
+  },
+});
 
 export const createInternalPaymentRecord = internalMutation({
   args: {

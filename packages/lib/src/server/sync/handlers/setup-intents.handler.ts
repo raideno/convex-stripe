@@ -26,7 +26,7 @@ export const SetupIntentsSyncImplementation = defineActionImplementation({
       options,
     );
     const localSetupIntentsById = new Map(
-      (localSetupIntentsRes.docs || []).map((p: any) => [p.setupIntentId, p]),
+      (localSetupIntentsRes.docs || []).map((p) => [p.setupIntentId, p]),
     );
 
     const setupIntents = await stripe.setupIntents

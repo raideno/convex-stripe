@@ -27,7 +27,7 @@ export const SubscriptionSchedulesSyncImplementation =
         options,
       );
       const localSubscriptionSchedulesById = new Map(
-        (localSubscriptionSchedulesRes.docs || []).map((p: any) => [
+        (localSubscriptionSchedulesRes.docs || []).map((p) => [
           p.subscriptionScheduleId,
           p,
         ]),

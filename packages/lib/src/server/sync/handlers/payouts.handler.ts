@@ -26,7 +26,7 @@ export const PayoutsSyncImplementation = defineActionImplementation({
       options,
     );
     const localPayoutsById = new Map(
-      (localPayoutsRes.docs || []).map((p: any) => [p.payoutId, p]),
+      (localPayoutsRes.docs || []).map((p) => [p.payoutId, p]),
     );
 
     const payouts = await stripe.payouts

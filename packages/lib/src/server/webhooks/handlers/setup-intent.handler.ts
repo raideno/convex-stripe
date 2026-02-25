@@ -2,7 +2,7 @@ import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { SetupIntentStripeToConvex } from "@/schema/models/setup-intent";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "../types";
+import { defineWebhookHandler } from "@/webhooks/types";
 
 export default defineWebhookHandler({
   events: [
@@ -38,6 +38,7 @@ export default defineWebhookHandler({
               setupIntentId: setupIntent.id,
               stripe: SetupIntentStripeToConvex(setupIntent),
               lastSyncedAt: Date.now(),
+              accountId: event.account,
             },
           },
           context,

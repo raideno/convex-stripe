@@ -26,7 +26,7 @@ export const TaxIdsSyncImplementation = defineActionImplementation({
       options,
     );
     const localTaxIdsById = new Map(
-      (localTaxIdsRes.docs || []).map((p: any) => [p.taxIdId, p]),
+      (localTaxIdsRes.docs || []).map((p) => [p.taxIdId, p]),
     );
 
     const taxIds = await stripe.taxIds

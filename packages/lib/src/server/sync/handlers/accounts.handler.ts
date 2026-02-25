@@ -3,58 +3,58 @@ import Stripe from "stripe";
 
 import { defineActionImplementation } from "@/helpers";
 import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
-import { CustomerStripeToConvex } from "@/schema/models/customer";
+import { AccountStripeToConvex } from "@/schema/models/account";
 import { storeDispatchTyped } from "@/store";
 
-export const CustomersSyncImplementation = defineActionImplementation({
+export const AccountsSyncImplementation = defineActionImplementation({
   args: v.object({}),
-  name: "customers",
+  name: "accounts",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripeCustomers !== true) return;
+    if (configuration.sync.stripeAccounts !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
       apiVersion: "2025-08-27.basil",
     });
 
-    const localCustomersRes = await storeDispatchTyped(
+    const localAccountsRes = await storeDispatchTyped(
       {
         operation: "selectAll",
-        table: "stripeCustomers",
+        table: "stripeAccounts",
       },
       context,
       configuration,
       options,
     );
-    const localCustomersById = new Map(
-      (localCustomersRes.docs || []).map((p) => [p.customerId, p]),
+    const localAccountById = new Map(
+      (localAccountsRes.docs || []).map((p) => [p.accountId, p]),
     );
 
-    const customers = await stripe.customers
+    const accounts = await stripe.accounts
       .list({ limit: 100 })
       .autoPagingToArray({ limit: 10_000 });
 
-    const stripeCustomerIds = new Set<string>();
+    const stripeAccountIds = new Set<string>();
 
-    for (const customer of customers) {
-      stripeCustomerIds.add(customer.id);
+    for (const account of accounts) {
+      stripeAccountIds.add(account.id);
 
-      const entityId = customer.metadata?.entityId;
+      const entityId = account.metadata?.entityId;
 
       if (!entityId) {
-        console.warn(`Customer ${customer.id} is missing entityId in metadata`);
+        console.warn(`Account ${account.id} is missing entityId in metadata`);
         if (!configuration.detached) continue;
       }
 
       await storeDispatchTyped(
         {
           operation: "upsert",
-          table: "stripeCustomers",
+          table: "stripeAccounts",
           indexName: BY_STRIPE_ID_INDEX_NAME,
-          idField: "customerId",
+          idField: "accountId",
           data: {
-            customerId: customer.id,
+            accountId: account.id,
             entityId: entityId,
-            stripe: CustomerStripeToConvex(customer),
+            stripe: AccountStripeToConvex(account),
             lastSyncedAt: Date.now(),
           },
         },
@@ -64,15 +64,15 @@ export const CustomersSyncImplementation = defineActionImplementation({
       );
     }
 
-    for (const [customerId] of localCustomersById.entries()) {
-      if (!stripeCustomerIds.has(customerId)) {
+    for (const [accountId] of localAccountById.entries()) {
+      if (!stripeAccountIds.has(accountId)) {
         await storeDispatchTyped(
           {
             operation: "deleteById",
-            table: "stripeCustomers",
+            table: "stripeAccounts",
             indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "customerId",
-            idValue: customerId,
+            idField: "accountId",
+            idValue: accountId,
           },
           context,
           configuration,

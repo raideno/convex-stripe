@@ -26,7 +26,7 @@ export const CreditNotesSyncImplementation = defineActionImplementation({
       options,
     );
     const localCreditNotesById = new Map(
-      (localCreditNotesRes.docs || []).map((p: any) => [p.creditNoteId, p]),
+      (localCreditNotesRes.docs || []).map((p) => [p.creditNoteId, p]),
     );
 
     const creditNotes = await stripe.creditNotes

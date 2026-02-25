@@ -2,10 +2,11 @@ import {
   DataModelFromSchemaDefinition,
   defineSchema,
   defineTable,
-  DocumentByName,
 } from "convex/server";
 import { v } from "convex/values";
 
+import { AccountSchema } from "@/schema/models/account";
+import { AccountLinkSchema } from "@/schema/models/account-link";
 import { BillingPortalConfigurationSchema } from "@/schema/models/billing-portal-configuration";
 import { ChargeSchema } from "@/schema/models/charge";
 import { CheckoutSessionSchema } from "@/schema/models/checkout-session";
@@ -33,21 +34,37 @@ import { TaxIdSchema } from "@/schema/models/tax-id";
 export const BY_STRIPE_ID_INDEX_NAME = "byStripeId" as const;
 
 export const stripeTables = {
+  stripeAccountLinks: defineTable({
+    stripe: v.object(AccountLinkSchema),
+    lastSyncedAt: v.number(),
+    accountId: v.string(),
+  }),
+  stripeAccounts: defineTable({
+    accountId: v.string(),
+    entityId: v.optional(v.string()),
+    stripe: v.object(AccountSchema),
+    lastSyncedAt: v.number(),
+  })
+    .index(BY_STRIPE_ID_INDEX_NAME, ["accountId"])
+    .index("byEntityId", ["entityId"]),
   stripeProducts: defineTable({
     productId: v.string(),
     stripe: v.object(ProductSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["productId"]),
   stripePrices: defineTable({
     priceId: v.string(),
     stripe: v.object(PriceSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["priceId"]),
   stripeCustomers: defineTable({
     customerId: v.string(),
     entityId: v.optional(v.string()),
     stripe: v.object(CustomerSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   })
     .index(BY_STRIPE_ID_INDEX_NAME, ["customerId"])
     .index("byEntityId", ["entityId"]),
@@ -56,6 +73,7 @@ export const stripeTables = {
     customerId: v.string(),
     stripe: SubscriptionObject,
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   })
     .index(BY_STRIPE_ID_INDEX_NAME, ["subscriptionId"])
     .index("byCustomerId", ["customerId"]),
@@ -63,96 +81,115 @@ export const stripeTables = {
     couponId: v.string(),
     stripe: v.object(CouponSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["couponId"]),
   stripePromotionCodes: defineTable({
     promotionCodeId: v.string(),
     stripe: v.object(PromotionCodeSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["promotionCodeId"]),
   stripePayouts: defineTable({
     payoutId: v.string(),
     stripe: v.object(PayoutSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["payoutId"]),
   stripeRefunds: defineTable({
     refundId: v.string(),
     stripe: v.object(RefundSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["refundId"]),
   stripePaymentIntents: defineTable({
     paymentIntentId: v.string(),
     stripe: v.object(PaymentIntentSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["paymentIntentId"]),
   stripeCheckoutSessions: defineTable({
     checkoutSessionId: v.string(),
     stripe: v.object(CheckoutSessionSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["checkoutSessionId"]),
   stripeInvoices: defineTable({
     invoiceId: v.string(),
     stripe: v.object(InvoiceSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["invoiceId"]),
   stripeReviews: defineTable({
     reviewId: v.string(),
     stripe: v.object(ReviewSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["reviewId"]),
   stripePlans: defineTable({
     planId: v.string(),
     stripe: v.object(PlanSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["planId"]),
   stripeDisputes: defineTable({
     disputeId: v.string(),
     stripe: v.object(DisputeSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["disputeId"]),
   stripeEarlyFraudWarnings: defineTable({
     earlyFraudWarningId: v.string(),
     stripe: v.object(EarlyFraudWarningSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["earlyFraudWarningId"]),
   stripeTaxIds: defineTable({
     taxIdId: v.string(),
     stripe: v.object(TaxIdSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["taxIdId"]),
   stripeSetupIntents: defineTable({
     setupIntentId: v.string(),
     stripe: v.object(SetupIntentSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["setupIntentId"]),
   stripeCreditNotes: defineTable({
     creditNoteId: v.string(),
     stripe: v.object(CreditNoteSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["creditNoteId"]),
   stripeCharges: defineTable({
     chargeId: v.string(),
     stripe: v.object(ChargeSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["chargeId"]),
   stripePaymentMethods: defineTable({
     paymentMethodId: v.string(),
     stripe: v.object(PaymentMethodSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["paymentMethodId"]),
   stripeSubscriptionSchedules: defineTable({
     subscriptionScheduleId: v.string(),
     stripe: v.object(SubscriptionScheduleSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["subscriptionScheduleId"]),
   stripeMandates: defineTable({
     mandateId: v.string(),
     stripe: v.object(MandateSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["mandateId"]),
   stripeBillingPortalConfigurations: defineTable({
     billingPortalConfigurationId: v.string(),
     stripe: v.object(BillingPortalConfigurationSchema),
     lastSyncedAt: v.number(),
+    accountId: v.optional(v.string()),
   }).index(BY_STRIPE_ID_INDEX_NAME, ["billingPortalConfigurationId"]),
 };
 

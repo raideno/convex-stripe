@@ -2,7 +2,7 @@ import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { PlanStripeToConvex } from "@/schema/models/plan";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "../types";
+import { defineWebhookHandler } from "@/webhooks/types";
 
 export default defineWebhookHandler({
   events: ["plan.created", "plan.deleted", "plan.updated"],
@@ -25,6 +25,7 @@ export default defineWebhookHandler({
               planId: plan.id,
               stripe: PlanStripeToConvex(plan),
               lastSyncedAt: Date.now(),
+              accountId: event.account,
             },
           },
           context,

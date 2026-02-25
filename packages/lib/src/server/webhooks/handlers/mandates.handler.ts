@@ -2,7 +2,7 @@ import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { MandateStripeToConvex } from "@/schema/models/mandate";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "../types";
+import { defineWebhookHandler } from "@/webhooks/types";
 
 export default defineWebhookHandler({
   events: ["mandate.updated"],
@@ -23,6 +23,7 @@ export default defineWebhookHandler({
               mandateId: mandate.id,
               stripe: MandateStripeToConvex(mandate),
               lastSyncedAt: Date.now(),
+              accountId: event.account,
             },
           },
           context,

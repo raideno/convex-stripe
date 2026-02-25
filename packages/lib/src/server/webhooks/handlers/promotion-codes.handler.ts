@@ -2,7 +2,7 @@ import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { PromotionCodeStripeToConvex } from "@/schema/models/promotion-code";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "../types";
+import { defineWebhookHandler } from "@/webhooks/types";
 
 export default defineWebhookHandler({
   events: ["promotion_code.created", "promotion_code.updated"],
@@ -24,6 +24,7 @@ export default defineWebhookHandler({
               promotionCodeId: promotionCode.id,
               stripe: PromotionCodeStripeToConvex(promotionCode),
               lastSyncedAt: Date.now(),
+              accountId: event.account,
             },
           },
           context,

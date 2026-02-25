@@ -2,8 +2,8 @@ import { v } from "convex/values";
 
 import { storeDispatchTyped } from "@/store";
 
-import { SubscriptionSyncImplementation } from "../../sync/handlers/subscription";
-import { defineRedirectHandler } from "../types";
+import { SubscriptionSyncImplementation } from "@/sync/handlers/subscription";
+import { defineRedirectHandler } from "@/redirects/types";
 
 export const PortalReturnImplementation = defineRedirectHandler({
   origins: ["portal-return"],

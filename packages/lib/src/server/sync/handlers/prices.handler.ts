@@ -26,7 +26,7 @@ export const PricesSyncImplementation = defineActionImplementation({
       options,
     );
     const localPricesById = new Map(
-      (localPricesRes.docs || []).map((p: any) => [p.priceId, p]),
+      (localPricesRes.docs || []).map((p) => [p.priceId, p]),
     );
 
     const prices = await stripe.prices

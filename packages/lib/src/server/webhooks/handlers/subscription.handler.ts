@@ -1,6 +1,6 @@
 import { SubscriptionSyncImplementation } from "@/sync/handlers/subscription";
 
-import { defineWebhookHandler } from "../types";
+import { defineWebhookHandler } from "@/webhooks/types";
 
 export default defineWebhookHandler({
   events: [
@@ -34,11 +34,12 @@ export default defineWebhookHandler({
     if (typeof customerId !== "string")
       throw new Error(`Customer ID ${customerId} isn't string.`);
 
+    // TODO: add the accountId
     await SubscriptionSyncImplementation.handler(
       context,
       { customerId },
       configuration,
-      options
+      options,
     );
   },
 });

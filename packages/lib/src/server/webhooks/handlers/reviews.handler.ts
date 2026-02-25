@@ -2,7 +2,7 @@ import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { ReviewStripeToConvex } from "@/schema/models/review";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "../types";
+import { defineWebhookHandler } from "@/webhooks/types";
 
 export default defineWebhookHandler({
   events: ["review.closed", "review.opened"],
@@ -24,6 +24,7 @@ export default defineWebhookHandler({
               reviewId: review.id,
               stripe: ReviewStripeToConvex(review),
               lastSyncedAt: Date.now(),
+              accountId: event.account,
             },
           },
           context,

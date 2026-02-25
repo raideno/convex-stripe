@@ -26,10 +26,7 @@ export const PaymentMethodsSyncImplementation = defineActionImplementation({
       options,
     );
     const localPaymentMethodsById = new Map(
-      (localPaymentMethodsRes.docs || []).map((p: any) => [
-        p.paymentMethodId,
-        p,
-      ]),
+      (localPaymentMethodsRes.docs || []).map((p) => [p.paymentMethodId, p]),
     );
 
     const paymentMethods = await stripe.paymentMethods

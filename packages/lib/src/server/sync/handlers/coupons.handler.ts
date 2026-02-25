@@ -26,7 +26,7 @@ export const CouponsSyncImplementation = defineActionImplementation({
       options,
     );
     const localCouponsById = new Map(
-      (localCouponsRes.docs || []).map((p: any) => [p.couponId, p]),
+      (localCouponsRes.docs || []).map((p) => [p.couponId, p]),
     );
 
     const coupons = await stripe.coupons

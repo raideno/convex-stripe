@@ -18,6 +18,7 @@ import { SubscriptionForm } from "./components/forms/subscription-form";
 import { UserForm } from "./components/forms/user-form";
 import { ChatForm } from "./components/forms/chat-form";
 import { GenericReturnFromModal } from "./components/modals/generic-return-from-modal";
+import { Marketplace } from "./components/forms/marketplace-form";
 
 export default function App() {
   return (
@@ -80,6 +81,7 @@ export default function App() {
           <SubscriptionForm />
           <ProductsForm />
           <PaymentsForm />
+          <Marketplace />
         </Flex>
         <GenericReturnFromModal />
       </Authenticated>

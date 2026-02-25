@@ -2,7 +2,7 @@ import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { EarlyFraudWarningStripeToConvex } from "@/schema/models/early-fraud-warning";
 import { storeDispatchTyped } from "@/store";
 
-import { defineWebhookHandler } from "../types";
+import { defineWebhookHandler } from "@/webhooks/types";
 
 export default defineWebhookHandler({
   events: [
@@ -27,6 +27,7 @@ export default defineWebhookHandler({
               earlyFraudWarningId: earlyFraudWarning.id,
               stripe: EarlyFraudWarningStripeToConvex(earlyFraudWarning),
               lastSyncedAt: Date.now(),
+              accountId: event.account,
             },
           },
           context,

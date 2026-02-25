@@ -26,7 +26,7 @@ export const EarlyFraudWarningsSyncImplementation = defineActionImplementation({
       options,
     );
     const localEarlyFraudWarningsById = new Map(
-      (localEarlyFraudWarningsRes.docs || []).map((p: any) => [
+      (localEarlyFraudWarningsRes.docs || []).map((p) => [
         p.early_fraud_warningId,
         p,
       ]),

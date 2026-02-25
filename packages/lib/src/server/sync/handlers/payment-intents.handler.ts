@@ -26,10 +26,7 @@ export const PaymentIntentsSyncImplementation = defineActionImplementation({
       options,
     );
     const localPaymentIntentsById = new Map(
-      (localPaymentIntentsRes.docs || []).map((p: any) => [
-        p.paymentIntentId,
-        p,
-      ]),
+      (localPaymentIntentsRes.docs || []).map((p) => [p.paymentIntentId, p]),
     );
 
     const paymentIntents = await stripe.paymentIntents

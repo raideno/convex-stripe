@@ -26,7 +26,7 @@ export const CheckoutSessionsSyncImplementation = defineActionImplementation({
       options,
     );
     const localCheckoutSessionsById = new Map(
-      (localCheckoutSessionsRes.docs || []).map((p: any) => [
+      (localCheckoutSessionsRes.docs || []).map((p) => [
         p.checkoutSessionId,
         p,
       ]),

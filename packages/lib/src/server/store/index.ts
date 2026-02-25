@@ -1,3 +1,4 @@
+// index.ts
 import {
   FieldTypeFromFieldPath,
   GenericActionCtx,
@@ -14,6 +15,7 @@ import { StoreDispatchArgs, StoreResultFor } from "./types";
 
 import {
   deleteById,
+  insert,
   selectAll,
   selectById,
   selectOne,
@@ -44,6 +46,7 @@ export const StoreImplementation = defineMutationImplementation({
   handler: async (context, args, configuration) => {
     const allowed = new Set([
       "upsert",
+      "insert",
       "deleteById",
       "selectOne",
       "selectById",
@@ -54,13 +57,6 @@ export const StoreImplementation = defineMutationImplementation({
     }
 
     const table = args.table as keyof StripeDataModel;
-
-    let returned_:
-      | { id: GenericId<any> }
-      | { deleted: boolean }
-      | { doc: any | null }
-      | { docs: any[] }
-      | undefined;
 
     switch (args.operation) {
       case "upsert": {
@@ -73,6 +69,7 @@ export const StoreImplementation = defineMutationImplementation({
         if (args.data == null) {
           throw new Error('Missing "data" for upsert');
         }
+
         const upsertIndexName =
           args.indexName as keyof StripeDataModel[typeof table]["indexes"] &
             string;
@@ -80,6 +77,7 @@ export const StoreImplementation = defineMutationImplementation({
           typeof table,
           typeof upsertIndexName
         >;
+
         const upsertData = args.data as WithoutSystemFields<
           StripeDataModel[typeof table]["document"]
         > &
@@ -97,7 +95,6 @@ export const StoreImplementation = defineMutationImplementation({
           upsertIdField,
           upsertData,
         );
-        returned_ = { id };
         if (
           configuration.callback &&
           configuration.callback.unstable__afterChange
@@ -106,9 +103,31 @@ export const StoreImplementation = defineMutationImplementation({
             await configuration.callback.unstable__afterChange(
               context,
               "upsert",
-              {
-                table: table,
-              },
+              { table },
+            );
+          } catch (error) {
+            console.error("[unstable__afterChange]:", error);
+          }
+        return { id };
+      }
+
+      case "insert": {
+        if (args.data == null) {
+          throw new Error('Missing "data" for insert');
+        }
+        const insertData = args.data as WithoutSystemFields<
+          StripeDataModel[typeof table]["document"]
+        >;
+        const id = await insert(context, table, insertData);
+        if (
+          configuration.callback &&
+          configuration.callback.unstable__afterChange
+        )
+          try {
+            await configuration.callback.unstable__afterChange(
+              context,
+              "insert",
+              { table },
             );
           } catch (error) {
             console.error("[unstable__afterChange]:", error);
@@ -117,27 +136,35 @@ export const StoreImplementation = defineMutationImplementation({
       }
 
       case "deleteById": {
+        if (!args.indexName) {
+          throw new Error('Missing "indexName" for deleteById');
+        }
         if (!args.idField) {
           throw new Error('Missing "idField" for deleteById');
         }
         if (typeof args.idValue === "undefined") {
           throw new Error('Missing "idValue" for deleteById');
         }
-        const deleteByIdField = args.idField as StripeIndexFieldPath<
+
+        const deleteByIdIndexName =
+          args.indexName as keyof StripeDataModel[typeof table]["indexes"] &
+            string;
+        const deleteByIdIdField = args.idField as StripeIndexFieldPath<
           typeof table,
-          typeof BY_STRIPE_ID_INDEX_NAME
+          typeof deleteByIdIndexName
         >;
-        const deleteByIdValue = args.idValue as FieldTypeFromFieldPath<
+        const deleteByIdIdValue = args.idValue as FieldTypeFromFieldPath<
           StripeDataModel[typeof table]["document"],
-          typeof deleteByIdField
+          typeof deleteByIdIdField
         >;
+
         const deleted = await deleteById(
           context,
           table,
-          deleteByIdField,
-          deleteByIdValue,
+          deleteByIdIndexName,
+          deleteByIdIdField,
+          deleteByIdIdValue,
         );
-        returned_ = { deleted };
         if (
           configuration.callback &&
           configuration.callback.unstable__afterChange
@@ -146,9 +173,7 @@ export const StoreImplementation = defineMutationImplementation({
             await configuration.callback.unstable__afterChange(
               context,
               "delete",
-              {
-                table: table,
-              },
+              { table },
             );
           } catch (error) {
             console.error("[unstable__afterChange]:", error);
@@ -184,7 +209,6 @@ export const StoreImplementation = defineMutationImplementation({
           selectOneField,
           selectOneValue,
         );
-        returned_ = { doc };
         return { doc };
       }
 
@@ -193,13 +217,11 @@ export const StoreImplementation = defineMutationImplementation({
           throw new Error('Missing "id" for selectById');
         }
         const doc = await selectById(context, table, args.id as GenericId<any>);
-        returned_ = { doc };
         return { doc };
       }
 
       case "selectAll": {
         const docs = await selectAll(context, table);
-        returned_ = { docs };
         return { docs };
       }
     }

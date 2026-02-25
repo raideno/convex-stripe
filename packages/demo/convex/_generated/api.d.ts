@@ -11,6 +11,7 @@
 import type * as auth from "../auth.js";
 import type * as chat from "../chat.js";
 import type * as http from "../http.js";
+import type * as marketplace from "../marketplace.js";
 import type * as profile from "../profile.js";
 import type * as stripe from "../stripe.js";
 
@@ -24,6 +25,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   chat: typeof chat;
   http: typeof http;
+  marketplace: typeof marketplace;
   profile: typeof profile;
   stripe: typeof stripe;
 }>;

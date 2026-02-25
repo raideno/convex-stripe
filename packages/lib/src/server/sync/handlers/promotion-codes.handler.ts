@@ -26,10 +26,7 @@ export const PromotionCodesSyncImplementation = defineActionImplementation({
       options,
     );
     const localPromotionCodesById = new Map(
-      (localPromotionCodesRes.docs || []).map((p: any) => [
-        p.promotionCodeId,
-        p,
-      ]),
+      (localPromotionCodesRes.docs || []).map((p) => [p.promotionCodeId, p]),
     );
 
     const promotionCodes = await stripe.promotionCodes

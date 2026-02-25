@@ -2,10 +2,10 @@ import { v } from "convex/values";
 
 import { defineActionImplementation } from "@/helpers";
 
-import { SyncDataImplementation } from "./data";
-import { SyncPortalImplementation } from "./portal";
-import { SyncPlansAndPricesImplementation } from "./plans-and-prices";
-import { SyncWebhookImplementation } from "./webhook";
+import { SyncDataImplementation } from "@/sync/data";
+import { SyncPlansAndPricesImplementation } from "@/sync/plans-and-prices";
+import { SyncPortalImplementation } from "@/sync/portal";
+import { SyncWebhookImplementation } from "@/sync/webhook";
 
 const DEFAULT_SYNC_DATA = true;
 const DEFAULT_SYNC_WEBHOOK = false;

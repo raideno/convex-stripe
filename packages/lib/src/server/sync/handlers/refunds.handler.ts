@@ -26,7 +26,7 @@ export const RefundsSyncImplementation = defineActionImplementation({
       options,
     );
     const localRefundsById = new Map(
-      (localRefundsRes.docs || []).map((p: any) => [p.refundId, p]),
+      (localRefundsRes.docs || []).map((p) => [p.refundId, p]),
     );
 
     const refunds = await stripe.refunds

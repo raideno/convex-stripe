@@ -26,7 +26,7 @@ export const InvoicesSyncImplementation = defineActionImplementation({
       options,
     );
     const localInvoicesById = new Map(
-      (localInvoicesRes.docs || []).map((p: any) => [p.invoiceId, p]),
+      (localInvoicesRes.docs || []).map((p) => [p.invoiceId, p]),
     );
 
     const invoices = await stripe.invoices

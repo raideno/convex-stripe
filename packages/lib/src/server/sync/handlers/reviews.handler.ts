@@ -26,7 +26,7 @@ export const ReviewsSyncImplementation = defineActionImplementation({
       options,
     );
     const localReviewsById = new Map(
-      (localReviewsRes.docs || []).map((p: any) => [p.reviewId, p]),
+      (localReviewsRes.docs || []).map((p) => [p.reviewId, p]),
     );
 
     const reviews = await stripe.reviews

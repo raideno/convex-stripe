@@ -26,7 +26,7 @@ export const PlansSyncImplementation = defineActionImplementation({
       options,
     );
     const localPlansById = new Map(
-      (localPlansRes.docs || []).map((p: any) => [p.planId, p]),
+      (localPlansRes.docs || []).map((p) => [p.planId, p]),
     );
 
     const plans = await stripe.plans

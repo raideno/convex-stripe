@@ -6,6 +6,12 @@ import { v } from "convex/values";
 export default defineSchema({
   ...stripeTables,
   ...authTables,
+  accounts: defineTable({
+    accountId: v.string(),
+    userId: v.id("users"),
+  })
+    .index("byUserId", ["userId"])
+    .index("byAccountId", ["accountId"]),
   payments: defineTable({
     userId: v.id("users"),
     checkoutSessionId: v.string(),

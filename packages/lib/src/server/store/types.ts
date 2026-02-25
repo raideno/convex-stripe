@@ -33,6 +33,10 @@ type IndexNamesOf<M, T extends keyof M> =
     ? Extract<keyof Indexes, string>
     : never;
 
+// Resolves to `true` only if the table has the stripe ID index
+type HasStripeIndex<M, T extends keyof M> =
+  typeof BY_STRIPE_ID_INDEX_NAME extends IndexNamesOf<M, T> ? true : false;
+
 type StripeIndexFieldPath<M, T extends keyof M> = Exclude<
   IndexFieldsOf<
     M,
@@ -51,44 +55,59 @@ type IndexFieldPath<M, T extends keyof M, IndexName extends string> = Exclude<
   IndexTiebreakerField
 >;
 
-type Keys<D> = Extract<keyof D, string>;
 type Operation =
   | "upsert"
+  | "insert"
   | "deleteById"
   | "selectOne"
   | "selectById"
   | "selectAll";
 
-type UpsertArgsFor<M, T extends keyof M> = {
-  [I in IndexNamesOf<M, T>]: {
-    [K in IndexFieldPath<M, T, I> & string]: {
-      operation: "upsert";
-      table: T;
-      indexName: I;
-      idField: K;
-      // @ts-ignore
-      data: WithoutSystemFields<DocOf<M, T>> &
-        Record<
-          K,
-          DocOf<M, T> extends GenericDocument
-            ? FieldTypeFromFieldPath<DocOf<M, T>, K>
-            : never
-        >;
-    };
-  }[IndexFieldPath<M, T, I> & string];
-}[IndexNamesOf<M, T>];
+// Requires the table to have the stripe index; otherwise resolves to `never`
+type UpsertArgsFor<M, T extends keyof M> =
+  HasStripeIndex<M, T> extends true
+    ? {
+        [I in IndexNamesOf<M, T>]: {
+          [K in IndexFieldPath<M, T, I> & string]: {
+            operation: "upsert";
+            table: T;
+            indexName: I;
+            idField: K;
+            // @ts-ignore
+            data: WithoutSystemFields<DocOf<M, T>> &
+              Record<
+                K,
+                DocOf<M, T> extends GenericDocument
+                  ? FieldTypeFromFieldPath<DocOf<M, T>, K>
+                  : never
+              >;
+          };
+        }[IndexFieldPath<M, T, I> & string];
+      }[IndexNamesOf<M, T>]
+    : never;
 
-type DeleteByIdArgsFor<M, T extends keyof M> = {
-  [K in StripeIndexFieldPath<M, T> & string]: {
-    operation: "deleteById";
-    table: T;
-    indexName: typeof BY_STRIPE_ID_INDEX_NAME;
-    idField: K;
-    idValue: DocOf<M, T> extends GenericDocument
-      ? FieldTypeFromFieldPath<DocOf<M, T>, K>
-      : never;
-  };
-}[StripeIndexFieldPath<M, T> & string];
+type InsertArgsFor<M, T extends keyof M> = {
+  operation: "insert";
+  table: T;
+  // @ts-ignore
+  data: WithoutSystemFields<DocOf<M, T>>;
+};
+
+// Requires the table to have the stripe index; otherwise resolves to `never`
+type DeleteByIdArgsFor<M, T extends keyof M> =
+  HasStripeIndex<M, T> extends true
+    ? {
+        [K in StripeIndexFieldPath<M, T> & string]: {
+          operation: "deleteById";
+          table: T;
+          indexName: typeof BY_STRIPE_ID_INDEX_NAME;
+          idField: K;
+          idValue: DocOf<M, T> extends GenericDocument
+            ? FieldTypeFromFieldPath<DocOf<M, T>, K>
+            : never;
+        };
+      }[StripeIndexFieldPath<M, T> & string]
+    : never;
 
 type SelectOneArgsFor<M, T extends keyof M> = {
   [I in IndexNamesOf<M, T>]: {
@@ -117,24 +136,26 @@ type SelectAllArgsFor<M, T extends keyof M> = {
 
 export type StoreArgsFor<
   M,
-  //   T extends keyof M,
   T extends keyof M & string,
   O extends Operation = Operation,
 > = O extends "upsert"
   ? UpsertArgsFor<M, T>
-  : O extends "deleteById"
-    ? DeleteByIdArgsFor<M, T>
-    : O extends "selectOne"
-      ? SelectOneArgsFor<M, T>
-      : O extends "selectById"
-        ? SelectByIdArgsFor<M, T>
-        : O extends "selectAll"
-          ? SelectAllArgsFor<M, T>
-          : never;
+  : O extends "insert"
+    ? InsertArgsFor<M, T>
+    : O extends "deleteById"
+      ? DeleteByIdArgsFor<M, T>
+      : O extends "selectOne"
+        ? SelectOneArgsFor<M, T>
+        : O extends "selectById"
+          ? SelectByIdArgsFor<M, T>
+          : O extends "selectAll"
+            ? SelectAllArgsFor<M, T>
+            : never;
 
 export type StoreDispatchArgs<M> = {
   [T in Extract<keyof M, string>]:
     | UpsertArgsFor<M, T>
+    | InsertArgsFor<M, T>
     | DeleteByIdArgsFor<M, T>
     | SelectOneArgsFor<M, T>
     | SelectByIdArgsFor<M, T>
@@ -146,12 +167,14 @@ export type StoreResultFor<M, A extends StoreDispatchArgs<M>> = A extends {
   table: infer T extends keyof M & string;
 }
   ? { id: GenericId<T> }
-  : A extends { operation: "deleteById" }
-    ? { deleted: boolean }
-    : A extends { operation: "selectOne"; table: infer T extends keyof M }
-      ? { doc: DocOf<M, T> | null }
-      : A extends { operation: "selectById"; table: infer T extends keyof M }
+  : A extends { operation: "insert"; table: infer T extends keyof M & string }
+    ? { id: GenericId<T> }
+    : A extends { operation: "deleteById" }
+      ? { deleted: boolean }
+      : A extends { operation: "selectOne"; table: infer T extends keyof M }
         ? { doc: DocOf<M, T> | null }
-        : A extends { operation: "selectAll"; table: infer T extends keyof M }
-          ? { docs: DocOf<M, T>[] }
-          : never;
+        : A extends { operation: "selectById"; table: infer T extends keyof M }
+          ? { doc: DocOf<M, T> | null }
+          : A extends { operation: "selectAll"; table: infer T extends keyof M }
+            ? { docs: DocOf<M, T>[] }
+            : never;
