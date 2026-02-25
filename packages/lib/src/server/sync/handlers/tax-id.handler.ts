@@ -7,7 +7,9 @@ import { TaxIdStripeToConvex } from "@/schema/models/tax-id";
 import { storeDispatchTyped } from "@/store";
 
 export const TaxIdsSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "taxIds",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeTaxIds !== true) return;
@@ -30,7 +32,7 @@ export const TaxIdsSyncImplementation = defineActionImplementation({
     );
 
     const taxIds = await stripe.taxIds
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripeTaxIdIds = new Set<string>();
@@ -48,6 +50,7 @@ export const TaxIdsSyncImplementation = defineActionImplementation({
             taxIdId: taxId.id,
             stripe: TaxIdStripeToConvex(taxId),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,

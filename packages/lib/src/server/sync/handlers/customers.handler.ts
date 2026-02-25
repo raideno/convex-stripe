@@ -7,7 +7,9 @@ import { CustomerStripeToConvex } from "@/schema/models/customer";
 import { storeDispatchTyped } from "@/store";
 
 export const CustomersSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "customers",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeCustomers !== true) return;
@@ -30,7 +32,7 @@ export const CustomersSyncImplementation = defineActionImplementation({
     );
 
     const customers = await stripe.customers
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripeCustomerIds = new Set<string>();
@@ -56,6 +58,7 @@ export const CustomersSyncImplementation = defineActionImplementation({
             entityId: entityId,
             stripe: CustomerStripeToConvex(customer),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,

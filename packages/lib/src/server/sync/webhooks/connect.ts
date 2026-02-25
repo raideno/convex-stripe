@@ -5,11 +5,11 @@ import { v } from "convex/values";
 import { defineActionImplementation } from "@/helpers";
 import { WEBHOOK_HANDLERS } from "@/webhooks";
 
-export const SyncAccountWebhookImplementation = defineActionImplementation({
+export const SyncConnectWebhookImplementation = defineActionImplementation({
   args: v.object({}),
-  name: "syncAccountWebhook",
+  name: "syncConnectWebhook",
   handler: async (context, args, configuration) => {
-    const url = `${process.env.CONVEX_SITE_URL}${configuration.webhook.path}`;
+    const url = `${process.env.CONVEX_SITE_URL}${configuration.webhook.path}?connect=true`;
 
     const events = new Set(
       WEBHOOK_HANDLERS.map((handler) => handler.events).flat(),
@@ -34,18 +34,18 @@ export const SyncAccountWebhookImplementation = defineActionImplementation({
 
       if (difference.size !== 0) {
         console.info(
-          "[STRIPE SYNC WEBHOOK](Updated) Adding events:",
+          "[STRIPE SYNC CONNECT WEBHOOK](Updated) Adding events:",
           Array.from(difference),
         );
         await stripe.webhookEndpoints.update(endpoint.id, {
           enabled_events: Array.from(events),
         });
-        console.info("[STRIPE SYNC ACCOUNT WEBHOOK](Updated) Done.");
+        console.info("[STRIPE SYNC CONNECT WEBHOOK](Updated) Done.");
       } else {
-        console.info("[STRIPE SYNC ACCOUNT WEBHOOK] Already up to date.");
+        console.info("[STRIPE SYNC CONNECT WEBHOOK] Already up to date.");
       }
 
-      return null;
+      return;
     } else {
       const endpoint = await stripe.webhookEndpoints.create({
         url: url,
@@ -54,11 +54,11 @@ export const SyncAccountWebhookImplementation = defineActionImplementation({
         // TODO: move version to a global constant or configuration
         api_version: "2025-08-27.basil",
         metadata: configuration.webhook.metadata,
-        connect: false,
+        connect: true,
       });
 
       console.info(
-        "[STRIPE SYNC ACCOUNT WEBHOOK](Created). Secret have been returned. Set in convex as Environment Variable STRIPE_ACCOUNT_WEBHOOK_SECRET.",
+        "[STRIPE SYNC CONNECT WEBHOOK](Created). Secret have been returned. Set in convex as Environment Variable STRIPE_CONNECT_WEBHOOK_SECRET",
       );
 
       console.log("[STRIPE SYNC ACCOUNT WEBHOOK](Secret):", endpoint.secret);

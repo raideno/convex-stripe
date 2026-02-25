@@ -7,7 +7,9 @@ import { storeDispatchTyped } from "@/store";
 import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 
 export const CheckoutSessionsSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "checkoutSessions",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeCheckoutSessions !== true) return;
@@ -33,7 +35,7 @@ export const CheckoutSessionsSyncImplementation = defineActionImplementation({
     );
 
     const checkoutSessions = await stripe.checkout.sessions
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripeCheckoutSessionIds = new Set<string>();
@@ -51,6 +53,7 @@ export const CheckoutSessionsSyncImplementation = defineActionImplementation({
             checkoutSessionId: checkoutSession.id,
             stripe: CheckoutSessionStripeToConvex(checkoutSession),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,

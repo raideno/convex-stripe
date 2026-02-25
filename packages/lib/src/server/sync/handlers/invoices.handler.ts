@@ -7,7 +7,9 @@ import { InvoiceStripeToConvex } from "@/schema/models/invoice";
 import { storeDispatchTyped } from "@/store";
 
 export const InvoicesSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "invoices",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeInvoices !== true) return;
@@ -30,7 +32,7 @@ export const InvoicesSyncImplementation = defineActionImplementation({
     );
 
     const invoices = await stripe.invoices
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripeInvoiceIds = new Set<string>();
@@ -55,6 +57,7 @@ export const InvoicesSyncImplementation = defineActionImplementation({
               id: invoice.id,
               ...invoice,
             }),
+            accountId: args.accountId,
             lastSyncedAt: Date.now(),
           },
         },

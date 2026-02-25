@@ -6,7 +6,9 @@ import { SubscriptionStripeToConvex } from "@/schema/models/subscription";
 import { storeDispatchTyped } from "@/store";
 
 export const SubscriptionsSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "subscriptions",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeSubscriptions !== true) return;
@@ -16,10 +18,13 @@ export const SubscriptionsSyncImplementation = defineActionImplementation({
     });
 
     const subscriptions = await stripe.subscriptions
-      .list({
-        limit: 100,
-        expand: ["data.default_payment_method", "data.customer"],
-      })
+      .list(
+        {
+          limit: 100,
+          expand: ["data.default_payment_method", "data.customer"],
+        },
+        { stripeAccount: args.accountId },
+      )
       .autoPagingToArray({ limit: 10_000 });
 
     for (const subscription of subscriptions) {
@@ -50,6 +55,7 @@ export const SubscriptionsSyncImplementation = defineActionImplementation({
             subscriptionId: subscription.id,
             stripe: SubscriptionStripeToConvex(subscription),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,

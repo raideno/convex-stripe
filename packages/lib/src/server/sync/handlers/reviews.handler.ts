@@ -7,7 +7,9 @@ import { ReviewStripeToConvex } from "@/schema/models/review";
 import { storeDispatchTyped } from "@/store";
 
 export const ReviewsSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "reviews",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeReviews !== true) return;
@@ -30,7 +32,7 @@ export const ReviewsSyncImplementation = defineActionImplementation({
     );
 
     const reviews = await stripe.reviews
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripeReviewIds = new Set<string>();
@@ -48,6 +50,7 @@ export const ReviewsSyncImplementation = defineActionImplementation({
             reviewId: review.id,
             stripe: ReviewStripeToConvex(review),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,

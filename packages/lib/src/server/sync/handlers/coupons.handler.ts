@@ -7,7 +7,9 @@ import { CouponStripeToConvex } from "@/schema/models/coupon";
 import { storeDispatchTyped } from "@/store";
 
 export const CouponsSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "coupons",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeCoupons !== true) return;
@@ -30,7 +32,7 @@ export const CouponsSyncImplementation = defineActionImplementation({
     );
 
     const coupons = await stripe.coupons
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripeCouponIds = new Set<string>();
@@ -48,6 +50,7 @@ export const CouponsSyncImplementation = defineActionImplementation({
             couponId: coupon.id,
             stripe: CouponStripeToConvex(coupon),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,

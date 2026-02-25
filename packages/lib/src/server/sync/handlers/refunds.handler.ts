@@ -7,7 +7,9 @@ import { RefundStripeToConvex } from "@/schema/models/refund";
 import { storeDispatchTyped } from "@/store";
 
 export const RefundsSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "refunds",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeRefunds !== true) return;
@@ -30,7 +32,7 @@ export const RefundsSyncImplementation = defineActionImplementation({
     );
 
     const refunds = await stripe.refunds
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripeRefundIds = new Set<string>();
@@ -48,6 +50,7 @@ export const RefundsSyncImplementation = defineActionImplementation({
             refundId: refund.id,
             stripe: RefundStripeToConvex(refund),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,

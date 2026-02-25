@@ -6,8 +6,11 @@ import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { CapabilityStripeToConvex } from "@/schema/models/capability";
 import { storeDispatchTyped } from "@/store";
 
+// TODO: won't be considering accountId, except for standard account type maybe
 export const CapabilitiesSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "capabilities",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeCapabilities !== true) return;

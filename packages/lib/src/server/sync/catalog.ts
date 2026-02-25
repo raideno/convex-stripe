@@ -148,9 +148,9 @@ const pickExistingPrice = (
   return undefined;
 };
 
-export const SyncPlansAndPricesImplementation = defineActionImplementation({
+export const SyncCatalogImplementation = defineActionImplementation({
   args: v.object({}),
-  name: "syncPlansAndPrices",
+  name: "syncCatalog",
   handler: async (context, args, configuration) => {
     const catalog = configuration.catalog;
     const products = catalog.products || [];

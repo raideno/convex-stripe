@@ -7,7 +7,9 @@ import { PaymentMethodStripeToConvex } from "@/schema/models/payment-method";
 import { storeDispatchTyped } from "@/store";
 
 export const PaymentMethodsSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "paymentMethods",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripePaymentMethods !== true) return;
@@ -30,7 +32,7 @@ export const PaymentMethodsSyncImplementation = defineActionImplementation({
     );
 
     const paymentMethods = await stripe.paymentMethods
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripePaymentMethodIds = new Set<string>();
@@ -48,6 +50,7 @@ export const PaymentMethodsSyncImplementation = defineActionImplementation({
             paymentMethodId: paymentMethod.id,
             stripe: PaymentMethodStripeToConvex(paymentMethod),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,

@@ -5,7 +5,9 @@ import { v } from "convex/values";
 import { defineActionImplementation } from "@/helpers";
 
 export const SyncPortalImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "syncPortal",
   handler: async (context, args, configuration) => {
     const stripe = new Stripe(configuration.stripe.secret_key, {
@@ -17,24 +19,22 @@ export const SyncPortalImplementation = defineActionImplementation({
       .autoPagingToArray({ limit: 10_000 });
 
     const defaultConfiguration = configurations.find(
-      (config) => config.is_default && config.active
+      (config) => config.is_default && config.active,
     );
 
     if (defaultConfiguration) {
       console.info(
-        "[STRIPE SYNC PORTAL] Default configuration already exists."
+        "[STRIPE SYNC PORTAL] Default configuration already exists.",
       );
-      return null;
+      return;
     }
 
     const newConfiguration = await stripe.billingPortal.configurations.create(
-      configuration.portal
+      configuration.portal,
     );
 
     console.info(
-      "[STRIPE SYNC PORTAL](Created) Default billing portal configuration created."
+      "[STRIPE SYNC PORTAL](Created) Default billing portal configuration created.",
     );
-
-    return newConfiguration.id;
   },
 });

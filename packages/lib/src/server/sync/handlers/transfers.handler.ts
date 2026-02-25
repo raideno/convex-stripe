@@ -7,7 +7,9 @@ import { TransferStripeToConvex } from "@/schema/models/transfer";
 import { storeDispatchTyped } from "@/store";
 
 export const TransfersSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "transfers",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeTransfers !== true) return;
@@ -30,7 +32,7 @@ export const TransfersSyncImplementation = defineActionImplementation({
     );
 
     const transfers = await stripe.transfers
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripeTransferIds = new Set<string>();
@@ -48,6 +50,7 @@ export const TransfersSyncImplementation = defineActionImplementation({
             transferId: transfer.id,
             stripe: TransferStripeToConvex(transfer),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,

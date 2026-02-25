@@ -8,7 +8,9 @@ import { storeDispatchTyped } from "@/store";
 
 export const SubscriptionSchedulesSyncImplementation =
   defineActionImplementation({
-    args: v.object({}),
+    args: v.object({
+      accountId: v.optional(v.string()),
+    }),
     name: "subscriptionSchedules",
     handler: async (context, args, configuration, options) => {
       if (configuration.sync.stripeSubscriptionSchedules !== true) return;
@@ -34,13 +36,13 @@ export const SubscriptionSchedulesSyncImplementation =
       );
 
       const subscriptionSchedules = await stripe.subscriptionSchedules
-        .list({ limit: 100 })
+        .list({ limit: 100 }, { stripeAccount: args.accountId })
         .autoPagingToArray({ limit: 10_000 });
 
-      const stripeSubscriptionscheduleIds = new Set<string>();
+      const stripeSubscriptionScheduleIds = new Set<string>();
 
       for (const subscriptionSchedule of subscriptionSchedules) {
-        stripeSubscriptionscheduleIds.add(subscriptionSchedule.id);
+        stripeSubscriptionScheduleIds.add(subscriptionSchedule.id);
 
         await storeDispatchTyped(
           {
@@ -52,6 +54,7 @@ export const SubscriptionSchedulesSyncImplementation =
               subscriptionScheduleId: subscriptionSchedule.id,
               stripe: SubscriptionScheduleStripeToConvex(subscriptionSchedule),
               lastSyncedAt: Date.now(),
+              accountId: args.accountId,
             },
           },
           context,
@@ -63,7 +66,7 @@ export const SubscriptionSchedulesSyncImplementation =
       for (const [
         subscriptionScheduleId,
       ] of localSubscriptionSchedulesById.entries()) {
-        if (!stripeSubscriptionscheduleIds.has(subscriptionScheduleId)) {
+        if (!stripeSubscriptionScheduleIds.has(subscriptionScheduleId)) {
           await storeDispatchTyped(
             {
               operation: "deleteById",

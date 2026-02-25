@@ -7,7 +7,9 @@ import { storeDispatchTyped } from "@/store";
 import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 
 export const ChargesSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "charges",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeCharges !== true) return;
@@ -30,7 +32,7 @@ export const ChargesSyncImplementation = defineActionImplementation({
     );
 
     const charges = await stripe.charges
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripeChargeIds = new Set<string>();
@@ -48,6 +50,7 @@ export const ChargesSyncImplementation = defineActionImplementation({
             chargeId: charge.id,
             stripe: ChargeStripeToConvex(charge),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,

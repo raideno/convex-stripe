@@ -7,7 +7,9 @@ import { DisputeStripeToConvex } from "@/schema/models/dispute";
 import { storeDispatchTyped } from "@/store";
 
 export const DisputesSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "disputes",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeDisputes !== true) return;
@@ -30,7 +32,7 @@ export const DisputesSyncImplementation = defineActionImplementation({
     );
 
     const disputes = await stripe.disputes
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripeDisputeIds = new Set<string>();
@@ -48,6 +50,7 @@ export const DisputesSyncImplementation = defineActionImplementation({
             disputeId: dispute.id,
             stripe: DisputeStripeToConvex(dispute),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,

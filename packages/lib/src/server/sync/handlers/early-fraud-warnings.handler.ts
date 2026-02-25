@@ -7,7 +7,9 @@ import { EarlyFraudWarningStripeToConvex } from "@/schema/models/early-fraud-war
 import { storeDispatchTyped } from "@/store";
 
 export const EarlyFraudWarningsSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "early_fraud_warnings",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeEarlyFraudWarnings !== true) return;
@@ -33,7 +35,7 @@ export const EarlyFraudWarningsSyncImplementation = defineActionImplementation({
     );
 
     const early_fraud_warnings = await stripe.radar.earlyFraudWarnings
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripeEarlyFraudWarningIds = new Set<string>();
@@ -51,6 +53,7 @@ export const EarlyFraudWarningsSyncImplementation = defineActionImplementation({
             earlyFraudWarningId: early_fraud_warning.id,
             stripe: EarlyFraudWarningStripeToConvex(early_fraud_warning),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,

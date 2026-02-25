@@ -7,7 +7,9 @@ import { PriceStripeToConvex } from "@/schema/models/price";
 import { storeDispatchTyped } from "@/store";
 
 export const PricesSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "prices",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripePrices !== true) return;
@@ -30,7 +32,10 @@ export const PricesSyncImplementation = defineActionImplementation({
     );
 
     const prices = await stripe.prices
-      .list({ limit: 100, expand: ["data.product"] })
+      .list(
+        { limit: 100, expand: ["data.product"] },
+        { stripeAccount: args.accountId },
+      )
       .autoPagingToArray({ limit: 10_000 });
 
     const stripePriceIds = new Set<string>();
@@ -48,6 +53,7 @@ export const PricesSyncImplementation = defineActionImplementation({
             priceId: price.id,
             stripe: PriceStripeToConvex(price),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,

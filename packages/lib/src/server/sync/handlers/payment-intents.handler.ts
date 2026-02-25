@@ -7,7 +7,9 @@ import { PaymentIntentStripeToConvex } from "@/schema/models/payment-intent";
 import { storeDispatchTyped } from "@/store";
 
 export const PaymentIntentsSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "paymentIntents",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripePaymentIntents !== true) return;
@@ -30,7 +32,7 @@ export const PaymentIntentsSyncImplementation = defineActionImplementation({
     );
 
     const paymentIntents = await stripe.paymentIntents
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripePaymentIntentIds = new Set<string>();
@@ -48,6 +50,7 @@ export const PaymentIntentsSyncImplementation = defineActionImplementation({
             paymentIntentId: paymentIntent.id,
             stripe: PaymentIntentStripeToConvex(paymentIntent),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,

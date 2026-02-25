@@ -7,7 +7,9 @@ import { CreditNoteStripeToConvex } from "@/schema/models/credit-note";
 import { storeDispatchTyped } from "@/store";
 
 export const CreditNotesSyncImplementation = defineActionImplementation({
-  args: v.object({}),
+  args: v.object({
+    accountId: v.optional(v.string()),
+  }),
   name: "creditNotes",
   handler: async (context, args, configuration, options) => {
     if (configuration.sync.stripeCreditNotes !== true) return;
@@ -30,7 +32,7 @@ export const CreditNotesSyncImplementation = defineActionImplementation({
     );
 
     const creditNotes = await stripe.creditNotes
-      .list({ limit: 100 })
+      .list({ limit: 100 }, { stripeAccount: args.accountId })
       .autoPagingToArray({ limit: 10_000 });
 
     const stripeCreditNoteIds = new Set<string>();
@@ -48,6 +50,7 @@ export const CreditNotesSyncImplementation = defineActionImplementation({
             creditNoteId: creditNote.id,
             stripe: CreditNoteStripeToConvex(creditNote),
             lastSyncedAt: Date.now(),
+            accountId: args.accountId,
           },
         },
         context,
