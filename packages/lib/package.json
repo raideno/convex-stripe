@@ -1,6 +1,6 @@
 {
   "name": "@raideno/convex-stripe",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Easy stripe billing for convex apps.",
   "keywords": [
     "billing",
@@ -12,9 +12,9 @@
   ],
   "files": [
     "dist",
-    "README.md",
-    "../../README.md"
+    "README.md"
   ],
+  "readme": "README.md",
   "exports": {
     "./server": {
       "import": "./dist/server.js",
