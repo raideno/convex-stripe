@@ -2,7 +2,6 @@ import { defineConfig } from "vite";
 
 import dts from "vite-plugin-dts";
 import tsconfigPaths from "vite-tsconfig-paths";
-import compileTime from "vite-plugin-compile-time";
 
 import { visualizer } from "rollup-plugin-visualizer";
 
@@ -37,7 +36,6 @@ export default defineConfig({
       copyDtsFiles: true,
       include: ["src/server/index.ts", "src/server/**/*.ts"],
     }),
-    compileTime(),
     visualizer({
       filename: "stats.local.html",
       gzipSize: true,
