@@ -3,6 +3,7 @@ import { Infer, Validator } from "convex/values";
 import Stripe from "stripe";
 
 import { Logger } from "@/logger";
+import { defineRedirectHandler } from "@/redirects/types";
 import { StripeDataModel, stripeTables } from "@/schema";
 
 export interface InternalOptions {
@@ -115,8 +116,13 @@ export interface InputConfiguration {
    */
   detached?: boolean;
 
-  /** TTL for redirect state (ms). */
-  redirectTtlMs?: number;
+  redirect?: {
+    /** TTL for redirect state (ms). */
+    ttlMs?: number;
+
+    /** Additional handlers for redirect-based flows (e.g. Checkout, OAuth). */
+    handlers?: Array<ReturnType<typeof defineRedirectHandler>>;
+  };
 }
 
 export type InternalConfiguration = RecursiveDeepRequired<InputConfiguration>;

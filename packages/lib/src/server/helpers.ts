@@ -42,7 +42,10 @@ export const DEFAULT_CONFIGURATION: InternalConfiguration = {
     account_webhook_secret: "",
     connect_webhook_secret: "",
   },
-  redirectTtlMs: 15 * 60 * 1000,
+  redirect: {
+    ttlMs: 15 * 60 * 1000,
+    handlers: [],
+  },
   detached: false,
   callbacks: {
     afterChange: async () => {},

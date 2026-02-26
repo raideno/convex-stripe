@@ -33,6 +33,14 @@ import type {
   InternalOptions,
 } from "./types";
 
+import type { RedirectHandler } from "./redirects/types";
+
+export { defineRedirectHandler } from "./redirects/types";
+
+export { RedirectHandler };
+
+export { buildSignedReturnUrl } from "./redirects/index";
+
 export { syncAllTables, syncAllTablesExcept, syncOnlyTables } from "./helpers";
 
 export { stripeTables } from "./schema";

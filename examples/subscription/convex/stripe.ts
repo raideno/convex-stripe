@@ -1,5 +1,6 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import {
+  defineRedirectHandler,
   internalConvexStripe,
   syncAllTables,
 } from "@raideno/convex-stripe/server";
@@ -21,6 +22,17 @@ export const { stripe, store, sync } = internalConvexStripe({
   },
   sync: {
     tables: syncAllTables(),
+  },
+  redirect: {
+    handlers: [
+      defineRedirectHandler({
+        origins: ["testing"] as string[],
+        data: {},
+        handle: async (origin, context, data, configuration, options) => {
+          console.log("testing redirect from", origin);
+        },
+      }),
+    ],
   },
 });
 

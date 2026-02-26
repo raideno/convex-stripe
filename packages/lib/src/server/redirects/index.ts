@@ -138,7 +138,7 @@ export async function buildSignedReturnUrl<O extends ReturnOrigin>({
     data,
     targetUrl,
     failureUrl,
-    exp: Date.now() + configuration.redirectTtlMs,
+    exp: Date.now() + configuration.redirect.ttlMs,
   };
 
   const data_ = toBase64Url(JSON.stringify(payload));
@@ -218,6 +218,8 @@ export const redirectImplementation = async (
   context: GenericActionCtx<StripeDataModel>,
   request: Request,
 ) => {
+  const handlers = [...REDIRECT_HANDLERS, ...configuration.redirect.handlers];
+
   const url = new URL(request.url);
 
   const segments = url.pathname.split("/").filter(Boolean);
@@ -226,7 +228,8 @@ export const redirectImplementation = async (
 
   if (
     !origin_ ||
-    !REDIRECT_HANDLERS.map((handler) => handler.origins)
+    !handlers
+      .map((handler) => handler.origins)
       .flat()
       .includes(origin_ as ReturnOrigin)
   ) {
@@ -291,7 +294,7 @@ export const redirectImplementation = async (
     return new Response("Invalid target", { status: 400 });
   }
 
-  for (const handler of REDIRECT_HANDLERS) {
+  for (const handler of handlers) {
     if (handler.origins.includes(origin as never)) {
       try {
         await handler.handle(
