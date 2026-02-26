@@ -1,7 +1,7 @@
 import { Infer, v } from "convex/values";
 import Stripe from "stripe";
 
-import { metadata, nullablestring, optionalnullableobject } from "@/helpers";
+import { metadata, nullablestring, optionalnullableobject } from "@/schema/validators";
 
 export const SetupIntentStripeToConvex = (setupIntent: Stripe.SetupIntent) => {
   const object: Infer<typeof SetupIntentObject> = {

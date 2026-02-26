@@ -13,6 +13,14 @@ import {
   InternalConfiguration,
   InternalOptions,
 } from "@/types";
+import {
+  metadata,
+  nullableboolean,
+  nullablenumber,
+  nullablestring,
+  optionalany,
+  optionalnullableobject,
+} from "./schema/validators";
 
 export const syncAllTables = () =>
   Object.fromEntries(
@@ -51,7 +59,7 @@ export const DEFAULT_CONFIGURATION: InternalConfiguration = {
   },
   detached: false,
   callbacks: {
-    afterChange: async () => {},
+    afterChange: async () => { },
   },
   sync: {
     catalog: {
@@ -216,11 +224,11 @@ export const defineMutationImplementation = <S extends ArgSchema, R>(spec: {
   ) => R;
 }) => spec;
 
-export const nullablestring = () => v.union(v.string(), v.null());
-export const nullableboolean = () => v.union(v.boolean(), v.null());
-export const nullablenumber = () => v.union(v.number(), v.null());
-export const metadata = () =>
-  v.record(v.string(), v.union(v.string(), v.number(), v.null()));
-export const optionalnullableobject = <T extends ArgSchema>(object: T) =>
-  v.optional(v.union(v.object(object), v.null()));
-export const optionalany = () => v.optional(v.any());
+export {
+  metadata,
+  nullableboolean,
+  nullablenumber,
+  nullablestring,
+  optionalany,
+  optionalnullableobject,
+};

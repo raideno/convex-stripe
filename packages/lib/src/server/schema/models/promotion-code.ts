@@ -1,7 +1,7 @@
 import { Infer, v } from "convex/values";
 import Stripe from "stripe";
 
-import { metadata, nullablenumber } from "@/helpers";
+import { metadata, nullablenumber } from "@/schema/validators";
 
 import { CouponSchema } from "./coupon";
 

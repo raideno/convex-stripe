@@ -1,7 +1,7 @@
 import { Infer, v } from "convex/values";
 import Stripe from "stripe";
 
-import { nullablestring, optionalnullableobject } from "@/helpers";
+import { nullablestring, optionalnullableobject } from "@/schema/validators";
 
 export const TaxIdStripeToConvex = (taxId: Stripe.TaxId) => {
   const object: Infer<typeof TaxIdObject> = {

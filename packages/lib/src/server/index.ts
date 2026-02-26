@@ -41,7 +41,7 @@ export { defineWebhookHandler } from "./webhooks/types";
 
 export { RedirectHandler };
 
-export { buildSignedReturnUrl } from "./redirects/index";
+export { buildSignedReturnUrl, REDIRECT_HANDLERS } from "./redirects/index";
 
 export { syncAllTables, syncAllTablesExcept, syncOnlyTables } from "./helpers";
 

@@ -7,7 +7,7 @@ import {
   nullablenumber,
   nullablestring,
   optionalnullableobject,
-} from "@/helpers";
+} from "@/schema/validators";
 
 export const SubscriptionScheduleStripeToConvex = (
   subscriptionSchedule: Stripe.SubscriptionSchedule

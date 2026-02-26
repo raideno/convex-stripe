@@ -1,7 +1,7 @@
 import { Infer, v } from "convex/values";
 import Stripe from "stripe";
 
-import { nullablestring } from "@/helpers";
+import { nullablestring } from "@/schema/validators";
 
 export const EarlyFraudWarningStripeToConvex = (
   earlyFraudWarning: Stripe.Radar.EarlyFraudWarning

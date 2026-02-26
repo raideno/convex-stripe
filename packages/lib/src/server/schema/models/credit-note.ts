@@ -1,4 +1,4 @@
-import { metadata, nullablenumber, nullablestring } from "@/helpers";
+import { metadata, nullablenumber, nullablestring } from "@/schema/validators";
 import { Infer, v } from "convex/values";
 import Stripe from "stripe";
 

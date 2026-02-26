@@ -1,7 +1,7 @@
 import { Infer, v } from "convex/values";
 import Stripe from "stripe";
 
-import { metadata, nullablestring } from "@/helpers";
+import { metadata, nullablestring } from "@/schema/validators";
 
 export const PaymentMethodStripeToConvex = (
   paymentMethod: Stripe.PaymentMethod

@@ -3,22 +3,59 @@ import { v } from "convex/values";
 import { defineActionImplementation } from "@/helpers";
 import Stripe from "stripe";
 
-const HANDLERS_MODULES = Object.values(
-  import.meta.glob("./handlers/*.handler.ts", {
-    eager: true,
-  }),
-) as unknown as Array<
-  Record<string, ReturnType<typeof defineActionImplementation>>
->;
+import { AccountsSyncImplementation } from "./handlers/accounts.handler";
+import { BillingPortalConfigurationsSyncImplementation } from "./handlers/billing-portal-configurations.handler";
+import { CapabilitiesSyncImplementation } from "./handlers/capabilities.handler";
+import { ChargesSyncImplementation } from "./handlers/charges.handler";
+import { CheckoutSessionsSyncImplementation } from "./handlers/checkout-sessions.handler";
+import { CouponsSyncImplementation } from "./handlers/coupons.handler";
+import { CreditNotesSyncImplementation } from "./handlers/credit-notes.handler";
+import { CustomersSyncImplementation } from "./handlers/customers.handler";
+import { DisputesSyncImplementation } from "./handlers/disputes.handler";
+import { EarlyFraudWarningsSyncImplementation } from "./handlers/early-fraud-warnings.handler";
+import { InvoicesSyncImplementation } from "./handlers/invoices.handler";
+import { PaymentIntentsSyncImplementation } from "./handlers/payment-intents.handler";
+import { PaymentMethodsSyncImplementation } from "./handlers/payment-methods.handler";
+import { PayoutsSyncImplementation } from "./handlers/payouts.handler";
+import { PlansSyncImplementation } from "./handlers/plans.handler";
+import { PricesSyncImplementation } from "./handlers/prices.handler";
+import { ProductsSyncImplementation } from "./handlers/products.handler";
+import { PromotionCodesSyncImplementation } from "./handlers/promotion-codes.handler";
+import { RefundsSyncImplementation } from "./handlers/refunds.handler";
+import { ReviewsSyncImplementation } from "./handlers/reviews.handler";
+import { SetupIntentsSyncImplementation } from "./handlers/setup-intents.handler";
+import { SubscriptionSchedulesSyncImplementation } from "./handlers/subscription-schedules.handler";
+import { SubscriptionsSyncImplementation } from "./handlers/subscriptions.handler";
+import { TaxIdsSyncImplementation } from "./handlers/tax-id.handler";
+import { TransfersSyncImplementation } from "./handlers/transfers.handler";
 
-if (HANDLERS_MODULES.some((handler) => Object.keys(handler).length > 1))
-  throw new Error(
-    "Each sync handler file should only have one export / default export",
-  );
-
-export const SYNC_HANDLERS = HANDLERS_MODULES.map(
-  (exports) => Object.values(exports)[0],
-);
+export const SYNC_HANDLERS = [
+  AccountsSyncImplementation,
+  BillingPortalConfigurationsSyncImplementation,
+  CapabilitiesSyncImplementation,
+  ChargesSyncImplementation,
+  CheckoutSessionsSyncImplementation,
+  CouponsSyncImplementation,
+  CreditNotesSyncImplementation,
+  CustomersSyncImplementation,
+  DisputesSyncImplementation,
+  EarlyFraudWarningsSyncImplementation,
+  InvoicesSyncImplementation,
+  PaymentIntentsSyncImplementation,
+  PaymentMethodsSyncImplementation,
+  PayoutsSyncImplementation,
+  PlansSyncImplementation,
+  PricesSyncImplementation,
+  ProductsSyncImplementation,
+  PromotionCodesSyncImplementation,
+  RefundsSyncImplementation,
+  ReviewsSyncImplementation,
+  SetupIntentsSyncImplementation,
+  SubscriptionSchedulesSyncImplementation,
+  SubscriptionsSyncImplementation,
+  TaxIdsSyncImplementation,
+  TransfersSyncImplementation,
+] as const;
 
 if (
   SYNC_HANDLERS.some(

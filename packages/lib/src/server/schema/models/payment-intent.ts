@@ -6,7 +6,7 @@ import {
   nullablenumber,
   nullablestring,
   optionalnullableobject,
-} from "@/helpers";
+} from "@/schema/validators";
 
 export const PaymentIntentStripeToConvex = (
   intent: Stripe.PaymentIntent

@@ -1,7 +1,7 @@
 import { Infer, v } from "convex/values";
 import Stripe from "stripe";
 
-import { metadata, nullablenumber, nullablestring } from "@/helpers";
+import { metadata, nullablenumber, nullablestring } from "@/schema/validators";
 
 export const PayoutStripeToConvex = (payout: Stripe.Payout) => {
   const object: Infer<typeof PayoutObject> = {

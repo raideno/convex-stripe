@@ -6,7 +6,7 @@ import {
   nullablestring,
   optionalany,
   optionalnullableobject,
-} from "@/helpers";
+} from "@/schema/validators";
 
 export const MandateStripeToConvex = (mandate: Stripe.Mandate) => {
   const object: Infer<typeof MandateObject> = {

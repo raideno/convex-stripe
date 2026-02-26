@@ -32,7 +32,8 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "vite build",
-    "dev": "vite build --watch"
+    "dev": "vite build --watch",
+    "test": "vitest run"
   },
   "type": "module",
   "peerDependencies": {
@@ -48,7 +49,8 @@
     "vite": "^7.1.5",
     "vite-plugin-compile-time": "^0.4.6",
     "vite-plugin-dts": "^4.5.4",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^4.0.18"
   },
   "dependencies": {
     "deepmerge": "^4.3.1"

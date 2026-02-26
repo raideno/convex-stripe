@@ -7,6 +7,9 @@ import compileTime from "vite-plugin-compile-time";
 import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig({
+  test: {
+    globals: true,
+  },
   build: {
     lib: {
       entry: {

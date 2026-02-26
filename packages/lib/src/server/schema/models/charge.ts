@@ -6,7 +6,7 @@ import {
   nullablenumber,
   nullablestring,
   optionalnullableobject,
-} from "@/helpers";
+} from "@/schema/validators";
 
 export const ChargeStripeToConvex = (charge: Stripe.Charge) => {
   const object: Infer<typeof ChargeObject> = {

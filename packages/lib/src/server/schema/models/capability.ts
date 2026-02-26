@@ -1,7 +1,7 @@
 import { Infer, v } from "convex/values";
 import Stripe from "stripe";
 
-import { nullablenumber } from "@/helpers";
+import { nullablenumber } from "@/schema/validators";
 
 export const CapabilityStripeToConvex = (
   capability: Stripe.Capability & { id: string },

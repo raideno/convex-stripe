@@ -3,22 +3,18 @@ import { GenericActionCtx } from "convex/server";
 import { StripeDataModel } from "@/schema";
 import { InferArgs, InternalConfiguration, InternalOptions } from "@/types";
 
-import { defineRedirectHandler, RedirectHandler } from "./types";
+import { CreateAccountReturnImplementation } from "./handlers/create-account-link.handler";
+import { PayReturnImplementation } from "./handlers/pay.handler";
+import { PortalReturnImplementation } from "./handlers/portal.handler";
+import { SubscribeReturnImplementation } from "./handlers/subscribe.handler";
+import { RedirectHandler } from "./types";
 
-const HANDLERS_MODULES = Object.values(
-  import.meta.glob("./handlers/*.handler.ts", {
-    eager: true,
-  }),
-) as unknown as Array<Record<string, ReturnType<typeof defineRedirectHandler>>>;
-
-if (HANDLERS_MODULES.some((handler) => Object.keys(handler).length > 1))
-  throw new Error(
-    "Each redirect handler file should only have one export / default export",
-  );
-
-export const REDIRECT_HANDLERS = HANDLERS_MODULES.map(
-  (exports) => Object.values(exports)[0],
-);
+export const REDIRECT_HANDLERS = [
+  CreateAccountReturnImplementation,
+  PayReturnImplementation,
+  PortalReturnImplementation,
+  SubscribeReturnImplementation,
+] as const;
 
 if (
   REDIRECT_HANDLERS.some(
