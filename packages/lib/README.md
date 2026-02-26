@@ -1,22 +1,73 @@
 # Convex Stripe
 
-Stripe [syncing](./references/tables.md), subscriptions, [checkouts](#-checkout-action) and stripe connect for Convex apps. Implemented according to the best practices listed in [Theo's Stripe Recommendations](https://github.com/t3dotgg/stripe-recommendations).
+Stripe [syncing](./documentation/references/tables.md), subscriptions, [checkouts](#stripesubscribe), one time payments, billing portal and Stripe Connect for Convex apps. Implemented according to the best practices listed in [Theo's Stripe Recommendations](https://github.com/t3dotgg/stripe-recommendations).
+
+## Table of Contents
+
+- [Convex Stripe](#convex-stripe)
+  - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+  - [Usage](#usage)
+    - [1. Set up Stripe](#1-set-up-stripe)
+    - [2. Set Environment Variables on Convex](#2-set-environment-variables-on-convex)
+    - [3. Add Tables](#3-add-tables)
+    - [4. Initialize the Library](#4-initialize-the-library)
+    - [5. Register HTTP Routes](#5-register-http-routes)
+    - [6. Stripe Customers](#6-stripe-customers)
+    - [7. Run the `sync` Action](#7-run-the-sync-action)
+    - [8. Start Building](#8-start-building)
+  - [Configuration](#configuration)
+    - [Stripe Configuration](#stripe-configuration)
+    - [Sync Configuration](#sync-configuration)
+      - [Table Selection](#table-selection)
+      - [Catalog (Unstable)](#catalog-unstable)
+      - [Webhook Configuration](#webhook-configuration)
+      - [Portal Configuration](#portal-configuration)
+    - [Callbacks](#callbacks)
+    - [Custom Webhook Handlers](#custom-webhook-handlers)
+    - [Custom Redirect Handlers](#custom-redirect-handlers)
+      - [`buildSignedReturnUrl`](#buildsignedreturnurl)
+    - [Options](#options)
+  - [Stripe Connect](#stripe-connect)
+    - [0. Enable Connect on your Stripe dashboard.](#0-enable-connect-on-your-stripe-dashboard)
+    - [1. Create a Connect webhook using the `sync` action.](#1-create-a-connect-webhook-using-the-sync-action)
+    - [2. Add the new webhook secret to your Convex environment and configuration.](#2-add-the-new-webhook-secret-to-your-convex-environment-and-configuration)
+    - [3. Create Stripe Accounts for Sellers \& Onboard them](#3-create-stripe-accounts-for-sellers--onboard-them)
+    - [4. Create Products for Sellers](#4-create-products-for-sellers)
+    - [5. Send Payouts](#5-send-payouts)
+  - [API Reference](#api-reference)
+    - [`stripe.customers.create`](#stripecustomerscreate)
+    - [`stripe.subscribe`](#stripesubscribe)
+    - [`stripe.pay`](#stripepay)
+    - [`stripe.portal`](#stripeportal)
+    - [`stripe.accounts.create`](#stripeaccountscreate)
+    - [`stripe.accounts.link`](#stripeaccountslink)
+    - [`stripe.addHttpRoutes`](#stripeaddhttproutes)
+    - [`stripe.client`](#stripeclient)
+    - [`sync` Action](#sync-action)
+    - [`store` Mutation](#store-mutation)
+  - [Synced Tables](#synced-tables)
+  - [Synced Events](#synced-events)
+  - [Best Practices](#best-practices)
+  - [Resources](#resources)
+  - [Development](#development)
+  - [Contributions](#contributions)
 
 ## Installation
 
-```sh [npm]
+```sh
 npm install @raideno/convex-stripe stripe
 ```
 
 ## Usage
 
-### 1. Set up Stripe  
-- Create a Stripe account.  
-- Configure a webhook pointing to:  
+### 1. Set up Stripe
+- Create a Stripe account.
+- Configure a webhook endpoint pointing to:
   ```
   https://<your-convex-app>.convex.site/stripe/webhook
   ```
-- Enable the following [Stripe Events](./references/events.md).  
+- Enable the required [Stripe Events](#synced-events) on the webhook.
 - Enable the [Stripe Billing Portal](https://dashboard.stripe.com/test/settings/billing/portal).
 
 ### 2. Set Environment Variables on Convex
@@ -26,11 +77,19 @@ npx convex env set STRIPE_SECRET_KEY "<secret>"
 npx convex env set STRIPE_ACCOUNT_WEBHOOK_SECRET "<secret>"
 ```
 
-### 3. Add tables.
+If you plan to use Stripe Connect, also set:
 
-Check [Tables Schemas](./references/tables.md) to know more about the synced tables.
+```bash
+npx convex env set STRIPE_CONNECT_WEBHOOK_SECRET "<secret>"
+```
 
-```ts [convex/schema.ts]
+### 3. Add Tables
+
+Spread the `stripeTables` export into your Convex schema. This creates all the [synced tables](#synced-tables) that the library uses to mirror Stripe data locally.
+
+```ts
+// convex/schema.ts
+
 import { defineSchema } from "convex/server";
 import { stripeTables } from "@raideno/convex-stripe/server";
 
@@ -40,7 +99,11 @@ export default defineSchema({
 });
 ```
 
-### 4. Initialize the library
+See [Tables Reference](./documentation/references/tables.md) for the full list of tables and their schemas.
+
+### 4. Initialize the Library
+
+Call `internalConvexStripe` with your Stripe credentials and sync configuration. This returns a `stripe` object with all the action functions, a `store` internal mutation and a `sync` internal action.
 
 ```ts
 // convex/stripe.ts
@@ -56,26 +119,18 @@ export const { stripe, store, sync } = internalConvexStripe({
     tables: syncAllTables(),
   },
 });
-
-export const createCustomer = internalAction({
-  args: {
-    email: v.optional(v.string()),
-    entityId: v.string(),
-  },
-  handler: async (context, args) => {
-    return stripe.customers.create(context, {
-      email: args.email,
-      entityId: args.entityId,
-    });
-  },
-});
-
 ```
 
-> **Note:** All exposed actions (`store`, `sync`) are **internal**. Meaning they can only be called from other convex functions, you can wrap them in public actions when needed.  
-> **Important:** `store` must always be exported, as it is used internally.
+> **Note:** All exposed actions (`store`, `sync`) are **internal**. They can only be called from other Convex functions. Wrap them in public actions when needed.
 
-### 5. Register HTTP routes
+> **Important:** `store` must always be exported from the same file, as it is used internally by the library to persist webhook data.
+
+### 5. Register HTTP Routes
+
+Register the Stripe webhook and redirect routes on your Convex HTTP router. This sets up two routes:
+
+- `POST /stripe/webhook` to receive and verify Stripe webhook events.
+- `GET /stripe/return/*` to handle post-checkout and post-portal redirect flows.
 
 ```ts
 // convex/http.ts
@@ -85,25 +140,21 @@ import { stripe } from "./stripe";
 
 const http = httpRouter();
 
-// registers POST /stripe/webhook
-// registers GET /stripe/return/*
 stripe.addHttpRoutes(http);
 
 export default http;
 ```
 
-### 6. Stripe customers
+### 6. Stripe Customers
 
-Ideally you want to create a stripe customer the moment a new entity (user, organization, etc) is created.
+Create a Stripe customer the moment a new entity (user, organization, etc.) is created in your app. An `entityId` is your app's internal identifier for the thing you are billing. Each entity must be associated with exactly one Stripe customer.
 
-An `entityId` refers to something you are billing. It can be a user, organization or any other thing. With each entity must be associated a stripe customer and the stripe customer can be created using the [`stripe.customers.create` function](#stripecustomerscreate-function).
-
-Below are with different auth providers examples where the user is the entity we are billing.
+The customer can be created using `stripe.customers.create`. Below are examples using different auth providers, where the user is the entity being billed.
 
 ::: code-group
 
 ```ts [convex-auth]
-"convex/auth.ts"
+// convex/auth.ts
 
 // example with convex-auth: https://labs.convex.dev/auth
 
@@ -117,9 +168,6 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
     // NOTE: create a customer immediately after a user is created
     afterUserCreatedOrUpdated: async (context, args) => {
       await context.scheduler.runAfter(0, internal.stripe.createCustomer, {
-        /*
-         * will call stripe.customers.create
-         */
         entityId: args.userId,
         email: args.profile.email,
       });
@@ -129,7 +177,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
 ```
 
 ```ts [better-auth]
-"convex/auth.ts"
+// convex/auth.ts
 
 // example with better-auth: https://convex-better-auth.netlify.app/
 
@@ -137,7 +185,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
 ```
 
 ```ts [clerk]
-"convex/auth.ts"
+// convex/auth.ts
 
 // example with clerk: https://docs.convex.dev/auth/clerk
 
@@ -146,68 +194,14 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
 
 :::
 
-### 7. Run `sync` action
-
-In your convex project's dashboard. Go the **Functions** section and execute the `sync` action.
-
-This is done to sync already existing stripe data into your convex database.
-It must be done in both your development and production deployments after installing or updating the library.
-
-This might not be necessary if you are starting with a fresh empty stripe project.
-
-### 8. Start building 
-
-Now you can use the provided functions to:
-- Generate a subscription or payment link [`stripe.subscribe`](#subscribe-function), [`stripe.pay`](#pay-function) for a given entity.
-- Generate a link to the entity's [`stripe.portal`](#portal-function) to manage their subscriptions.
-- Create stripe connect accounts and link them, [`stripe.accounts.create`](#), [`stripe.accounts.link`](#).
-- Consult the [synced tables](documentation/references/tables.md).
-- Etc.
-
-## Add Stripe Connect
-
-If you wish to also add stripe connect, below is a guide on how to do it. You can find a full example in [`examples/marketplaces/README.md`](examples/marketplace/README.md).
-
-### 0. Enable connect on your stripe dashboard.
-...
-
-### 1. Create a connect webhook using `sync` method.
-...
-
-### 2. Add the new webhook secret to the dashboard and configuration.
-...
-
-### 3. Create Stripe Accounts for Sellers & Onboard them
-...
-
-### 4. Create Products for Sellers
-...
-
-### 5. Send payouts
-...
-
-## References
-
-The library automatically syncs the [following tables](documentation/references/tables.md).
-
-You can query these tables at any time to:
-
-- List available products/plans and prices.
-- Retrieve customers and their `customerId`.
-- Check active subscriptions.
-- Etc.
-
-
-### `stripe.customers.create` Function
-
-Creates or updates a Stripe customer for a given entity (user or organization). Will call [`stripe.customers.create`](https://docs.stripe.com/api/customers/create) under the hood.
-
-This should be called whenever a new entity is created in your app, or when you want to ensure the entity has a Stripe customer associated with it.
+When using the example above, you also need to export the `createCustomer` action from your Stripe file:
 
 ```ts
+// convex/stripe.ts
+
 import { v } from "convex/values";
+import { internalAction } from "./_generated/server";
 import { stripe } from "./stripe";
-import { action, internal } from "./_generated/api";
 
 export const createCustomer = internalAction({
   args: {
@@ -223,67 +217,407 @@ export const createCustomer = internalAction({
 });
 ```
 
-**Notes:**
+### 7. Run the `sync` Action
 
-- `entityId` is your app’s internal ID (user/org).
-- `customerId` is stripe's internal ID.
-- `email` is optional, but recommended so the Stripe customer has a contact email.
-- If the entity already has a Stripe customer, `createEntity` will return the existing one instead of creating a duplicate.
-- Typically, you’ll call this automatically in your user/org creation flow (see [Configuration - 6](#configuration)).
+In your Convex project's dashboard, go to the **Functions** section and execute the `sync` action with `{ tables: true }`.
 
+This syncs already existing Stripe data (products, prices, customers, subscriptions, etc.) into your Convex database. It must be done in both your development and production deployments after installing or updating the library.
 
-### `sync` Action
+This step is not necessary if you are starting with a fresh, empty Stripe account.
 
-Synchronizes Stripe resources with your Convex database.
+### 8. Start Building
 
-This action is typically manually called or setup to be automatically called in your ci/cd pipeline.
+With everything set up, you can now use the provided functions to:
 
-**Parameters:**
+- Create subscription checkout sessions: [`stripe.subscribe`](#stripesubscribe).
+- Create one time payment checkout sessions: [`stripe.pay`](#stripepay).
+- Open the Stripe Billing Portal for an entity: [`stripe.portal`](#stripeportal).
+- Create Stripe Connect accounts: [`stripe.accounts.create`](#stripeaccountscreate).
+- Generate onboarding links for connected accounts: [`stripe.accounts.link`](#stripeaccountslink).
+- Query any of the [synced tables](#synced-tables) directly in your Convex functions.
+
+## Configuration
+
+The `internalConvexStripe` function accepts a configuration object and an optional options object.
+
+```ts
+const { stripe, store, sync } = internalConvexStripe(configuration, options);
+```
+
+### Stripe Configuration
+
+The `stripe` key in the configuration object holds your Stripe credentials and API settings.
+
+| Property                 | Type     | Required | Description                                                                             |
+| :----------------------- | :------- | :------- | :-------------------------------------------------------------------------------------- |
+| `secret_key`             | `string` | Yes      | Your Stripe secret key (starts with `sk_`).                                             |
+| `account_webhook_secret` | `string` | Yes      | The webhook signing secret for account level webhooks (starts with `whsec_`).           |
+| `connect_webhook_secret` | `string` | No       | The webhook signing secret for Stripe Connect webhooks. Required only if using Connect. |
+| `version`                | `string` | No       | Stripe API version to pin against. Defaults to `2025-08-27.basil`.                      |
+
+### Sync Configuration
+
+The `sync` key controls which tables are synced and allows you to define catalog items, webhook endpoints, and billing portal configuration.
+
+#### Table Selection
+
+Three helper functions are provided to control which Stripe tables are synced into Convex:
+
+```ts
+import {
+  syncAllTables,
+  syncAllTablesExcept,
+  syncOnlyTables,
+} from "@raideno/convex-stripe/server";
+
+// Sync all 24 tables (default)
+{ tables: syncAllTables() }
+
+// Sync all tables except specific ones
+{ tables: syncAllTablesExcept(["stripeReviews", "stripePlans"]) }
+
+// Sync only specific tables
+{ tables: syncOnlyTables(["stripeCustomers", "stripeSubscriptions", "stripeProducts", "stripePrices"]) }
+```
+
+All 24 available tables are listed in the [Synced Tables](#synced-tables) section.
+
+#### Catalog (Unstable)
+
+The `sync.catalog` key lets you pre-define products and prices that should exist in Stripe. When the `sync` action is called with `{ catalog: true }`, the library ensures these objects exist in your Stripe account.
+
+```ts
+internalConvexStripe({
+  // ...
+  sync: {
+    tables: syncAllTables(),
+    catalog: {
+      products: [
+        { name: "Pro Plan", metadata: { convex_stripe_key: "pro" } },
+      ],
+      prices: [
+        {
+          currency: "usd",
+          unit_amount: 1999,
+          recurring: { interval: "month" },
+          product_data: { name: "Pro Plan", metadata: { convex_stripe_key: "pro" } },
+          metadata: { convex_stripe_key: "pro-monthly" },
+        },
+      ],
+      metadataKey: "convex_stripe_key", // default
+      behavior: {
+        onExisting: "update",   // "update" | "archive_and_recreate" | "skip" | "error"
+        onMissingKey: "create", // "create" | "error"
+      },
+    },
+  },
+});
+```
+
+#### Webhook Configuration
+
+The `sync.webhooks` key lets you customize the metadata and description of the webhook endpoints that the library creates when you call `sync` with `{ webhooks: { account: true } }` or `{ webhooks: { connect: true } }`.
 
 ```ts
 {
-  data?: boolean | { withConnect: boolean };
-  webhook?: { account?: boolean; connect?: boolean };
-  portal?: boolean;
-  unstable_catalog?: boolean;
+  sync: {
+    webhooks: {
+      account: {
+        description: "My App - Account Webhook",
+        metadata: { app: "my-app" },
+      },
+      connect: {
+        description: "My App - Connect Webhook",
+        metadata: { app: "my-app" },
+      },
+    },
+  },
 }
 ```
 
-- `tables` (optional, default: `true`): Syncs all existing Stripe resources to Convex tables.
-- `tables.withConnect` (option, default: `false`): Syncs all existing Stripe resources from linked accounts to Convex tables.
-- `webhook.account` (optional, default: `false`): Creates/updates the account webhook endpoint. Returns the webhook secret if a new endpoint is created. You must set it in your convex environment variables as `STRIPE_ACCOUNT_WEBHOOK_SECRET`.
-- `webhook.connect` (optional, default: `false`): Creates/updates the connect webhook endpoint. Returns the webhook secret if a new endpoint is created. You must set it in your convex environment variables as `STRIPE_CONNECT_WEBHOOK_SECRET`.
-- `portal` (optional, default: `false`): Creates the default billing portal configuration if it doesn't exist.
-- `unstable_catalog` (optional, default: `false`): Creates the default provided products and prices passed in the configuration.
+#### Portal Configuration
 
-### `stripe.subscribe` Function
+The `sync.portal` key accepts a `Stripe.BillingPortal.ConfigurationCreateParams` object. When `sync` is called with `{ portal: true }`, the library creates the billing portal configuration if it does not already exist.
 
-Creates a Stripe Subscription Checkout session for a given entity. Will call [`stripe.checkout.sessions.create`](https://docs.stripe.com/api/checkout/sessions/create) under the hood, the same parameters can be passed.
+### Callbacks
+
+The `callbacks.afterChange` function is called every time a row is inserted, upserted, or deleted in any of the synced Stripe tables. This is useful for triggering side effects when Stripe data changes.
 
 ```ts
+internalConvexStripe({
+  // ...
+  callbacks: {
+    afterChange: async (context, operation, event) => {
+      // operation: "upsert" | "delete" | "insert"
+      // event.table: the name of the table that changed (e.g. "stripeSubscriptions")
+      console.log(`Stripe data changed: ${operation} on ${event.table}`);
+    },
+  },
+});
+```
+
+### Custom Webhook Handlers
+
+You can register additional webhook handlers to react to specific Stripe events beyond the default syncing behavior. Use `defineWebhookHandler` to create a handler:
+
+```ts
+import { defineWebhookHandler } from "@raideno/convex-stripe/server";
+
+const myHandler = defineWebhookHandler({
+  events: ["invoice.payment_succeeded"],
+  handle: async (event, context, configuration, options) => {
+    // react to the event
+  },
+});
+
+internalConvexStripe({
+  // ...
+  webhook: {
+    handlers: [myHandler],
+  },
+});
+```
+
+### Custom Redirect Handlers
+
+Redirect handlers let you run custom logic when a user is redirected back from Stripe (after a checkout, portal session, or account link flow). Use `defineRedirectHandler` to create one:
+
+```ts
+import { defineRedirectHandler } from "@raideno/convex-stripe/server";
+
+const myRedirectHandler = defineRedirectHandler({
+  origins: ["subscribe-success", "pay-success"],
+  handle: async (origin, context, data, configuration, options) => {
+    // run custom logic after a successful payment or subscription
+  },
+});
+
+internalConvexStripe({
+  // ...
+  redirect: {
+    ttlMs: 15 * 60 * 1000, // default: 15 minutes
+    handlers: [myRedirectHandler],
+  },
+});
+```
+
+The available redirect origins are:
+
+| Origin                        | Trigger                                           |
+| :---------------------------- | :------------------------------------------------ |
+| `subscribe-success`           | User completed a subscription checkout.           |
+| `subscribe-cancel`            | User cancelled a subscription checkout.           |
+| `pay-success`                 | User completed a one time payment checkout.       |
+| `pay-cancel`                  | User cancelled a one time payment checkout.       |
+| `portal-return`               | User returned from the billing portal.            |
+| `create-account-link-return`  | Connected account completed onboarding.           |
+| `create-account-link-refresh` | Connected account link expired and needs refresh. |
+
+#### `buildSignedReturnUrl`
+
+The library also exports a `buildSignedReturnUrl` utility that you can use to manually build signed redirect URLs. This is the same function used internally by `stripe.subscribe`, `stripe.pay`, `stripe.portal`, and `stripe.accounts.link` to generate their `success_url`, `cancel_url`, and `return_url` values.
+
+Each signed URL points to `GET /stripe/return/<origin>` on your Convex backend, carries an HMAC-SHA256 signature derived from your `account_webhook_secret`, and expires after the configured `redirect.ttlMs` (default: 15 minutes). When the user hits the URL, the library verifies the signature, checks expiry, runs any matching redirect handler, and then issues a 302 redirect to the `targetUrl` you specified. If verification fails or the link has expired, the user is redirected to your `failureUrl` instead (if provided).
+
+```ts
+import { buildSignedReturnUrl } from "@raideno/convex-stripe/server";
+
+const url = await buildSignedReturnUrl({
+  configuration,         // your InternalConfiguration object
+  origin: "pay-success", // one of the redirect origins listed above
+  targetUrl: "https://example.com/payments/success",
+  failureUrl: "https://example.com/payments/error", // optional
+  data: {
+    entityId: "user_123",
+    referenceId: "order_456",
+    // data fields depend on the origin
+  },
+});
+```
+
+You typically do not need to call this function directly, as the built-in actions already handle URL signing for you. It is useful when building custom checkout or redirect flows outside of the provided actions.
+
+### Options
+
+The second argument to `internalConvexStripe` is an optional options object.
+
+```ts
+const { stripe, store, sync } = internalConvexStripe(configuration, {
+  debug: true,   // enable debug logging
+  base: "stripe", // base path for HTTP routes (default: "stripe")
+  store: "store", // name of the store mutation export (default: "store")
+});
+```
+
+## Stripe Connect
+
+If you want to build a marketplace or platform with Stripe Connect, follow these additional steps after completing the [Usage](#usage) setup.
+
+### 0. Enable Connect on your Stripe dashboard.
+
+Go to the [Stripe Connect settings](https://dashboard.stripe.com/test/settings/connect) and enable Connect for your account.
+
+### 1. Create a Connect webhook using the `sync` action.
+
+Run the `sync` action from your Convex dashboard with the following arguments:
+
+```json
+{
+  "tables": true,
+  "webhooks": {
+    "connect": true
+  }
+}
+```
+
+This creates a Connect webhook endpoint on your Stripe account. The webhook secret will be printed in the Convex function logs.
+
+### 2. Add the new webhook secret to your Convex environment and configuration.
+
+Set the Connect webhook secret as an environment variable:
+
+```bash
+npx convex env set STRIPE_CONNECT_WEBHOOK_SECRET "<secret>"
+```
+
+Then update your configuration to include it:
+
+```ts
+// convex/stripe.ts
+
+export const { stripe, store, sync } = internalConvexStripe({
+  stripe: {
+    secret_key: process.env.STRIPE_SECRET_KEY!,
+    account_webhook_secret: process.env.STRIPE_ACCOUNT_WEBHOOK_SECRET!,
+    connect_webhook_secret: process.env.STRIPE_CONNECT_WEBHOOK_SECRET!,
+  },
+  sync: {
+    tables: syncAllTables(),
+  },
+});
+```
+
+### 3. Create Stripe Accounts for Sellers & Onboard them
+
+Create a connected account for each seller and generate an onboarding link:
+
+```ts
+// convex/connect.ts
+
 import { v } from "convex/values";
-
+import { action } from "./_generated/server";
 import { stripe } from "./stripe";
-import { action, internal } from "./_generated/api";
 
-export const createCheckout = action({
+export const createSellerAccount = action({
+  args: { entityId: v.string(), email: v.string() },
+  handler: async (context, args) => {
+    // create the connected account
+    const account = await stripe.accounts.create(context, {
+      entityId: args.entityId,
+      email: args.email,
+      controller: {
+        fees: { payer: "application" },
+        losses: { payments: "application" },
+        stripe_dashboard: { type: "express" },
+      },
+    });
+
+    // generate the onboarding link
+    const link = await stripe.accounts.link(context, {
+      account: account.accountId,
+      refresh_url: "http://localhost:3000/connect/refresh",
+      return_url: "http://localhost:3000/connect/return",
+      type: "account_onboarding",
+      collection_options: { fields: "eventually_due" },
+    });
+
+    return link.url;
+  },
+});
+```
+
+### 4. Create Products for Sellers
+
+Create products and prices on connected accounts by passing `stripeAccount` in the Stripe request options:
+
+```ts
+const product = await stripe.client.products.create(
+  { name: "Widget", default_price_data: { currency: "usd", unit_amount: 1000 } },
+  { stripeAccount: account.accountId },
+);
+```
+
+### 5. Send Payouts
+
+Payouts to connected accounts are handled by Stripe automatically based on your Connect payout schedule. You can also create manual transfers using the `stripe.client`:
+
+```ts
+const transfer = await stripe.client.transfers.create({
+  amount: 1000,
+  currency: "usd",
+  destination: account.accountId,
+});
+```
+
+## API Reference
+
+### `stripe.customers.create`
+
+Creates or retrieves a Stripe customer for a given entity. If the entity already has a Stripe customer associated with it, the existing customer is returned instead of creating a duplicate.
+
+This should be called whenever a new entity is created in your app. See [Stripe Customers](#6-stripe-customers) for integration examples.
+
+**Parameters:**
+
+| Parameter  | Type     | Required | Description                                                 |
+| :--------- | :------- | :------- | :---------------------------------------------------------- |
+| `entityId` | `string` | Yes      | Your app's internal identifier for the entity being billed. |
+| `email`    | `string` | No       | Email address for the Stripe customer. Recommended.         |
+| `metadata` | `object` | No       | Additional metadata to attach to the Stripe customer.       |
+
+All other parameters from [`Stripe.CustomerCreateParams`](https://docs.stripe.com/api/customers/create) are also accepted.
+
+**Returns:** The Stripe customer document from your Convex database.
+
+```ts
+const customer = await stripe.customers.create(context, {
+  entityId: args.entityId,
+  email: args.email,
+});
+```
+
+### `stripe.subscribe`
+
+Creates a Stripe Checkout session in `subscription` mode. Calls [`stripe.checkout.sessions.create`](https://docs.stripe.com/api/checkout/sessions/create) under the hood.
+
+**Parameters:**
+
+| Parameter                       | Type             | Required | Description                                                                                        |
+| :------------------------------ | :--------------- | :------- | :------------------------------------------------------------------------------------------------- |
+| `entityId`                      | `string`         | Yes      | Your app's internal identifier for the entity subscribing.                                         |
+| `priceId`                       | `string`         | Yes      | The Stripe Price ID for the subscription.                                                          |
+| `mode`                          | `"subscription"` | Yes      | Must be `"subscription"`.                                                                          |
+| `success_url`                   | `string`         | Yes      | URL to redirect to after a successful checkout.                                                    |
+| `cancel_url`                    | `string`         | Yes      | URL to redirect to if the user cancels.                                                            |
+| `failure_url`                   | `string`         | No       | URL to redirect to if the redirect signing fails.                                                  |
+| `createStripeCustomerIfMissing` | `boolean`        | No       | If `true` (default), creates a Stripe customer automatically if one does not exist for the entity. |
+
+All other parameters from [`Stripe.Checkout.SessionCreateParams`](https://docs.stripe.com/api/checkout/sessions/create) (except `customer`, `ui_mode`, `mode`, `line_items`, `client_reference_id`, `success_url`, `cancel_url`) are also accepted.
+
+An optional third argument accepts [`Stripe.RequestOptions`](https://docs.stripe.com/api/request_options) (e.g. `stripeAccount` for Connect).
+
+**Returns:** A [`Stripe.Checkout.Session`](https://docs.stripe.com/api/checkout/sessions/object). Use the `url` property to redirect the user.
+
+```ts
+export const createSubscription = action({
   args: { entityId: v.string(), priceId: v.string() },
   handler: async (context, args) => {
-    // TODO: add your own auth/authorization logic here
-
     const response = await stripe.subscribe(context, {
       entityId: args.entityId,
       priceId: args.priceId,
       mode: "subscription",
-      success_url: "http://localhost:3000/payments/success",
-      cancel_url: "http://localhost:3000/payments/cancel",
-      /*
-       * Other parameters from stripe.checkout.sessions.create(...)
-       */
-    }, {
-      /*
-       * Optional Stripe Request Options
-       */
+      success_url: "https://example.com/payments/success",
+      cancel_url: "https://example.com/payments/cancel",
     });
 
     return response.url;
@@ -291,68 +625,40 @@ export const createCheckout = action({
 });
 ```
 
+### `stripe.pay`
 
-### `stripe.portal` Function
+Creates a Stripe Checkout session in `payment` mode for one time payments. Calls [`stripe.checkout.sessions.create`](https://docs.stripe.com/api/checkout/sessions/create) under the hood.
 
-Allows an entity to manage their subscription via the Stripe Portal. Will call [`stripe.billingPortal.sessions.create`](https://docs.stripe.com/api/customer_portal/sessions/create) under the hood, the same parameters can be passed.
+**Parameters:**
 
-```ts
-import { v } from "convex/values";
+| Parameter                       | Type        | Required | Description                                                                                                               |
+| :------------------------------ | :---------- | :------- | :------------------------------------------------------------------------------------------------------------------------ |
+| `entityId`                      | `string`    | Yes      | Your app's internal identifier for the entity making the payment.                                                         |
+| `referenceId`                   | `string`    | Yes      | Your app's reference ID for this payment (e.g. an order ID). Stored as the `client_reference_id` on the checkout session. |
+| `mode`                          | `"payment"` | Yes      | Must be `"payment"`.                                                                                                      |
+| `line_items`                    | `array`     | Yes      | The line items for the checkout session (price, quantity, etc.).                                                          |
+| `success_url`                   | `string`    | Yes      | URL to redirect to after a successful payment.                                                                            |
+| `cancel_url`                    | `string`    | Yes      | URL to redirect to if the user cancels.                                                                                   |
+| `failure_url`                   | `string`    | No       | URL to redirect to if the redirect signing fails.                                                                         |
+| `createStripeCustomerIfMissing` | `boolean`   | No       | If `true` (default), creates a Stripe customer automatically if one does not exist for the entity.                        |
 
-import { stripe } from "./stripe";
-import { action, internal } from "./_generated/api";
+All other parameters from [`Stripe.Checkout.SessionCreateParams`](https://docs.stripe.com/api/checkout/sessions/create) (except `customer`, `ui_mode`, `mode`, `client_reference_id`, `success_url`, `cancel_url`) are also accepted.
 
-export const portal = action({
-  args: { entityId: v.string() },
-  handler: async (context, args) => {
-    const response = await stripe.portal(context, {
-      entityId: args.entityId,
-      returnUrl: "http://localhost:3000/return-from-portal",
-      /*
-       * Other parameters from stripe.billingPortal.sessions.create(...)
-       */
-    }, {
-      /*
-       * Optional Stripe Request Options
-       */
-    });
+An optional third argument accepts [`Stripe.RequestOptions`](https://docs.stripe.com/api/request_options).
 
-    return response.url;
-  },
-});
-```
-The provided entityId must have a customerId associated to it otherwise the action will throw an error.
-
-
-### `stripe.pay` Function
-
-Creates a Stripe One Time Payment Checkout session for a given entity. Will call [`stripe.checkout.sessions.create`](https://docs.stripe.com/api/checkout/sessions/create) under the hood, the same parameters can be passed.
+**Returns:** A [`Stripe.Checkout.Session`](https://docs.stripe.com/api/checkout/sessions/object). Use the `url` property to redirect the user.
 
 ```ts
-import { v } from "convex/values";
-
-import { stripe } from "./stripe";
-import { action, internal } from "./_generated/api";
-
-export const pay = action({
+export const createPayment = action({
   args: { entityId: v.string(), orderId: v.string(), priceId: v.string() },
   handler: async (context, args) => {
-    // Add your own auth/authorization logic here
-
     const response = await stripe.pay(context, {
       referenceId: args.orderId,
       entityId: args.entityId,
       mode: "payment",
       line_items: [{ price: args.priceId, quantity: 1 }],
-      success_url: `${process.env.SITE_URL}/?return-from-pay=success`,
-      cancel_url: `${process.env.SITE_URL}/?return-from-pay=cancel`,
-      /*
-       * Other parameters from stripe.checkout.sessions.create(...)
-       */
-    }, {
-      /*
-       * Optional Stripe Request Options
-       */
+      success_url: `${process.env.SITE_URL}/payments/success`,
+      cancel_url: `${process.env.SITE_URL}/payments/cancel`,
     });
 
     return response.url;
@@ -360,22 +666,219 @@ export const pay = action({
 });
 ```
 
+### `stripe.portal`
+
+Opens a Stripe Billing Portal session for an existing customer. Allows users to manage their subscriptions, invoices, and payment methods. Calls [`stripe.billingPortal.sessions.create`](https://docs.stripe.com/api/customer_portal/sessions/create) under the hood.
+
+**Parameters:**
+
+| Parameter                       | Type      | Required | Description                                                                                        |
+| :------------------------------ | :-------- | :------- | :------------------------------------------------------------------------------------------------- |
+| `entityId`                      | `string`  | Yes      | Your app's internal identifier for the entity.                                                     |
+| `return_url`                    | `string`  | Yes      | URL to redirect to when the user leaves the portal.                                                |
+| `failure_url`                   | `string`  | No       | URL to redirect to if the redirect signing fails.                                                  |
+| `createStripeCustomerIfMissing` | `boolean` | No       | If `true` (default), creates a Stripe customer automatically if one does not exist for the entity. |
+
+All other parameters from [`Stripe.BillingPortal.SessionCreateParams`](https://docs.stripe.com/api/customer_portal/sessions/create) (except `customer` and `return_url`) are also accepted.
+
+An optional third argument accepts [`Stripe.RequestOptions`](https://docs.stripe.com/api/request_options).
+
+**Returns:** A [`Stripe.BillingPortal.Session`](https://docs.stripe.com/api/customer_portal/sessions/object). Use the `url` property to redirect the user.
+
+```ts
+export const openPortal = action({
+  args: { entityId: v.string() },
+  handler: async (context, args) => {
+    const response = await stripe.portal(context, {
+      entityId: args.entityId,
+      return_url: "https://example.com/account",
+    });
+
+    return response.url;
+  },
+});
+```
+
+### `stripe.accounts.create`
+
+Creates a new Stripe Connect account and stores it in your Convex database. If an account already exists for the given entity, the existing account is returned.
+
+**Parameters:**
+
+| Parameter  | Type     | Required | Description                                                    |
+| :--------- | :------- | :------- | :------------------------------------------------------------- |
+| `entityId` | `string` | Yes      | Your app's internal identifier for the seller/platform entity. |
+
+All other parameters from [`Stripe.AccountCreateParams`](https://docs.stripe.com/api/accounts/create) (except `type`) are also accepted.
+
+An optional third argument accepts [`Stripe.RequestOptions`](https://docs.stripe.com/api/request_options).
+
+**Returns:** The Stripe account document from your Convex database.
+
+```ts
+const account = await stripe.accounts.create(context, {
+  entityId: args.entityId,
+  email: args.email,
+  controller: {
+    fees: { payer: "application" },
+    losses: { payments: "application" },
+    stripe_dashboard: { type: "express" },
+  },
+});
+```
+
+### `stripe.accounts.link`
+
+Creates a Stripe Connect Account Link for onboarding. Redirects the connected account holder to Stripe's hosted onboarding flow.
+
+**Parameters:**
+
+| Parameter     | Type     | Required | Description                                         |
+| :------------ | :------- | :------- | :-------------------------------------------------- |
+| `account`     | `string` | Yes      | The Stripe Account ID to onboard (e.g. `acct_...`). |
+| `refresh_url` | `string` | Yes      | URL to redirect to if the link expires.             |
+| `return_url`  | `string` | Yes      | URL to redirect to after onboarding is complete.    |
+| `failure_url` | `string` | No       | URL to redirect to if the redirect signing fails.   |
+
+All other parameters from [`Stripe.AccountLinkCreateParams`](https://docs.stripe.com/api/account_links/create) (except `refresh_url` and `return_url`) are also accepted.
+
+An optional third argument accepts [`Stripe.RequestOptions`](https://docs.stripe.com/api/request_options).
+
+**Returns:** A [`Stripe.AccountLink`](https://docs.stripe.com/api/account_links/object). Use the `url` property to redirect the user.
+
+```ts
+const link = await stripe.accounts.link(context, {
+  account: account.accountId,
+  refresh_url: "https://example.com/connect/refresh",
+  return_url: "https://example.com/connect/return",
+  type: "account_onboarding",
+  collection_options: { fields: "eventually_due" },
+});
+```
+
+### `stripe.addHttpRoutes`
+
+Registers the Stripe webhook and redirect routes on your Convex HTTP router. Call this inside your `convex/http.ts` file.
+
+Registers two routes:
+- `POST /stripe/webhook` receives and verifies Stripe webhook events.
+- `GET /stripe/return/*` handles post-checkout and post-portal redirect flows.
+
+```ts
+const http = httpRouter();
+stripe.addHttpRoutes(http);
+export default http;
+```
+
+### `stripe.client`
+
+A pre-configured [Stripe SDK](https://docs.stripe.com/api) client using your `secret_key` and API `version`. Use this for any Stripe API call not covered by the library's built-in functions.
+
+```ts
+const product = await stripe.client.products.create({
+  name: "New Product",
+  default_price_data: { currency: "usd", unit_amount: 999 },
+});
+```
+
+### `sync` Action
+
+An internal action that synchronizes Stripe resources with your Convex database.
+
+This action is typically called manually from the Convex dashboard, or set up to be called automatically in your CI/CD pipeline on each deployment.
+
+**Parameters:**
+
+| Parameter  | Type                                       | Required | Description                                                                                                                                                                                                                          |
+| :--------- | :----------------------------------------- | :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tables`   | `boolean \| { withConnect: boolean }`      | Yes      | If `true`, syncs all existing Stripe resources to Convex tables. If an object with `withConnect: true`, also syncs resources from linked connected accounts.                                                                         |
+| `webhooks` | `{ account?: boolean, connect?: boolean }` | No       | If `account` is `true`, creates or updates the account webhook endpoint. If `connect` is `true`, creates or updates the Connect webhook endpoint. The webhook secret is printed to the function logs when a new endpoint is created. |
+| `portal`   | `boolean`                                  | No       | If `true`, creates the default billing portal configuration if it does not already exist.                                                                                                                                            |
+| `catalog`  | `boolean`                                  | No       | If `true`, creates or updates the products and prices defined in your `sync.catalog` configuration.                                                                                                                                  |
+
+### `store` Mutation
+
+An internal mutation that persists Stripe objects into your Convex database. This is called automatically from within the webhook handler and is not meant for direct use. It must be exported from the same file as your `internalConvexStripe` call.
+
+## Synced Tables
+
+The library automatically syncs the following 24 Stripe resource types into your Convex database:
+
+| Table                               | ID Field                       | Description                   |
+| :---------------------------------- | :----------------------------- | :---------------------------- |
+| `stripeAccounts`                    | `accountId`                    | Connected accounts            |
+| `stripeProducts`                    | `productId`                    | Products                      |
+| `stripePrices`                      | `priceId`                      | Prices                        |
+| `stripeCustomers`                   | `customerId`                   | Customers                     |
+| `stripeSubscriptions`               | `subscriptionId`               | Subscriptions                 |
+| `stripeCoupons`                     | `couponId`                     | Coupons                       |
+| `stripePromotionCodes`              | `promotionCodeId`              | Promotion codes               |
+| `stripePayouts`                     | `payoutId`                     | Payouts                       |
+| `stripeRefunds`                     | `refundId`                     | Refunds                       |
+| `stripePaymentIntents`              | `paymentIntentId`              | Payment intents               |
+| `stripeCheckoutSessions`            | `checkoutSessionId`            | Checkout sessions             |
+| `stripeInvoices`                    | `invoiceId`                    | Invoices                      |
+| `stripeReviews`                     | `reviewId`                     | Reviews                       |
+| `stripePlans`                       | `planId`                       | Plans                         |
+| `stripeDisputes`                    | `disputeId`                    | Disputes                      |
+| `stripeEarlyFraudWarnings`          | `earlyFraudWarningId`          | Early fraud warnings          |
+| `stripeTaxIds`                      | `taxIdId`                      | Tax IDs                       |
+| `stripeSetupIntents`                | `setupIntentId`                | Setup intents                 |
+| `stripeCreditNotes`                 | `creditNoteId`                 | Credit notes                  |
+| `stripeCharges`                     | `chargeId`                     | Charges                       |
+| `stripePaymentMethods`              | `paymentMethodId`              | Payment methods               |
+| `stripeSubscriptionSchedules`       | `subscriptionScheduleId`       | Subscription schedules        |
+| `stripeMandates`                    | `mandateId`                    | Mandates                      |
+| `stripeBillingPortalConfigurations` | `billingPortalConfigurationId` | Billing portal configurations |
+| `stripeTransfers`                   | `transferId`                   | Transfers                     |
+| `stripeCapabilities`                | `capabilityId`                 | Capabilities                  |
+
+Each table stores the full Stripe object in a `stripe` field and includes a `lastSyncedAt` timestamp. All tables have a `byStripeId` index on their ID field. Tables with an `accountId` field also have a `byAccountId` index for filtering by connected account.
+
+For the full schema of each table, see [Tables Reference](./documentation/references/tables.md).
+
+## Synced Events
+
+The library handles a large number of Stripe webhook events to keep your local data in sync. Below is a summary by resource type. For the full list, see [Events Reference](./documentation/references/events.md).
+
+| Resource               | Events                                                                                     |
+| :--------------------- | :----------------------------------------------------------------------------------------- |
+| Subscriptions          | `customer.subscription.created`, `updated`, `deleted`, `paused`, `resumed`, etc.           |
+| Checkout Sessions      | `checkout.session.completed`, `expired`, `async_payment_succeeded`, `async_payment_failed` |
+| Customers              | `customer.created`, `updated`, `deleted`                                                   |
+| Invoices               | `invoice.created`, `paid`, `payment_failed`, `finalized`, `voided`, etc.                   |
+| Payment Intents        | `payment_intent.created`, `succeeded`, `canceled`, `payment_failed`, etc.                  |
+| Products               | `product.created`, `updated`, `deleted`                                                    |
+| Prices                 | `price.created`, `updated`, `deleted`                                                      |
+| Charges                | `charge.captured`, `succeeded`, `failed`, `refunded`, etc.                                 |
+| Refunds                | `refund.created`, `updated`, `failed`                                                      |
+| Payouts                | `payout.created`, `paid`, `failed`, `canceled`, etc.                                       |
+| Disputes               | `charge.dispute.created`, `updated`, `closed`, etc.                                        |
+| Payment Methods        | `payment_method.attached`, `detached`, `updated`, etc.                                     |
+| Setup Intents          | `setup_intent.created`, `succeeded`, `canceled`, `setup_failed`, etc.                      |
+| Coupons                | `coupon.created`, `updated`, `deleted`                                                     |
+| Promotion Codes        | `promotion_code.created`, `updated`                                                        |
+| Credit Notes           | `credit_note.created`, `updated`, `voided`                                                 |
+| Reviews                | `review.opened`, `closed`                                                                  |
+| Plans                  | `plan.created`, `updated`, `deleted`                                                       |
+| Tax IDs                | `customer.tax_id.created`, `updated`, `deleted`                                            |
+| Early Fraud Warnings   | `radar.early_fraud_warning.created`, `updated`                                             |
+| Subscription Schedules | `subscription_schedule.created`, `updated`, `canceled`, `completed`, etc.                  |
 
 ## Best Practices
 
-- Always create a Stripe customer (`stripe.customers.create`) when a new entity is created.  
-- Use `metadata` or `marketing_features` on products to store feature flags or limits.  
-- Run `sync` when you first configure the extension to sync already existing stripe resources.  
-- Never expose internal actions directly to clients, wrap them in public actions with proper authorization.
-
+- Always create a Stripe customer (`stripe.customers.create`) the moment a new entity is created in your app. This ensures every user or organization has a Stripe customer ready for billing.
+- Use `metadata` or `marketing_features` on Stripe products to store feature flags or usage limits. You can then query the synced `stripeProducts` table to check entitlements.
+- Run the `sync` action when you first configure the library, and after each deployment, to ensure your local database is up to date with Stripe.
+- Never expose internal actions directly to clients. Always wrap them in public actions with proper authentication and authorization checks.
+- Keep your webhook secrets secure. Never commit them to source control. Always use Convex environment variables.
 
 ## Resources
 
-- [Convex Documentation](https://docs.convex.dev)  
-- [Stripe Documentation](https://stripe.com/docs)  
+- [Convex Documentation](https://docs.convex.dev)
+- [Stripe Documentation](https://stripe.com/docs)
 - [GitHub Repository](https://github.com/raideno/convex-stripe)
 - [Theo's Stripe Recommendations](https://github.com/t3dotgg/stripe-recommendations)
-
 
 ## Development
 
@@ -403,4 +906,4 @@ npm run dev --workspace demo
 
 ## Contributions
 
-All contributions are welcome! Please open an issue or a PR.
+All contributions are welcome. Please open an issue or a pull request.
