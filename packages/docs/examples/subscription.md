@@ -1,3 +1,0 @@
-# Subscription Example
-
-TODO: complete

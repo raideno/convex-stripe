@@ -12,8 +12,9 @@
   ],
   "workspaces": [
     "packages/lib",
-    "packages/docs",
-    "packages/demo"
+    "examples/marketplace",
+    "examples/e-commerce",
+    "examples/subscription"
   ],
   "homepage": "https://raideno.github.io/convex-stripe",
   "bugs": "https://github.com/raideno/convex-stripe/issues",

@@ -8,7 +8,7 @@ Stripe [syncing](./references/tables.md), subscriptions, [checkouts](#-checkout-
 npm install @raideno/convex-stripe stripe
 ```
 
-## Configuration
+## Usage
 
 ### 1. Set up Stripe  
 - Create a Stripe account.  
@@ -42,7 +42,9 @@ export default defineSchema({
 
 ### 4. Initialize the library
 
-```ts [convex/stripe.ts]
+```ts
+// convex/stripe.ts
+
 import { internalConvexStripe } from "@raideno/convex-stripe/server";
 
 export const { stripe, store, sync } = internalConvexStripe({
@@ -67,12 +69,14 @@ export const createCustomer = internalAction({
 
 ```
 
-> **Note:** All exposed actions (store, sync, createEntity) are **internal**. Meaning they can only be called from other convex functions, you can wrap them in public actions when needed.  
+> **Note:** All exposed actions (`store`, `sync`) are **internal**. Meaning they can only be called from other convex functions, you can wrap them in public actions when needed.  
 > **Important:** `store` must always be exported, as it is used internally.
 
 ### 5. Register HTTP routes
 
-```ts [convex/http.ts]
+```ts
+// convex/http.ts
+
 import { httpRouter } from "convex/server";
 import { stripe } from "./stripe";
 
@@ -89,7 +93,7 @@ export default http;
 
 Ideally you want to create a stripe customer the moment a new entity (user, organization, etc) is created.
 
-An `entityId` refers to something you are billing. It can be a user, organization or any other thing. With each entity must be associated a stripe customer and the stripe customer can be created using the [`createEntity` action](#createentity-action).
+An `entityId` refers to something you are billing. It can be a user, organization or any other thing. With each entity must be associated a stripe customer and the stripe customer can be created using the [`stripe.customers.create` function](#stripecustomerscreate-function).
 
 Below are with different auth providers examples where the user is the entity we are billing.
 
@@ -107,6 +111,7 @@ import { internal } from "./_generated/api";
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [Password],
   callbacks: {
+    // NOTE: create a customer immediately after a user is created
     afterUserCreatedOrUpdated: async (context, args) => {
       await context.scheduler.runAfter(0, internal.stripe.createCustomer, {
         /*
@@ -148,17 +153,36 @@ It must be done in both your development and production deployments after instal
 This might not be necessary if you are starting with a fresh empty stripe project.
 
 ### 8. Start building 
+
 Now you can use the provided functions to:
 - Generate a subscription or payment link [`stripe.subscribe`](#subscribe-function), [`stripe.pay`](#pay-function) for a given entity.
 - Generate a link to the entity's [`stripe.portal`](#portal-function) to manage their subscriptions.
 - Create stripe connect accounts and link them, [`stripe.accounts.create`](#), [`stripe.accounts.link`](#).
-- Consult the [synced tables](./references/tables.md).
+- Consult the [synced tables](documentation/references/tables.md).
 - Etc.
 
+## Add Stripe Connect
 
-## Usage
+If you wish to also add stripe connect, below is a guide on how to do it. You can find a full example in [`examples/marketplaces/README.md`](examples/marketplace/README.md).
 
-The library automatically syncs the [following tables](./references/tables.md).
+### 1. Create a connect webhook using `sync` method.
+...
+
+### 2. Add the new webhook secret to the dashboard and configuration.
+...
+
+### 3. Create Stripe Accounts for Sellers & Onboard them
+...
+
+### 4. Create Products for Sellers
+...
+
+### 5. Send payouts
+...
+
+## References
+
+The library automatically syncs the [following tables](documentation/references/tables.md).
 
 You can query these tables at any time to:
 
@@ -168,7 +192,7 @@ You can query these tables at any time to:
 - Etc.
 
 
-### `customers.create` Function
+### `stripe.customers.create` Function
 
 Creates or updates a Stripe customer for a given entity (user or organization). Will call [`stripe.customers.create`](https://docs.stripe.com/api/customers/create) under the hood.
 
@@ -210,6 +234,15 @@ This action is typically manually called or setup to be automatically called in 
 
 **Parameters:**
 
+```ts
+{
+  data?: boolean | { withConnect: boolean };
+  webhook?: { account?: boolean; connect?: boolean };
+  portal?: boolean;
+  unstable_catalog?: boolean;
+}
+```
+
 - `data` (optional, default: `true`): Syncs all existing Stripe resources to Convex tables.
 - `data.withConnect` (option, default: `false`): Syncs all existing Stripe resources from linked accounts to Convex tables.
 - `webhook.account` (optional, default: `false`): Creates/updates the account webhook endpoint. Returns the webhook secret if a new endpoint is created. You must set it in your convex environment variables as `STRIPE_ACCOUNT_WEBHOOK_SECRET`.
@@ -217,7 +250,7 @@ This action is typically manually called or setup to be automatically called in 
 - `portal` (optional, default: `false`): Creates the default billing portal configuration if it doesn't exist.
 - `unstable_catalog` (optional, default: `false`): Creates the default provided products and prices passed in the configuration.
 
-### `subscribe` Function
+### `stripe.subscribe` Function
 
 Creates a Stripe Subscription Checkout session for a given entity. Will call [`stripe.checkout.sessions.create`](https://docs.stripe.com/api/checkout/sessions/create) under the hood, the same parameters can be passed.
 
@@ -253,7 +286,7 @@ export const createCheckout = action({
 ```
 
 
-### `portal` Function
+### `stripe.portal` Function
 
 Allows an entity to manage their subscription via the Stripe Portal. Will call [`stripe.billingPortal.sessions.create`](https://docs.stripe.com/api/customer_portal/sessions/create) under the hood, the same parameters can be passed.
 
@@ -285,7 +318,7 @@ export const portal = action({
 The provided entityId must have a customerId associated to it otherwise the action will throw an error.
 
 
-### `pay` Function
+### `stripe.pay` Function
 
 Creates a Stripe One Time Payment Checkout session for a given entity. Will call [`stripe.checkout.sessions.create`](https://docs.stripe.com/api/checkout/sessions/create) under the hood, the same parameters can be passed.
 
@@ -324,7 +357,7 @@ export const pay = action({
 
 ## Best Practices
 
-- Always create a Stripe customer (`createEntity`) when a new entity is created.  
+- Always create a Stripe customer (`stripe.customers.create`) when a new entity is created.  
 - Use `metadata` or `marketing_features` on products to store feature flags or limits.  
 - Run `sync` when you first configure the extension to sync already existing stripe resources.  
 - Never expose internal actions directly to clients, wrap them in public actions with proper authorization.

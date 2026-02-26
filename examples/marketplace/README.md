@@ -1,3 +1,1 @@
 # Marketplace Example
-
-TODO: complete
