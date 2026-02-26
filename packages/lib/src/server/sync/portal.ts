@@ -29,9 +29,7 @@ export const SyncPortalImplementation = defineActionImplementation({
       return;
     }
 
-    const newConfiguration = await stripe.billingPortal.configurations.create(
-      configuration.sync.portal,
-    );
+    await stripe.billingPortal.configurations.create(configuration.sync.portal);
 
     console.info(
       "[STRIPE SYNC PORTAL](Created) Default billing portal configuration created.",

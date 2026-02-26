@@ -21,24 +21,18 @@ export const SyncImplementation = defineActionImplementation({
       }),
     ),
     portal: v.optional(v.boolean()),
-    unstable_catalog: v.optional(v.boolean()),
+    catalog: v.optional(v.boolean()),
   }),
   name: "sync",
   handler: async (
     context,
-    {
-      tables,
-      webhooks,
-      // TODO: enable catalog and portal setup for accounts as well, except if enabling it on root enables it on sub accounts too
-      portal,
-      unstable_catalog,
-    },
+    { tables, webhooks, portal, catalog },
     configuration,
     options,
   ) => {
     const tasks: Array<[boolean, () => Promise<void>, string]> = [
       [
-        Boolean(unstable_catalog),
+        Boolean(catalog),
         () =>
           SyncCatalogImplementation.handler(
             context,
