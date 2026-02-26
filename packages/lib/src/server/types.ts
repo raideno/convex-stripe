@@ -32,26 +32,62 @@ export type RecursiveDeepRequired<T> = T extends (...args: any[]) => any
 
 export interface InputConfiguration {
   stripe: {
+    /** Stripe API version to pin against (recommended for stability). */
     version?: Stripe.StripeConfig["apiVersion"];
+
+    /** Secret key for your Stripe account (starts with `sk_`). */
     secret_key: string;
+
+    /** Webhook signing secret for account-level webhooks (starts with `whsec_`). */
     account_webhook_secret: string;
+
+    /**
+     * Webhook signing secret for Stripe Connect webhooks (if you use Connect).
+     * If omitted, Connect webhooks are treated as disabled/unverified.
+     */
     connect_webhook_secret?: string;
   };
 
   sync: {
     catalog?: {
+      /** Products to ensure exist in Stripe (optional bootstrap). */
       products?: Stripe.ProductCreateParams[];
+
+      /** Prices to ensure exist in Stripe (optional bootstrap). */
       prices?: Stripe.PriceCreateParams[];
+
       behavior?: {
+        /**
+         * What to do if a product/price already exists in Stripe.
+         * - update: update fields
+         * - archive_and_recreate: archive and create a new object
+         * - skip: leave as-is
+         * - error: throw
+         */
         onExisting?: "update" | "archive_and_recreate" | "skip" | "error";
+
+        /**
+         * What to do if the "metadata key" is missing on an object.
+         * - create: create it
+         * - error: throw
+         */
         onMissingKey?: "create" | "error";
       };
+
+      /**
+       * Metadata field used to match local definitions to Stripe objects.
+       * Example: "app_internal_key"
+       */
       metadataKey?: string;
     };
+
     webhooks?: {
       account: {
+        /** Metadata applied when creating/updating the Stripe webhook endpoint. */
         metadata?: Record<string, string>;
+        /** Description used for the Stripe webhook endpoint. */
         description?: string;
+        /** Override the default path (otherwise your code uses `/stripe/webhook`). */
         path?: string;
       };
       connect: {
@@ -60,16 +96,26 @@ export interface InputConfiguration {
         path?: string;
       };
     };
+
+    /** Optional Billing Portal configuration to create/sync. */
     portal?: Stripe.BillingPortal.ConfigurationCreateParams;
+
+    /** Which Stripe tables you want to sync into Convex. */
     tables: Record<keyof typeof stripeTables, boolean>;
   };
 
   callbacks?: {
+    /** Called after a row is inserted/upserted/deleted in your Stripe tables. */
     afterChange?: CallbackAfterChange;
   };
 
+  /**
+   * If true, avoids attaching routes/state globally (depends on your library meaning).
+   * Document your intended behavior here.
+   */
   detached?: boolean;
 
+  /** TTL for redirect state (ms). */
   redirectTtlMs?: number;
 }
 
