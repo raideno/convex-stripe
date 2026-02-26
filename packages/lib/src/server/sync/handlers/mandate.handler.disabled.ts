@@ -8,7 +8,7 @@ export const MandatesSyncImplementation = defineActionImplementation({
   }),
   name: "mandates",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripeMandates !== true) return;
+    if (configuration.sync.tables.stripeMandates !== true) return;
 
     options.logger.log("No `.list` method for mandates in Stripe API");
   },

@@ -12,24 +12,11 @@ export const ChargesSyncImplementation = defineActionImplementation({
   }),
   name: "charges",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripeCharges !== true) return;
+    if (configuration.sync.tables.stripeCharges !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
-
-    const localChargesRes = await storeDispatchTyped(
-      {
-        operation: "selectAll",
-        table: "stripeCharges",
-      },
-      context,
-      configuration,
-      options,
-    );
-    const localChargesById = new Map(
-      (localChargesRes.docs || []).map((p) => [p.chargeId, p]),
-    );
 
     const charges = await stripe.charges
       .list({ limit: 100 }, { stripeAccount: args.accountId })
@@ -58,22 +45,5 @@ export const ChargesSyncImplementation = defineActionImplementation({
         options,
       );
     }
-
-    // for (const [chargeId] of localChargesById.entries()) {
-    //   if (!stripeChargeIds.has(chargeId)) {
-    //     await storeDispatchTyped(
-    //       {
-    //         operation: "deleteById",
-    //         table: "stripeCharges",
-    //         indexName: BY_STRIPE_ID_INDEX_NAME,
-    //         idField: "chargeId",
-    //         idValue: chargeId,
-    //       },
-    //       context,
-    //       configuration,
-    //       options,
-    //     );
-    //   }
-    // }
   },
 });

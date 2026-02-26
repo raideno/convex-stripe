@@ -7,7 +7,7 @@ import { defineWebhookHandler } from "@/webhooks/types";
 export default defineWebhookHandler({
   events: ["capability.updated"],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripeAccounts !== true) return;
+    if (configuration.sync.tables.stripeAccounts !== true) return;
 
     const capability = event.data.object;
 

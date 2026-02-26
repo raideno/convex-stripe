@@ -3,14 +3,14 @@ import { v } from "convex/values";
 import { defineActionImplementation } from "@/helpers";
 
 import { SyncCatalogImplementation } from "@/sync/catalog";
-import { SyncDataImplementation } from "@/sync/data";
+import { SyncTablesImplementation } from "@/sync/tables";
 import { SyncPortalImplementation } from "@/sync/portal";
 import { SyncAccountWebhookImplementation } from "@/sync/webhooks/account";
 import { SyncConnectWebhookImplementation } from "@/sync/webhooks/connect";
 
 export const SyncImplementation = defineActionImplementation({
   args: v.object({
-    data: v.union(
+    tables: v.union(
       v.boolean(),
       v.object({ withConnect: v.optional(v.boolean()) }),
     ),
@@ -27,7 +27,7 @@ export const SyncImplementation = defineActionImplementation({
   handler: async (
     context,
     {
-      data,
+      tables,
       webhooks,
       // TODO: enable catalog and portal setup for accounts as well, except if enabling it on root enables it on sub accounts too
       portal,
@@ -49,17 +49,17 @@ export const SyncImplementation = defineActionImplementation({
         "catalog",
       ],
       [
-        Boolean(data),
+        Boolean(tables),
         () =>
-          SyncDataImplementation.handler(
+          SyncTablesImplementation.handler(
             context,
             {
-              withConnect: typeof data === "object" && data.withConnect,
+              withConnect: typeof tables === "object" && tables.withConnect,
             },
             configuration,
             options,
           ),
-        "data",
+        "tables",
       ],
       [
         Boolean(webhooks?.account),

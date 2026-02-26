@@ -1,5 +1,5 @@
 {
-    "name": "demo",
+    "name": "examples.subscription",
     "description": "Example app using @raideno/convex-stripe",
     "version": "0.0.0",
     "type": "module",

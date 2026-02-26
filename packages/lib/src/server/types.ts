@@ -15,10 +15,6 @@ export interface InternalOptions {
 export type CallbackEvent = {
   [K in keyof StripeDataModel]: {
     table: K;
-    // TODO: put them back when StoreImplementation is mature enough
-    // NOTE: only before is passed when deleting, only after is passed when inserting, both are passed when updating
-    // before?: DocumentByName<StripeDataModel, K>;
-    // after?: DocumentByName<StripeDataModel, K>;
   };
 }[keyof StripeDataModel];
 
@@ -28,55 +24,58 @@ export type CallbackAfterChange = (
   event: CallbackEvent,
 ) => Promise<void>;
 
-export interface InternalConfiguration {
+export type RecursiveDeepRequired<T> = T extends (...args: any[]) => any
+  ? T
+  : T extends object
+    ? { [K in keyof T]-?: RecursiveDeepRequired<T[K]> }
+    : T;
+
+export interface InputConfiguration {
   stripe: {
+    version?: Stripe.StripeConfig["apiVersion"];
     secret_key: string;
     account_webhook_secret: string;
     connect_webhook_secret?: string;
   };
 
-  catalog: {
-    products: Stripe.ProductCreateParams[];
-    prices: Stripe.PriceCreateParams[];
-    behavior: {
-      onExisting: "update" | "archive_and_recreate" | "skip" | "error";
-      onMissingKey: "create" | "error";
+  sync: {
+    catalog?: {
+      products?: Stripe.ProductCreateParams[];
+      prices?: Stripe.PriceCreateParams[];
+      behavior?: {
+        onExisting?: "update" | "archive_and_recreate" | "skip" | "error";
+        onMissingKey?: "create" | "error";
+      };
+      metadataKey?: string;
     };
-    metadataKey: string;
+    webhooks?: {
+      account: {
+        metadata?: Record<string, string>;
+        description?: string;
+        path?: string;
+      };
+      connect: {
+        metadata?: Record<string, string>;
+        description?: string;
+        path?: string;
+      };
+    };
+    portal?: Stripe.BillingPortal.ConfigurationCreateParams;
+    tables: Record<keyof typeof stripeTables, boolean>;
   };
 
-  // TODO: move catalog, account_webhook, sync (tables) and portal to the same group and call it sync
-  webhook: {
-    metadata: Record<string, string>;
-    description: string;
-    path: string;
+  callbacks?: {
+    afterChange?: CallbackAfterChange;
   };
 
-  portal: Stripe.BillingPortal.ConfigurationCreateParams;
+  detached?: boolean;
 
-  callback?: {
-    unstable__afterChange?: CallbackAfterChange;
-  };
-
-  detached: boolean;
-
-  sync: Partial<Record<keyof typeof stripeTables, boolean>>;
-
-  redirectTtlMs: number;
+  redirectTtlMs?: number;
 }
 
-export type WithOptional<T, K extends keyof T = never> = Omit<T, K> &
-  Partial<Pick<T, K>>;
+export type InternalConfiguration = RecursiveDeepRequired<InputConfiguration>;
 
-export type InputConfiguration = WithOptional<
-  InternalConfiguration,
-  "portal" | "sync" | "redirectTtlMs" | "webhook" | "detached" | "catalog"
->;
-
-export type InputOptions = WithOptional<
-  InternalOptions,
-  "store" | "debug" | "logger" | "base"
->;
+export type InputOptions = Partial<InternalOptions>;
 
 export type ArgSchema = Record<
   string,

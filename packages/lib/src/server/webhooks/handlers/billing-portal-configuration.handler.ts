@@ -10,7 +10,7 @@ export default defineWebhookHandler({
     "billing_portal.configuration.updated",
   ],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripeProducts !== true) return;
+    if (configuration.sync.tables.stripeProducts !== true) return;
 
     const billingPortalConfiguration = event.data.object;
 

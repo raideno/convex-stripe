@@ -12,24 +12,11 @@ export const PaymentIntentsSyncImplementation = defineActionImplementation({
   }),
   name: "paymentIntents",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripePaymentIntents !== true) return;
+    if (configuration.sync.tables.stripePaymentIntents !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
-
-    const localPaymentIntentsRes = await storeDispatchTyped(
-      {
-        operation: "selectAll",
-        table: "stripePaymentIntents",
-      },
-      context,
-      configuration,
-      options,
-    );
-    const localPaymentIntentsById = new Map(
-      (localPaymentIntentsRes.docs || []).map((p) => [p.paymentIntentId, p]),
-    );
 
     const paymentIntents = await stripe.paymentIntents
       .list({ limit: 100 }, { stripeAccount: args.accountId })
@@ -58,22 +45,5 @@ export const PaymentIntentsSyncImplementation = defineActionImplementation({
         options,
       );
     }
-
-    // for (const [paymentIntentId] of localPaymentIntentsById.entries()) {
-    //   if (!stripePaymentIntentIds.has(paymentIntentId)) {
-    //     await storeDispatchTyped(
-    //       {
-    //         operation: "deleteById",
-    //         table: "stripePaymentIntents",
-    //         indexName: BY_STRIPE_ID_INDEX_NAME,
-    //         idField: "paymentIntentId",
-    //         idValue: paymentIntentId,
-    //       },
-    //       context,
-    //       configuration,
-    //       options,
-    //     );
-    //   }
-    // }
   },
 });

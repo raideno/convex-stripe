@@ -12,24 +12,11 @@ export const RefundsSyncImplementation = defineActionImplementation({
   }),
   name: "refunds",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripeRefunds !== true) return;
+    if (configuration.sync.tables.stripeRefunds !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
-
-    const localRefundsRes = await storeDispatchTyped(
-      {
-        operation: "selectAll",
-        table: "stripeRefunds",
-      },
-      context,
-      configuration,
-      options,
-    );
-    const localRefundsById = new Map(
-      (localRefundsRes.docs || []).map((p) => [p.refundId, p]),
-    );
 
     const refunds = await stripe.refunds
       .list({ limit: 100 }, { stripeAccount: args.accountId })
@@ -58,22 +45,5 @@ export const RefundsSyncImplementation = defineActionImplementation({
         options,
       );
     }
-
-    // for (const [refundId] of localRefundsById.entries()) {
-    //   if (!stripeRefundIds.has(refundId)) {
-    //     await storeDispatchTyped(
-    //       {
-    //         operation: "deleteById",
-    //         table: "stripeRefunds",
-    //         indexName: BY_STRIPE_ID_INDEX_NAME,
-    //         idField: "refundId",
-    //         idValue: refundId,
-    //       },
-    //       context,
-    //       configuration,
-    //       options,
-    //     );
-    //   }
-    // }
   },
 });

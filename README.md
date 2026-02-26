@@ -45,12 +45,15 @@ export default defineSchema({
 ```ts
 // convex/stripe.ts
 
-import { internalConvexStripe } from "@raideno/convex-stripe/server";
+import { internalConvexStripe, syncAllTables } from "@raideno/convex-stripe/server";
 
 export const { stripe, store, sync } = internalConvexStripe({
   stripe: {
     secret_key: process.env.STRIPE_SECRET_KEY!,
     account_webhook_secret: process.env.STRIPE_ACCOUNT_WEBHOOK_SECRET!,
+  },
+  sync: {
+    tables: syncAllTables(),
   },
 });
 
@@ -165,6 +168,9 @@ Now you can use the provided functions to:
 
 If you wish to also add stripe connect, below is a guide on how to do it. You can find a full example in [`examples/marketplaces/README.md`](examples/marketplace/README.md).
 
+### 0. Enable connect on your stripe dashboard.
+...
+
 ### 1. Create a connect webhook using `sync` method.
 ...
 
@@ -243,8 +249,8 @@ This action is typically manually called or setup to be automatically called in 
 }
 ```
 
-- `data` (optional, default: `true`): Syncs all existing Stripe resources to Convex tables.
-- `data.withConnect` (option, default: `false`): Syncs all existing Stripe resources from linked accounts to Convex tables.
+- `tables` (optional, default: `true`): Syncs all existing Stripe resources to Convex tables.
+- `tables.withConnect` (option, default: `false`): Syncs all existing Stripe resources from linked accounts to Convex tables.
 - `webhook.account` (optional, default: `false`): Creates/updates the account webhook endpoint. Returns the webhook secret if a new endpoint is created. You must set it in your convex environment variables as `STRIPE_ACCOUNT_WEBHOOK_SECRET`.
 - `webhook.connect` (optional, default: `false`): Creates/updates the connect webhook endpoint. Returns the webhook secret if a new endpoint is created. You must set it in your convex environment variables as `STRIPE_CONNECT_WEBHOOK_SECRET`.
 - `portal` (optional, default: `false`): Creates the default billing portal configuration if it doesn't exist.

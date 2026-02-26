@@ -12,24 +12,11 @@ export const TransfersSyncImplementation = defineActionImplementation({
   }),
   name: "transfers",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripeTransfers !== true) return;
+    if (configuration.sync.tables.stripeTransfers !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
-
-    const localTransfersRes = await storeDispatchTyped(
-      {
-        operation: "selectAll",
-        table: "stripeTransfers",
-      },
-      context,
-      configuration,
-      options,
-    );
-    const localTransfersById = new Map(
-      (localTransfersRes.docs || []).map((p) => [p.transferId, p]),
-    );
 
     const transfers = await stripe.transfers
       .list({ limit: 100 }, { stripeAccount: args.accountId })
@@ -58,22 +45,5 @@ export const TransfersSyncImplementation = defineActionImplementation({
         options,
       );
     }
-
-    // for (const [transferId] of localTransfersById.entries()) {
-    //   if (!stripeTransferIds.has(transferId)) {
-    //     await storeDispatchTyped(
-    //       {
-    //         operation: "deleteById",
-    //         table: "stripeTransfers",
-    //         indexName: BY_STRIPE_ID_INDEX_NAME,
-    //         idField: "transferId",
-    //         idValue: transferId,
-    //       },
-    //       context,
-    //       configuration,
-    //       options,
-    //     );
-    //   }
-    // }
   },
 });

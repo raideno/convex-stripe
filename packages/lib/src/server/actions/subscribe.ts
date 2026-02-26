@@ -40,7 +40,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
       DEFAULT_CREATE_STRIPE_CUSTOMER_IF_MISSING;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
 
     const stripeCustomer = await storeDispatchTyped(

@@ -12,24 +12,11 @@ export const CouponsSyncImplementation = defineActionImplementation({
   }),
   name: "coupons",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripeCoupons !== true) return;
+    if (configuration.sync.tables.stripeCoupons !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
-
-    const localCouponsRes = await storeDispatchTyped(
-      {
-        operation: "selectAll",
-        table: "stripeCoupons",
-      },
-      context,
-      configuration,
-      options,
-    );
-    const localCouponsById = new Map(
-      (localCouponsRes.docs || []).map((p) => [p.couponId, p]),
-    );
 
     const coupons = await stripe.coupons
       .list({ limit: 100 }, { stripeAccount: args.accountId })
@@ -58,22 +45,5 @@ export const CouponsSyncImplementation = defineActionImplementation({
         options,
       );
     }
-
-    // for (const [couponId] of localCouponsById.entries()) {
-    //   if (!stripeCouponIds.has(couponId)) {
-    //     await storeDispatchTyped(
-    //       {
-    //         operation: "deleteById",
-    //         table: "stripeCoupons",
-    //         indexName: BY_STRIPE_ID_INDEX_NAME,
-    //         idField: "couponId",
-    //         idValue: couponId,
-    //       },
-    //       context,
-    //       configuration,
-    //       options,
-    //     );
-    //   }
-    // }
   },
 });

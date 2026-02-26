@@ -14,7 +14,7 @@ export default defineWebhookHandler({
     "payout.updated",
   ],
   handle: async (event, context, configuration, option) => {
-    if (configuration.sync.stripePayouts !== true) return;
+    if (configuration.sync.tables.stripePayouts !== true) return;
 
     const payout = event.data.object;
 

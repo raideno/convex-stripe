@@ -1,8 +1,10 @@
+import deepmerge from "deepmerge";
+
 import { GenericActionCtx, GenericMutationCtx } from "convex/server";
 import { Infer, v, VObject } from "convex/values";
 
 import { Logger } from "@/logger";
-import { StripeDataModel } from "@/schema";
+import { StripeDataModel, stripeTables } from "@/schema";
 import {
   ArgSchema,
   InferArgs,
@@ -12,36 +14,50 @@ import {
   InternalOptions,
 } from "@/types";
 
-export const DEFAULT_PATH = "/stripe/webhook";
-export const DEFAULT_DESCRIPTION = "Convex Stripe Webhook Endpoint";
-export const DEFAULT_METADATA = {};
-export const DEFAULT_DETACHED = false;
-export const DEFAULT_CATALOG_METADATA_KEY = "convex_stripe_key";
-export const DEFAULT_CATALOG_BEHAVIOR_ON_EXISTING = "update";
-export const DEFAULT_CATALOG_BEHAVIOR_ON_MISSING_KEY = "create";
+export const syncAllTables = () =>
+  Object.fromEntries(
+    Object.keys(stripeTables).map((table) => [table, true]),
+  ) as Record<keyof typeof stripeTables, boolean>;
 
-export const normalizeConfiguration = (
-  config: InputConfiguration,
-): InternalConfiguration => {
-  return {
-    // TODO: should be on the bottom no ?
-    ...config,
-    redirectTtlMs: 15 * 60 * 1000,
-    detached: DEFAULT_DETACHED,
+export const syncAllTablesExcept = (tables: Array<keyof typeof stripeTables>) =>
+  Object.fromEntries(
+    Object.keys(stripeTables).map((table) => [
+      table,
+      !tables.includes(table as keyof typeof stripeTables),
+    ]),
+  ) as Record<keyof typeof stripeTables, boolean>;
+
+export const syncOnlyTables = (tables: Array<keyof typeof stripeTables>) =>
+  Object.fromEntries(
+    Object.keys(stripeTables).map((table) => [
+      table,
+      tables.includes(table as keyof typeof stripeTables),
+    ]),
+  ) as Record<keyof typeof stripeTables, boolean>;
+
+export const DEFAULT_CONFIGURATION: InternalConfiguration = {
+  stripe: {
+    version: "2025-08-27.basil",
+    secret_key: "",
+    account_webhook_secret: "",
+    connect_webhook_secret: "",
+  },
+  redirectTtlMs: 15 * 60 * 1000,
+  detached: false,
+  callbacks: {
+    afterChange: async () => {},
+  },
+  sync: {
     catalog: {
-      products: config.catalog?.products || [],
-      prices: config.catalog?.prices || [],
-      metadataKey: config.catalog?.metadataKey || DEFAULT_CATALOG_METADATA_KEY,
+      products: [],
+      prices: [],
+      metadataKey: "convex_stripe_key",
       behavior: {
-        onExisting:
-          config.catalog?.behavior?.onExisting ||
-          DEFAULT_CATALOG_BEHAVIOR_ON_EXISTING,
-        onMissingKey:
-          config.catalog?.behavior?.onMissingKey ||
-          DEFAULT_CATALOG_BEHAVIOR_ON_MISSING_KEY,
+        onExisting: "update",
+        onMissingKey: "create",
       },
     },
-    sync: {
+    tables: {
       stripeAccounts: true,
       stripeCapabilities: true,
       stripeTransfers: true,
@@ -69,16 +85,30 @@ export const normalizeConfiguration = (
       stripeMandates: true,
       stripeBillingPortalConfigurations: true,
     },
-    webhook: {
-      path: config.webhook?.path || DEFAULT_PATH,
-      description: config.webhook?.description || DEFAULT_DESCRIPTION,
-      metadata: config.webhook?.metadata || DEFAULT_METADATA,
+    webhooks: {
+      account: {
+        path: "/stripe/webhook",
+        description: "Convex Stripe Webhook Endpoint",
+        metadata: {},
+      },
+      connect: {
+        path: "/stripe/webhook?connect=true",
+        description: "Convex Stripe Webhook Endpoint",
+        metadata: {},
+      },
     },
-    portal: config.portal || {
+    portal: {
+      metadata: {},
+      login_page: {
+        enabled: true,
+      },
+      default_return_url: "https://example.com/account",
+      expand: ["business_profile"],
+      name: "Customer Portal",
       business_profile: {
-        headline: undefined,
-        privacy_policy_url: undefined,
-        terms_of_service_url: undefined,
+        headline: "",
+        privacy_policy_url: "",
+        terms_of_service_url: "",
       },
       features: {
         customer_update: {
@@ -93,6 +123,7 @@ export const normalizeConfiguration = (
         },
         subscription_cancel: {
           enabled: true,
+          proration_behavior: "none",
           mode: "at_period_end",
           cancellation_reason: {
             enabled: true,
@@ -110,25 +141,33 @@ export const normalizeConfiguration = (
         },
         subscription_update: {
           enabled: false,
+          schedule_at_period_end: {
+            conditions: [],
+          },
           default_allowed_updates: [],
           proration_behavior: "none",
           products: [],
         },
       },
     },
-  };
+  },
 };
 
-export const normalizeOptions = (
-  options: Partial<InputOptions>,
-): InternalOptions => {
-  return {
-    ...options,
-    store: options.store || "store",
-    debug: options.debug || false,
-    logger: options.logger || new Logger(options.debug || false),
-    base: options.base || "stripe",
-  };
+export const normalizeConfiguration = (
+  config: InputConfiguration,
+): InternalConfiguration => {
+  return deepmerge(DEFAULT_CONFIGURATION, config as InternalConfiguration);
+};
+
+export const DEFAULT_OPTIONS: InternalOptions = {
+  store: "store",
+  debug: false,
+  logger: new Logger(false),
+  base: "stripe",
+};
+
+export const normalizeOptions = (options: InputOptions): InternalOptions => {
+  return deepmerge(DEFAULT_OPTIONS, options);
 };
 
 export const defineActionCallableFunction = <

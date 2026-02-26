@@ -16,7 +16,7 @@ export default defineWebhookHandler({
     "customer.subscription.trial_will_end",
   ],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripeSubscriptions !== true) return;
+    if (configuration.sync.tables.stripeSubscriptions !== true) return;
 
     const subscription = event.data.object;
 

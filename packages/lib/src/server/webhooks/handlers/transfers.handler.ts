@@ -14,7 +14,7 @@ export default defineWebhookHandler({
     // "treasury.credit_reversal.created"
   ],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripeAccounts !== true) return;
+    if (configuration.sync.tables.stripeAccounts !== true) return;
 
     const transfer = event.data.object;
 

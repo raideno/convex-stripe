@@ -152,14 +152,14 @@ export const SyncCatalogImplementation = defineActionImplementation({
   args: v.object({}),
   name: "syncCatalog",
   handler: async (context, args, configuration) => {
-    const catalog = configuration.catalog;
+    const catalog = configuration.sync.catalog;
     const products = catalog.products || [];
     const prices = catalog.prices || [];
 
     if (products.length === 0 && prices.length === 0) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
 
     const metadataKey = catalog.metadataKey || "convex_stripe_key";

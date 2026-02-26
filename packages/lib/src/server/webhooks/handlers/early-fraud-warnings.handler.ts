@@ -10,7 +10,7 @@ export default defineWebhookHandler({
     "radar.early_fraud_warning.updated",
   ],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripeDisputes !== true) return;
+    if (configuration.sync.tables.stripeDisputes !== true) return;
 
     const earlyFraudWarning = event.data.object;
 

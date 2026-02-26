@@ -12,24 +12,11 @@ export const TaxIdsSyncImplementation = defineActionImplementation({
   }),
   name: "taxIds",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripeTaxIds !== true) return;
+    if (configuration.sync.tables.stripeTaxIds !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
-
-    const localTaxIdsRes = await storeDispatchTyped(
-      {
-        operation: "selectAll",
-        table: "stripeTaxIds",
-      },
-      context,
-      configuration,
-      options,
-    );
-    const localTaxIdsById = new Map(
-      (localTaxIdsRes.docs || []).map((p) => [p.taxIdId, p]),
-    );
 
     const taxIds = await stripe.taxIds
       .list({ limit: 100 }, { stripeAccount: args.accountId })
@@ -58,22 +45,5 @@ export const TaxIdsSyncImplementation = defineActionImplementation({
         options,
       );
     }
-
-    // for (const [taxIdId] of localTaxIdsById.entries()) {
-    //   if (!stripeTaxIdIds.has(taxIdId)) {
-    //     await storeDispatchTyped(
-    //       {
-    //         operation: "deleteById",
-    //         table: "stripeTaxIds",
-    //         indexName: BY_STRIPE_ID_INDEX_NAME,
-    //         idField: "taxIdId",
-    //         idValue: taxIdId,
-    //       },
-    //       context,
-    //       configuration,
-    //       options,
-    //     );
-    //   }
-    // }
   },
 });

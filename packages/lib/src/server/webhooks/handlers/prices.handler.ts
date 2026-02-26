@@ -7,7 +7,7 @@ import { defineWebhookHandler } from "@/webhooks/types";
 export default defineWebhookHandler({
   events: ["price.created", "price.updated", "price.deleted"],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripePrices !== true) return;
+    if (configuration.sync.tables.stripePrices !== true) return;
 
     const price = event.data.object;
 

@@ -11,7 +11,7 @@ export default defineWebhookHandler({
     "customer.tax_id.updated",
   ],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripeTaxIds !== true) return;
+    if (configuration.sync.tables.stripeTaxIds !== true) return;
 
     const taxId = event.data.object;
 

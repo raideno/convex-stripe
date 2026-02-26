@@ -11,7 +11,7 @@ export const SyncPortalImplementation = defineActionImplementation({
   name: "syncPortal",
   handler: async (context, args, configuration) => {
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
 
     const configurations = await stripe.billingPortal.configurations
@@ -30,7 +30,7 @@ export const SyncPortalImplementation = defineActionImplementation({
     }
 
     const newConfiguration = await stripe.billingPortal.configurations.create(
-      configuration.portal,
+      configuration.sync.portal,
     );
 
     console.info(

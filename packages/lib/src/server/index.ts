@@ -33,6 +33,8 @@ import type {
   InternalOptions,
 } from "./types";
 
+export { syncAllTables, syncAllTablesExcept, syncOnlyTables } from "./helpers";
+
 export { stripeTables } from "./schema";
 
 export { Logger } from "./logger";
@@ -51,6 +53,7 @@ const buildHttp = (
   options: InternalOptions,
 ) => ({
   webhook: {
+    // TODO: should be using the url from the stripe webhook
     path: "/stripe/webhook",
     method: "POST" as const as RoutableMethod,
     handler: (
@@ -106,7 +109,7 @@ export const internalConvexStripe = (
     stripe: {
       http: http_,
       client: new Stripe(ConvexStripeInternalConfiguration.stripe.secret_key, {
-        apiVersion: "2025-08-27.basil",
+        apiVersion: ConvexStripeInternalConfiguration.stripe.version,
       }),
       addHttpRoutes: (http: HttpRouter, config?: InputConfiguration) => {
         config = normalizeConfiguration(config || configuration_);

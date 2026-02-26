@@ -7,7 +7,7 @@ import { defineWebhookHandler } from "@/webhooks/types";
 export default defineWebhookHandler({
   events: ["review.closed", "review.opened"],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripeReviews !== true) return;
+    if (configuration.sync.tables.stripeReviews !== true) return;
 
     const review = event.data.object;
 

@@ -12,10 +12,10 @@ export const ProductsSyncImplementation = defineActionImplementation({
   }),
   name: "products",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripeProducts !== true) return;
+    if (configuration.sync.tables.stripeProducts !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
 
     const localProductsResponse = await storeDispatchTyped(
@@ -63,22 +63,5 @@ export const ProductsSyncImplementation = defineActionImplementation({
         options,
       );
     }
-
-    // for (const [productId, doc] of localProductsById.entries()) {
-    //   if (!stripeProductIds.has(productId)) {
-    //     await storeDispatchTyped(
-    //       {
-    //         operation: "deleteById",
-    //         table: "stripeProducts",
-    //         indexName: BY_STRIPE_ID_INDEX_NAME,
-    //         idField: "productId",
-    //         idValue: productId,
-    //       },
-    //       context,
-    //       configuration,
-    //       options,
-    //     );
-    //   }
-    // }
   },
 });

@@ -12,27 +12,11 @@ export const EarlyFraudWarningsSyncImplementation = defineActionImplementation({
   }),
   name: "early_fraud_warnings",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripeEarlyFraudWarnings !== true) return;
+    if (configuration.sync.tables.stripeEarlyFraudWarnings !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
-
-    const localEarlyFraudWarningsRes = await storeDispatchTyped(
-      {
-        operation: "selectAll",
-        table: "stripeEarlyFraudWarnings",
-      },
-      context,
-      configuration,
-      options,
-    );
-    const localEarlyFraudWarningsById = new Map(
-      (localEarlyFraudWarningsRes.docs || []).map((p) => [
-        p.earlyFraudWarningId,
-        p,
-      ]),
-    );
 
     const early_fraud_warnings = await stripe.radar.earlyFraudWarnings
       .list({ limit: 100 }, { stripeAccount: args.accountId })
@@ -61,24 +45,5 @@ export const EarlyFraudWarningsSyncImplementation = defineActionImplementation({
         options,
       );
     }
-
-    // for (const [
-    //   early_fraud_warningId,
-    // ] of localEarlyFraudWarningsById.entries()) {
-    //   if (!stripeEarlyFraudWarningIds.has(early_fraud_warningId)) {
-    //     await storeDispatchTyped(
-    //       {
-    //         operation: "deleteById",
-    //         table: "stripeEarlyFraudWarnings",
-    //         indexName: BY_STRIPE_ID_INDEX_NAME,
-    //         idField: "earlyFraudWarningId",
-    //         idValue: early_fraud_warningId,
-    //       },
-    //       context,
-    //       configuration,
-    //       options,
-    //     );
-    //   }
-    // }
   },
 });

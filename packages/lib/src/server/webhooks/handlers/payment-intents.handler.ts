@@ -16,7 +16,7 @@ export default defineWebhookHandler({
     "payment_intent.succeeded",
   ],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripePaymentIntents !== true) return;
+    if (configuration.sync.tables.stripePaymentIntents !== true) return;
 
     const paymentIntent = event.data.object;
 

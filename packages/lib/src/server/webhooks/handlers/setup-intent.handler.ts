@@ -13,7 +13,7 @@ export default defineWebhookHandler({
     "setup_intent.succeeded",
   ],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripeSetupIntents !== true) return;
+    if (configuration.sync.tables.stripeSetupIntents !== true) return;
 
     const setupIntent = event.data.object;
 

@@ -12,24 +12,11 @@ export const DisputesSyncImplementation = defineActionImplementation({
   }),
   name: "disputes",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripeDisputes !== true) return;
+    if (configuration.sync.tables.stripeDisputes !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
-
-    const localDisputesRes = await storeDispatchTyped(
-      {
-        operation: "selectAll",
-        table: "stripeDisputes",
-      },
-      context,
-      configuration,
-      options,
-    );
-    const localDisputesById = new Map(
-      (localDisputesRes.docs || []).map((p) => [p.disputeId, p]),
-    );
 
     const disputes = await stripe.disputes
       .list({ limit: 100 }, { stripeAccount: args.accountId })
@@ -58,22 +45,5 @@ export const DisputesSyncImplementation = defineActionImplementation({
         options,
       );
     }
-
-    // for (const [disputeId] of localDisputesById.entries()) {
-    //   if (!stripeDisputeIds.has(disputeId)) {
-    //     await storeDispatchTyped(
-    //       {
-    //         operation: "deleteById",
-    //         table: "stripeDisputes",
-    //         indexName: BY_STRIPE_ID_INDEX_NAME,
-    //         idField: "disputeId",
-    //         idValue: disputeId,
-    //       },
-    //       context,
-    //       configuration,
-    //       options,
-    //     );
-    //   }
-    // }
   },
 });

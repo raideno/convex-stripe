@@ -24,7 +24,9 @@
   },
   "license": "Apache-2.0",
   "author": "raideno",
-  "scripts": {},
+  "scripts": {
+    "sync-documentation": "node scripts/sync-documentation.js"
+  },
   "type": "module",
   "devDependencies": {
     "globals": "^16.4.0"

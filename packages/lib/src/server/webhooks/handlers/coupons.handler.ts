@@ -7,7 +7,7 @@ import { defineWebhookHandler } from "@/webhooks/types";
 export default defineWebhookHandler({
   events: ["coupon.created", "coupon.updated", "coupon.deleted"],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripeCoupons !== true) return;
+    if (configuration.sync.tables.stripeCoupons !== true) return;
 
     const coupon = event.data.object;
 

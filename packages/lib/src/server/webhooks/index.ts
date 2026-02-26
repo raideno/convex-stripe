@@ -46,7 +46,7 @@ export const webhookImplementation = async (
   const stripe = stripe_
     ? stripe_
     : new Stripe(configuration.stripe.secret_key, {
-        apiVersion: "2025-08-27.basil",
+        apiVersion: configuration.stripe.version,
       });
 
   if (typeof signature !== "string")

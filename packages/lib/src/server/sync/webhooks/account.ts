@@ -9,14 +9,14 @@ export const SyncAccountWebhookImplementation = defineActionImplementation({
   args: v.object({}),
   name: "syncAccountWebhook",
   handler: async (context, args, configuration) => {
-    const url = `${process.env.CONVEX_SITE_URL}${configuration.webhook.path}`;
+    const url = `${process.env.CONVEX_SITE_URL}${configuration.sync.webhooks.account.path}`;
 
     const events = new Set(
       WEBHOOK_HANDLERS.map((handler) => handler.events).flat(),
     );
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
 
     const endpoints = await stripe.webhookEndpoints
@@ -50,10 +50,9 @@ export const SyncAccountWebhookImplementation = defineActionImplementation({
       const endpoint = await stripe.webhookEndpoints.create({
         url: url,
         enabled_events: Array.from(events),
-        description: configuration.webhook.description,
-        // TODO: move version to a global constant or configuration
-        api_version: "2025-08-27.basil",
-        metadata: configuration.webhook.metadata,
+        description: configuration.sync.webhooks.account.description,
+        api_version: configuration.stripe.version,
+        metadata: configuration.sync.webhooks.account.metadata,
         connect: false,
       });
 

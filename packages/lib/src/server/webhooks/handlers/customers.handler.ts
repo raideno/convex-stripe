@@ -7,7 +7,7 @@ import { defineWebhookHandler } from "@/webhooks/types";
 export default defineWebhookHandler({
   events: ["customer.created", "customer.updated", "customer.deleted"],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripeCustomers !== true) return;
+    if (configuration.sync.tables.stripeCustomers !== true) return;
 
     const customer = event.data.object;
     const entityId = customer.metadata?.entityId as string | undefined;

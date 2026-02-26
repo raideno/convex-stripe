@@ -12,7 +12,7 @@ export default defineWebhookHandler({
     "checkout.session.expired",
   ],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripeCheckoutSessions !== true) return;
+    if (configuration.sync.tables.stripeCheckoutSessions !== true) return;
 
     const checkoutSession = event.data.object;
 

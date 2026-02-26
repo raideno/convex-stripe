@@ -13,27 +13,12 @@ export const BillingPortalConfigurationsSyncImplementation =
     }),
     name: "billingPortalConfigurations",
     handler: async (context, args, configuration, options) => {
-      if (configuration.sync.stripeBillingPortalConfigurations !== true) return;
+      if (configuration.sync.tables.stripeBillingPortalConfigurations !== true)
+        return;
 
       const stripe = new Stripe(configuration.stripe.secret_key, {
-        apiVersion: "2025-08-27.basil",
+        apiVersion: configuration.stripe.version,
       });
-
-      const localBillingPortalConfigurationsRes = await storeDispatchTyped(
-        {
-          operation: "selectAll",
-          table: "stripeBillingPortalConfigurations",
-        },
-        context,
-        configuration,
-        options,
-      );
-      const localBillingPortalConfigurationsById = new Map(
-        (localBillingPortalConfigurationsRes.docs || []).map((p) => [
-          p.billingPortalConfigurationId,
-          p,
-        ]),
-      );
 
       const billingPortalConfigurations =
         await stripe.billingPortal.configurations
@@ -65,26 +50,5 @@ export const BillingPortalConfigurationsSyncImplementation =
           options,
         );
       }
-
-      // for (const [
-      //   billingPortalConfigurationId,
-      // ] of localBillingPortalConfigurationsById.entries()) {
-      //   if (
-      //     !stripeBillingPortalConfigurationIds.has(billingPortalConfigurationId)
-      //   ) {
-      //     await storeDispatchTyped(
-      //       {
-      //         operation: "deleteById",
-      //         table: "stripeBillingPortalConfigurations",
-      //         indexName: BY_STRIPE_ID_INDEX_NAME,
-      //         idField: "billingPortalConfigurationId",
-      //         idValue: billingPortalConfigurationId,
-      //       },
-      //       context,
-      //       configuration,
-      //       options,
-      //     );
-      //   }
-      // }
     },
   });

@@ -95,19 +95,16 @@ export const StoreImplementation = defineMutationImplementation({
           upsertIdField,
           upsertData,
         );
-        if (
-          configuration.callback &&
-          configuration.callback.unstable__afterChange
-        )
+        if (configuration.callbacks && configuration.callbacks.afterChange)
           try {
-            await configuration.callback.unstable__afterChange(
+            await configuration.callbacks.afterChange(
               context,
               "upsert",
               // TODO: remove any
               { table: table as any },
             );
           } catch (error) {
-            console.error("[unstable__afterChange]:", error);
+            console.error("[afterChange]:", error);
           }
         return { id };
       }
@@ -120,19 +117,16 @@ export const StoreImplementation = defineMutationImplementation({
           StripeDataModel[typeof table]["document"]
         >;
         const id = await insert(context, table, insertData);
-        if (
-          configuration.callback &&
-          configuration.callback.unstable__afterChange
-        )
+        if (configuration.callbacks && configuration.callbacks.afterChange)
           try {
-            await configuration.callback.unstable__afterChange(
+            await configuration.callbacks.afterChange(
               context,
               "insert",
               // TODO: remove any
               { table: table as any },
             );
           } catch (error) {
-            console.error("[unstable__afterChange]:", error);
+            console.error("[afterChange]:", error);
           }
         return { id };
       }
@@ -167,19 +161,16 @@ export const StoreImplementation = defineMutationImplementation({
           deleteByIdIdField,
           deleteByIdIdValue,
         );
-        if (
-          configuration.callback &&
-          configuration.callback.unstable__afterChange
-        )
+        if (configuration.callbacks && configuration.callbacks.afterChange)
           try {
-            await configuration.callback.unstable__afterChange(
+            await configuration.callbacks.afterChange(
               context,
               "delete",
               // TODO: remove any
               { table: table as any },
             );
           } catch (error) {
-            console.error("[unstable__afterChange]:", error);
+            console.error("[afterChange]:", error);
           }
         return { deleted };
       }

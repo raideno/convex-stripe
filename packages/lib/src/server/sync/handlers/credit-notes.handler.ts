@@ -12,24 +12,11 @@ export const CreditNotesSyncImplementation = defineActionImplementation({
   }),
   name: "creditNotes",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripeCreditNotes !== true) return;
+    if (configuration.sync.tables.stripeCreditNotes !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
-
-    const localCreditNotesRes = await storeDispatchTyped(
-      {
-        operation: "selectAll",
-        table: "stripeCreditNotes",
-      },
-      context,
-      configuration,
-      options,
-    );
-    const localCreditNotesById = new Map(
-      (localCreditNotesRes.docs || []).map((p) => [p.creditNoteId, p]),
-    );
 
     const creditNotes = await stripe.creditNotes
       .list({ limit: 100 }, { stripeAccount: args.accountId })
@@ -58,22 +45,5 @@ export const CreditNotesSyncImplementation = defineActionImplementation({
         options,
       );
     }
-
-    // for (const [creditNoteId] of localCreditNotesById.entries()) {
-    //   if (!stripeCreditNoteIds.has(creditNoteId)) {
-    //     await storeDispatchTyped(
-    //       {
-    //         operation: "deleteById",
-    //         table: "stripeCreditNotes",
-    //         indexName: BY_STRIPE_ID_INDEX_NAME,
-    //         idField: "creditNoteId",
-    //         idValue: creditNoteId,
-    //       },
-    //       context,
-    //       configuration,
-    //       options,
-    //     );
-    //   }
-    // }
   },
 });

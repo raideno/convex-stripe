@@ -15,7 +15,7 @@ export default defineWebhookHandler({
     "charge.updated",
   ],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripeCharges !== true) return;
+    if (configuration.sync.tables.stripeCharges !== true) return;
 
     const charge = event.data.object;
 

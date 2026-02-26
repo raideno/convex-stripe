@@ -13,7 +13,7 @@ export const SubscriptionSyncImplementation = defineActionImplementation({
   name: "syncSubscription",
   handler: async (context, args, configuration, options) => {
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
 
     const customerId = args.customerId;

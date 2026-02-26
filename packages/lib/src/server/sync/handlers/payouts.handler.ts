@@ -12,24 +12,11 @@ export const PayoutsSyncImplementation = defineActionImplementation({
   }),
   name: "payouts",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripePayouts !== true) return;
+    if (configuration.sync.tables.stripePayouts !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
-
-    const localPayoutsRes = await storeDispatchTyped(
-      {
-        operation: "selectAll",
-        table: "stripePayouts",
-      },
-      context,
-      configuration,
-      options,
-    );
-    const localPayoutsById = new Map(
-      (localPayoutsRes.docs || []).map((p) => [p.payoutId, p]),
-    );
 
     const payouts = await stripe.payouts
       .list({ limit: 100 }, { stripeAccount: args.accountId })
@@ -58,22 +45,5 @@ export const PayoutsSyncImplementation = defineActionImplementation({
         options,
       );
     }
-
-    // for (const [payoutId] of localPayoutsById.entries()) {
-    //   if (!stripePayoutIds.has(payoutId)) {
-    //     await storeDispatchTyped(
-    //       {
-    //         operation: "deleteById",
-    //         table: "stripePayouts",
-    //         indexName: BY_STRIPE_ID_INDEX_NAME,
-    //         idField: "payoutId",
-    //         idValue: payoutId,
-    //       },
-    //       context,
-    //       configuration,
-    //       options,
-    //     );
-    //   }
-    // }
   },
 });

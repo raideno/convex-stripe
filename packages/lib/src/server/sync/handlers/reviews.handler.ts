@@ -12,24 +12,11 @@ export const ReviewsSyncImplementation = defineActionImplementation({
   }),
   name: "reviews",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripeReviews !== true) return;
+    if (configuration.sync.tables.stripeReviews !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
-
-    const localReviewsRes = await storeDispatchTyped(
-      {
-        operation: "selectAll",
-        table: "stripeReviews",
-      },
-      context,
-      configuration,
-      options,
-    );
-    const localReviewsById = new Map(
-      (localReviewsRes.docs || []).map((p) => [p.reviewId, p]),
-    );
 
     const reviews = await stripe.reviews
       .list({ limit: 100 }, { stripeAccount: args.accountId })
@@ -58,22 +45,5 @@ export const ReviewsSyncImplementation = defineActionImplementation({
         options,
       );
     }
-
-    // for (const [reviewId] of localReviewsById.entries()) {
-    //   if (!stripeReviewIds.has(reviewId)) {
-    //     await storeDispatchTyped(
-    //       {
-    //         operation: "deleteById",
-    //         table: "stripeReviews",
-    //         indexName: BY_STRIPE_ID_INDEX_NAME,
-    //         idField: "reviewId",
-    //         idValue: reviewId,
-    //       },
-    //       context,
-    //       configuration,
-    //       options,
-    //     );
-    //   }
-    // }
   },
 });

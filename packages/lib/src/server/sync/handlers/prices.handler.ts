@@ -12,24 +12,11 @@ export const PricesSyncImplementation = defineActionImplementation({
   }),
   name: "prices",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripePrices !== true) return;
+    if (configuration.sync.tables.stripePrices !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
-
-    const localPricesRes = await storeDispatchTyped(
-      {
-        operation: "selectAll",
-        table: "stripePrices",
-      },
-      context,
-      configuration,
-      options,
-    );
-    const localPricesById = new Map(
-      (localPricesRes.docs || []).map((p) => [p.priceId, p]),
-    );
 
     const prices = await stripe.prices
       .list(
@@ -61,22 +48,5 @@ export const PricesSyncImplementation = defineActionImplementation({
         options,
       );
     }
-
-    // for (const [priceId] of localPricesById.entries()) {
-    //   if (!stripePriceIds.has(priceId)) {
-    //     await storeDispatchTyped(
-    //       {
-    //         operation: "deleteById",
-    //         table: "stripePrices",
-    //         indexName: BY_STRIPE_ID_INDEX_NAME,
-    //         idField: "priceId",
-    //         idValue: priceId,
-    //       },
-    //       context,
-    //       configuration,
-    //       options,
-    //     );
-    //   }
-    // }
   },
 });

@@ -12,24 +12,11 @@ export const PlansSyncImplementation = defineActionImplementation({
   }),
   name: "plans",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripePlans !== true) return;
+    if (configuration.sync.tables.stripePlans !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
-
-    const localPlansRes = await storeDispatchTyped(
-      {
-        operation: "selectAll",
-        table: "stripePlans",
-      },
-      context,
-      configuration,
-      options,
-    );
-    const localPlansById = new Map(
-      (localPlansRes.docs || []).map((p) => [p.planId, p]),
-    );
 
     const plans = await stripe.plans
       .list(
@@ -61,22 +48,5 @@ export const PlansSyncImplementation = defineActionImplementation({
         options,
       );
     }
-
-    // for (const [planId] of localPlansById.entries()) {
-    //   if (!stripePlanIds.has(planId)) {
-    //     await storeDispatchTyped(
-    //       {
-    //         operation: "deleteById",
-    //         table: "stripePlans",
-    //         indexName: BY_STRIPE_ID_INDEX_NAME,
-    //         idField: "planId",
-    //         idValue: planId,
-    //       },
-    //       context,
-    //       configuration,
-    //       options,
-    //     );
-    //   }
-    // }
   },
 });

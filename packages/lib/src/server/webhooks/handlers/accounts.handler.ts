@@ -22,7 +22,7 @@ export default defineWebhookHandler({
     // "financial_connections.account.created",
   ],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripeAccounts !== true) return;
+    if (configuration.sync.tables.stripeAccounts !== true) return;
 
     const account = event.data.object;
     const entityId = account.metadata?.entityId;

@@ -6,31 +6,18 @@ import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { CapabilityStripeToConvex } from "@/schema/models/capability";
 import { storeDispatchTyped } from "@/store";
 
-// TODO: won't be considering accountId, except for standard account type maybe
+// NOTE: won't be considering accountId, except for standard account type maybe
 export const CapabilitiesSyncImplementation = defineActionImplementation({
   args: v.object({
     accountId: v.optional(v.string()),
   }),
   name: "capabilities",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripeCapabilities !== true) return;
+    if (configuration.sync.tables.stripeCapabilities !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
-
-    const localCapabilitiesRes = await storeDispatchTyped(
-      {
-        operation: "selectAll",
-        table: "stripeCapabilities",
-      },
-      context,
-      configuration,
-      options,
-    );
-    const localCapabilitiesById = new Map(
-      (localCapabilitiesRes.docs || []).map((p) => [p.capabilityId, p]),
-    );
 
     const accounts = await stripe.accounts
       .list()
@@ -65,22 +52,5 @@ export const CapabilitiesSyncImplementation = defineActionImplementation({
         );
       }
     }
-
-    // for (const [capabilityId] of localCapabilitiesById.entries()) {
-    //   if (!stripeCapabilityIds.has(capabilityId)) {
-    //     await storeDispatchTyped(
-    //       {
-    //         operation: "deleteById",
-    //         table: "stripeCapabilities",
-    //         indexName: BY_STRIPE_ID_INDEX_NAME,
-    //         idField: "capabilityId",
-    //         idValue: capabilityId,
-    //       },
-    //       context,
-    //       configuration,
-    //       options,
-    //     );
-    //   }
-    // }
   },
 });

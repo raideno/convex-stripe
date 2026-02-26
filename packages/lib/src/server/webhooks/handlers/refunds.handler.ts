@@ -12,7 +12,7 @@ export default defineWebhookHandler({
     "charge.refund.updated",
   ],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripeRefunds !== true) return;
+    if (configuration.sync.tables.stripeRefunds !== true) return;
 
     const refund = event.data.object;
 

@@ -29,11 +29,11 @@ if (
     "Each sync handler file should export a valid implementation",
   );
 
-export const SyncDataImplementation = defineActionImplementation({
+export const SyncTablesImplementation = defineActionImplementation({
   args: v.object({
     withConnect: v.optional(v.boolean()),
   }),
-  name: "sync",
+  name: "syncTables",
   handler: async (context, args, configuration, options) => {
     if (!args.withConnect) {
       await Promise.all(
@@ -57,7 +57,7 @@ export const SyncDataImplementation = defineActionImplementation({
       );
     } else {
       const stripe = new Stripe(configuration.stripe.secret_key, {
-        apiVersion: "2025-08-27.basil",
+        apiVersion: configuration.stripe.version,
       });
 
       const accounts = await stripe.accounts
@@ -67,8 +67,6 @@ export const SyncDataImplementation = defineActionImplementation({
       const accountIds = [undefined, ...accounts.map((account) => account.id)];
 
       await Promise.all(
-        // TODO: syncing an accounts is deleting all other resources
-        // thus only last account is being really considered, remove the deletion of the resources
         accountIds.map(async (accountId) => {
           await Promise.all(
             SYNC_HANDLERS.map(async (handler) => {

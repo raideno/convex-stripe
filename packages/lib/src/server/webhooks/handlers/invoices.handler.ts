@@ -24,7 +24,7 @@ export default defineWebhookHandler({
     "invoice.will_be_due",
   ],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripeInvoices !== true) return;
+    if (configuration.sync.tables.stripeInvoices !== true) return;
 
     const invoice = event.data.object;
 

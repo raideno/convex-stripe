@@ -15,7 +15,7 @@ export const CreateAccountLinkImplementation = defineActionCallableFunction<
   name: "createAccountLink",
   handler: async (context, args, stripeOptions, configuration, options) => {
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
 
     const refreshUrl = await buildSignedReturnUrl({

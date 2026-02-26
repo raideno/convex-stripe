@@ -17,7 +17,7 @@ export const post = mutation({
 
     if (args.message.length > MAX_MESSAGE_LENGTH) {
       throw new Error(
-        `Message too long (max ${MAX_MESSAGE_LENGTH} characters)`
+        `Message too long (max ${MAX_MESSAGE_LENGTH} characters)`,
       );
     }
 
@@ -33,7 +33,7 @@ export const post = mutation({
       const subscription = await context.db
         .query("stripeSubscriptions")
         .withIndex("byCustomerId", (q) =>
-          q.eq("customerId", customer.customerId)
+          q.eq("customerId", customer.customerId),
         )
         .unique();
       if (
@@ -52,7 +52,7 @@ export const post = mutation({
     if (planPriceId) {
       const price = await context.db
         .query("stripePrices")
-        .withIndex("byPriceId", (q) => q.eq("priceId", planPriceId))
+        .withIndex("byStripeId", (q) => q.eq("priceId", planPriceId))
         .unique();
       if (price) {
         const product = await context.db
@@ -71,7 +71,7 @@ export const post = mutation({
       .collect();
 
     const successfulPayments = checkouts.filter(
-      (c) => (c as any).stripe.payment_status === "paid"
+      (c) => (c as any).stripe.payment_status === "paid",
     ).length;
 
     const username = user.name || user.email?.split("@")[0] || "Unknown";

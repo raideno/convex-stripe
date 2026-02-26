@@ -1,5 +1,8 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { internalConvexStripe } from "@raideno/convex-stripe/server";
+import {
+  internalConvexStripe,
+  syncAllTables,
+} from "@raideno/convex-stripe/server";
 import { v } from "convex/values";
 
 import { internal } from "./_generated/api";
@@ -9,9 +12,17 @@ import {
   internalMutation,
   query,
 } from "./_generated/server";
-import configuration from "./stripe.config";
 
-export const { stripe, store, sync } = internalConvexStripe(configuration);
+export const { stripe, store, sync } = internalConvexStripe({
+  stripe: {
+    secret_key: process.env.STRIPE_SECRET_KEY!,
+    account_webhook_secret: process.env.STRIPE_ACCOUNT_WEBHOOK_SECRET!,
+    connect_webhook_secret: process.env.STRIPE_CONNECT_WEBHOOK_SECRET!,
+  },
+  sync: {
+    tables: syncAllTables(),
+  },
+});
 
 export const createCustomer = internalAction({
   args: {

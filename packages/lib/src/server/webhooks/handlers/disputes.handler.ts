@@ -13,7 +13,7 @@ export default defineWebhookHandler({
     "charge.dispute.funds_withdrawn",
   ],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripeDisputes !== true) return;
+    if (configuration.sync.tables.stripeDisputes !== true) return;
 
     const dispute = event.data.object;
 

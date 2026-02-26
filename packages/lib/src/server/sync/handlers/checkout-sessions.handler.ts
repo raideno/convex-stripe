@@ -12,27 +12,11 @@ export const CheckoutSessionsSyncImplementation = defineActionImplementation({
   }),
   name: "checkoutSessions",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripeCheckoutSessions !== true) return;
+    if (configuration.sync.tables.stripeCheckoutSessions !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
-
-    const localCheckoutSessionsRes = await storeDispatchTyped(
-      {
-        operation: "selectAll",
-        table: "stripeCheckoutSessions",
-      },
-      context,
-      configuration,
-      options,
-    );
-    const localCheckoutSessionsById = new Map(
-      (localCheckoutSessionsRes.docs || []).map((p) => [
-        p.checkoutSessionId,
-        p,
-      ]),
-    );
 
     const checkoutSessions = await stripe.checkout.sessions
       .list({ limit: 100 }, { stripeAccount: args.accountId })
@@ -61,22 +45,5 @@ export const CheckoutSessionsSyncImplementation = defineActionImplementation({
         options,
       );
     }
-
-    // for (const [checkoutSessionId] of localCheckoutSessionsById.entries()) {
-    //   if (!stripeCheckoutSessionIds.has(checkoutSessionId)) {
-    //     await storeDispatchTyped(
-    //       {
-    //         operation: "deleteById",
-    //         table: "stripeCheckoutSessions",
-    //         indexName: BY_STRIPE_ID_INDEX_NAME,
-    //         idField: "checkoutSessionId",
-    //         idValue: checkoutSessionId,
-    //       },
-    //       context,
-    //       configuration,
-    //       options,
-    //     );
-    //   }
-    // }
   },
 });

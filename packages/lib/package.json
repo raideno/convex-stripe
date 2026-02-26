@@ -1,6 +1,6 @@
 {
   "name": "@raideno/convex-stripe",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Easy stripe billing for convex apps.",
   "keywords": [
     "billing",
@@ -49,5 +49,8 @@
     "vite-plugin-compile-time": "^0.4.6",
     "vite-plugin-dts": "^4.5.4",
     "vite-tsconfig-paths": "^5.1.4"
+  },
+  "dependencies": {
+    "deepmerge": "^4.3.1"
   }
 }

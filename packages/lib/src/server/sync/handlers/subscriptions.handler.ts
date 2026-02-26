@@ -11,10 +11,10 @@ export const SubscriptionsSyncImplementation = defineActionImplementation({
   }),
   name: "subscriptions",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripeSubscriptions !== true) return;
+    if (configuration.sync.tables.stripeSubscriptions !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
 
     const subscriptions = await stripe.subscriptions
@@ -75,26 +75,27 @@ export const SubscriptionsSyncImplementation = defineActionImplementation({
         typeof s.customer === "string" ? s.customer : s.customer.id,
       ),
     );
-    // for (const sub of localSubsResponse.docs || []) {
-    //   if (!hasSub.has(sub.customerId)) {
-    //     await storeDispatchTyped(
-    //       {
-    //         operation: "upsert",
-    //         table: "stripeSubscriptions",
-    //         indexName: "byCustomerId",
-    //         idField: "customerId",
-    //         data: {
-    //           customerId: sub.customerId,
-    //           subscriptionId: null,
-    //           stripe: null,
-    //           lastSyncedAt: Date.now(),
-    //         },
-    //       },
-    //       context,
-    //       configuration,
-    //       options,
-    //     );
-    //   }
-    // }
+
+    for (const sub of localSubsResponse.docs || []) {
+      if (!hasSub.has(sub.customerId)) {
+        await storeDispatchTyped(
+          {
+            operation: "upsert",
+            table: "stripeSubscriptions",
+            indexName: "byCustomerId",
+            idField: "customerId",
+            data: {
+              customerId: sub.customerId,
+              subscriptionId: null,
+              stripe: null,
+              lastSyncedAt: Date.now(),
+            },
+          },
+          context,
+          configuration,
+          options,
+        );
+      }
+    }
   },
 });

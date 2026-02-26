@@ -7,7 +7,7 @@ import { defineWebhookHandler } from "@/webhooks/types";
 export default defineWebhookHandler({
   events: ["plan.created", "plan.deleted", "plan.updated"],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripePlans !== true) return;
+    if (configuration.sync.tables.stripePlans !== true) return;
 
     const plan = event.data.object;
 

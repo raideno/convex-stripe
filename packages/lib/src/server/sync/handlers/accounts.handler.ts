@@ -6,31 +6,18 @@ import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { AccountStripeToConvex } from "@/schema/models/account";
 import { storeDispatchTyped } from "@/store";
 
-// TODO: won't be considering accountId, except for standard account type maybe
+// NOTE: won't be considering accountId, except for standard account type maybe
 export const AccountsSyncImplementation = defineActionImplementation({
   args: v.object({
     accountId: v.optional(v.string()),
   }),
   name: "accounts",
   handler: async (context, args, configuration, options) => {
-    if (configuration.sync.stripeAccounts !== true) return;
+    if (configuration.sync.tables.stripeAccounts !== true) return;
 
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
-
-    const localAccountsRes = await storeDispatchTyped(
-      {
-        operation: "selectAll",
-        table: "stripeAccounts",
-      },
-      context,
-      configuration,
-      options,
-    );
-    const localAccountById = new Map(
-      (localAccountsRes.docs || []).map((p) => [p.accountId, p]),
-    );
 
     const accounts = await stripe.accounts
       .list({ limit: 100 })
@@ -66,22 +53,5 @@ export const AccountsSyncImplementation = defineActionImplementation({
         options,
       );
     }
-
-    // for (const [accountId] of localAccountById.entries()) {
-    //   if (!stripeAccountIds.has(accountId)) {
-    //     await storeDispatchTyped(
-    //       {
-    //         operation: "deleteById",
-    //         table: "stripeAccounts",
-    //         indexName: BY_STRIPE_ID_INDEX_NAME,
-    //         idField: "accountId",
-    //         idValue: accountId,
-    //       },
-    //       context,
-    //       configuration,
-    //       options,
-    //     );
-    //   }
-    // }
   },
 });

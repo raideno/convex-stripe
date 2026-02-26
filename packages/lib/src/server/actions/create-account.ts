@@ -19,7 +19,7 @@ export const CreateAccountImplementation = defineActionCallableFunction<
   name: "createAccount",
   handler: async (context, args, stripeOptions, configuration, options) => {
     const stripe = new Stripe(configuration.stripe.secret_key, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: configuration.stripe.version,
     });
 
     // TODO: is it enough to check on the locally synced version, what if someone modifies the dashboard in the mean time

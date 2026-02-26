@@ -15,7 +15,7 @@ export default defineWebhookHandler({
     "subscription_schedule.updated",
   ],
   handle: async (event, context, configuration, options) => {
-    if (configuration.sync.stripeSubscriptionSchedules !== true) return;
+    if (configuration.sync.tables.stripeSubscriptionSchedules !== true) return;
 
     const subscriptionSchedule = event.data.object;
 
