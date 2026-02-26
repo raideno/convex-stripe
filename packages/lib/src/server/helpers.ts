@@ -43,6 +43,26 @@ export const syncOnlyTables = (tables: Array<keyof typeof stripeTables>) =>
     ]),
   ) as Record<keyof typeof stripeTables, boolean>;
 
+export const allStripeTablesExcept = (tables: Array<keyof typeof stripeTables>) =>
+  Object.fromEntries(
+    Object.entries(stripeTables).map(([table, definition]) => [
+      table,
+      !tables.includes(table as keyof typeof stripeTables)
+        ? definition
+        : undefined,
+    ]),
+  ) as typeof stripeTables;
+
+export const onlyStripeTables = (tables: Array<keyof typeof stripeTables>) =>
+  Object.fromEntries(
+    Object.entries(stripeTables).map(([table, definition]) => [
+      table,
+      tables.includes(table as keyof typeof stripeTables)
+        ? definition
+        : undefined,
+    ]),
+  ) as typeof stripeTables;
+
 export const DEFAULT_CONFIGURATION: InternalConfiguration = {
   stripe: {
     version: "2025-08-27.basil",

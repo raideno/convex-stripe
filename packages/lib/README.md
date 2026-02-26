@@ -99,6 +99,23 @@ export default defineSchema({
 });
 ```
 
+If you only want to sync specific tables and avoid creating empty tables in your database, you can use the `allStripeTablesExcept` or `onlyStripeTables` helpers instead of `stripeTables`:
+
+```ts
+// convex/schema.ts
+
+import { defineSchema } from "convex/server";
+import { onlyStripeTables } from "@raideno/convex-stripe/server";
+
+export default defineSchema({
+  ...onlyStripeTables(["stripeCustomers", "stripeSubscriptions", "stripeProducts", "stripePrices"]),
+  // your other tables...
+});
+```
+
+> [!WARNING]
+> Ensure that your table configuration in `convex/schema.ts` matches your `sync.tables` configuration in `convex/stripe.ts` exactly! If your `sync.tables` tries to sync a table that is excluded from your schema, Convex Stripe will throw a runtime error when processing webhooks.
+
 See [Tables Reference](./documentation/references/tables.md) for the full list of tables and their schemas.
 
 ### 4. Initialize the Library
