@@ -17,7 +17,7 @@ export interface InternalOptions {
 export type CallbackEvent = {
   [K in keyof StripeDataModel]: {
     table: K;
-    _id: IdField<K>;
+    _id: StripeDataModel[K]["document"]["_id"];
   };
 }[keyof StripeDataModel];
 
