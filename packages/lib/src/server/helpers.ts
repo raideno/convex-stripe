@@ -46,6 +46,9 @@ export const DEFAULT_CONFIGURATION: InternalConfiguration = {
     ttlMs: 15 * 60 * 1000,
     handlers: [],
   },
+  webhook: {
+    handlers: [],
+  },
   detached: false,
   callbacks: {
     afterChange: async () => {},

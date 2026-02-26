@@ -5,6 +5,7 @@ import Stripe from "stripe";
 import { Logger } from "@/logger";
 import { defineRedirectHandler } from "@/redirects/types";
 import { StripeDataModel, stripeTables } from "@/schema";
+import { defineWebhookHandler } from "./webhooks/types";
 
 export interface InternalOptions {
   store: string;
@@ -115,6 +116,11 @@ export interface InputConfiguration {
    * Document your intended behavior here.
    */
   detached?: boolean;
+
+  webhook?: {
+    /** Optional additional webhook handlers to handle custom Stripe events or override default behavior. */
+    handlers?: Array<ReturnType<typeof defineWebhookHandler>>;
+  };
 
   redirect?: {
     /** TTL for redirect state (ms). */

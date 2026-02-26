@@ -84,5 +84,18 @@ export const webhookImplementation = async (
     }
   }
 
+  for (const handler of configuration.webhook.handlers) {
+    if (handler.events.includes(event.type)) {
+      try {
+        await handler.handle(event, context, configuration, options);
+        options.logger.debug(`[STRIPE HOOK](HANDLED BY CONFIG): ${event.type}`);
+      } catch (error) {
+        options.logger.error(
+          `[STRIPE HOOK](Error in config handler): ${error}`,
+        );
+      }
+    }
+  }
+
   return new Response("OK", { status: 200 });
 };

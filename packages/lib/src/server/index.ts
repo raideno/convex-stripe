@@ -37,6 +37,8 @@ import type { RedirectHandler } from "./redirects/types";
 
 export { defineRedirectHandler } from "./redirects/types";
 
+export { defineWebhookHandler } from "./webhooks/types";
+
 export { RedirectHandler };
 
 export { buildSignedReturnUrl } from "./redirects/index";
