@@ -10,8 +10,6 @@ export type ReturnType = StripeDataModel["stripeAccounts"]["document"];
 export const CreateAccountImplementation = defineActionCallableFunction<
   {
     entityId: string;
-    // type: "express" | "standard" | "custom";
-    type: "express" | "custom";
   } & Omit<Stripe.AccountCreateParams, "type">,
   Stripe.RequestOptions,
   Promise<ReturnType>
