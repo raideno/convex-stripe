@@ -88,7 +88,7 @@ export const StoreImplementation = defineMutationImplementation({
               typeof upsertIdField
             >
           >;
-        const id = await upsert(
+        const _id = await upsert(
           context,
           table,
           upsertIndexName,
@@ -101,12 +101,12 @@ export const StoreImplementation = defineMutationImplementation({
               context,
               "upsert",
               // TODO: remove any
-              { table: table as any },
+              { table: table as any, _id: _id as any },
             );
           } catch (error) {
             console.error("[afterChange]:", error);
           }
-        return { id };
+        return { _id };
       }
 
       case "insert": {
@@ -116,19 +116,19 @@ export const StoreImplementation = defineMutationImplementation({
         const insertData = args.data as WithoutSystemFields<
           StripeDataModel[typeof table]["document"]
         >;
-        const id = await insert(context, table, insertData);
+        const _id = await insert(context, table, insertData);
         if (configuration.callbacks && configuration.callbacks.afterChange)
           try {
             await configuration.callbacks.afterChange(
               context,
               "insert",
               // TODO: remove any
-              { table: table as any },
+              { table: table as any, _id: _id as any },
             );
           } catch (error) {
             console.error("[afterChange]:", error);
           }
-        return { id };
+        return { _id };
       }
 
       case "deleteById": {
@@ -154,7 +154,7 @@ export const StoreImplementation = defineMutationImplementation({
           typeof deleteByIdIdField
         >;
 
-        const deleted = await deleteById(
+        const _id = await deleteById(
           context,
           table,
           deleteByIdIndexName,
@@ -167,12 +167,12 @@ export const StoreImplementation = defineMutationImplementation({
               context,
               "delete",
               // TODO: remove any
-              { table: table as any },
+              { table: table as any, _id: _id as any },
             );
           } catch (error) {
             console.error("[afterChange]:", error);
           }
-        return { deleted };
+        return { _id };
       }
 
       case "selectOne": {

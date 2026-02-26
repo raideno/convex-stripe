@@ -5,6 +5,7 @@ import {
 } from "convex/server";
 
 import { BY_STRIPE_ID_INDEX_NAME, StripeDataModel } from "../../schema";
+import { GenericId } from "convex/values";
 
 type StripeIndexFieldPath<
   TableName extends keyof StripeDataModel,
@@ -27,7 +28,7 @@ export async function deleteById<
     StripeDataModel[TableName]["document"],
     IndexField
   >,
-): Promise<boolean> {
+): Promise<GenericId<TableName> | null> {
   const existing = await context.db
     .query(table)
     .withIndex(indexName, (q) => q.eq(idField, idValue))
@@ -35,8 +36,8 @@ export async function deleteById<
 
   if (existing) {
     await context.db.delete(existing._id);
-    return true;
+    return existing._id;
   }
 
-  return false;
+  return null;
 }

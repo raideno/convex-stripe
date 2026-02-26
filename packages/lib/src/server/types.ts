@@ -1,4 +1,4 @@
-import { GenericMutationCtx } from "convex/server";
+import { GenericMutationCtx, IdField } from "convex/server";
 import { Infer, Validator } from "convex/values";
 import Stripe from "stripe";
 
@@ -17,6 +17,7 @@ export interface InternalOptions {
 export type CallbackEvent = {
   [K in keyof StripeDataModel]: {
     table: K;
+    _id: IdField<K>;
   };
 }[keyof StripeDataModel];
 
