@@ -1,13 +1,27 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { action, internalQuery, query } from "./_generated/server";
 import { stripe } from "./stripe";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { api, internal } from "./_generated/api";
 
 export const products = query({
   args: {},
   handler: async (context) => {
-    return context.db.query("stripeProducts").collect();
+    const prices = await context.db.query("stripePrices").collect();
+    const products = await context.db.query("stripeProducts").collect();
+
+    return products.map((product) => {
+      const price = prices.find(
+        (price) => price.stripe.productId === product.productId,
+      );
+      return {
+        ...product,
+        stripe: {
+          ...product.stripe,
+          default_price: price,
+        },
+      };
+    });
   },
 });
 
@@ -80,25 +94,64 @@ export const getUserAccount = internalQuery({
   },
 });
 
+export const productsCount = internalQuery({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (context, args) => {
+    const account = await context.db
+      .query("stripeAccounts")
+      .withIndex("byEntityId", (q) => q.eq("entityId", args.userId))
+      .first();
+
+    if (!account) return 0;
+
+    const accountProducts = await context.db
+      .query("stripeProducts")
+      .withIndex("byAccountId", (q) => q.eq("accountId", account.accountId))
+      .collect();
+
+    return accountProducts.length;
+  },
+});
+
 export const createProduct = action({
   args: {
     name: v.string(),
     description: v.string(),
     price: v.number(),
+    images: v.optional(v.array(v.string())),
   },
   handler: async (context, args) => {
     const userId = await getAuthUserId(context);
 
-    if (!userId) throw new Error("Unauthorized");
+    if (!userId) throw new ConvexError("Unauthorized");
 
     const account = await context.runQuery(internal.marketplace.getUserAccount);
 
-    if (!account) throw new Error("No account found");
+    if (!account) throw new ConvexError("No account found");
+
+    if (args.images && args.images.length > 8) {
+      throw new ConvexError("You can only provide up to 8 images");
+    }
+
+    const accountProducts = await context.runQuery(
+      internal.marketplace.productsCount,
+      {
+        userId: userId,
+      },
+    );
+
+    if (accountProducts > 8)
+      throw new ConvexError(
+        "You have reached the maximum number of products (8)",
+      );
 
     const product = await stripe.client.products.create(
       {
         name: args.name,
         description: args.description,
+        images: args.images,
       },
       {
         stripeAccount: account.stripe.id,

@@ -7,6 +7,7 @@ import { Theme } from "@radix-ui/themes";
 import { ConvexReactClient } from "convex/react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { ErrorBoundary } from "react-error-boundary";
 
 import App from "./app";
 
@@ -22,11 +23,20 @@ const root = createRoot(container);
 
 root.render(
   <StrictMode>
-    <ConvexAuthProvider client={convex}>
-      <Theme appearance="dark">
-        <App />
-        <Toaster />
-      </Theme>
-    </ConvexAuthProvider>
-  </StrictMode>
+    <ErrorBoundary
+      fallbackRender={({ error }) => (
+        <div className="p-4 bg-red-100 text-red-800 rounded">
+          <h2 className="text-lg font-bold mb-2">An error occurred:</h2>
+          <pre className="whitespace-pre-wrap">{JSON.stringify(error)}</pre>
+        </div>
+      )}
+    >
+      <ConvexAuthProvider client={convex}>
+        <Theme appearance="dark">
+          <App />
+          <Toaster />
+        </Theme>
+      </ConvexAuthProvider>
+    </ErrorBoundary>
+  </StrictMode>,
 );

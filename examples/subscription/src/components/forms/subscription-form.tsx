@@ -20,11 +20,12 @@ export const currencyToSymbol: Record<string, string> = {
   gbp: "£",
   inr: "₹",
   // TODO: to be completed
+  unknown: "unknown",
 };
 
 export const SubscriptionForm = () => {
   const products = useQuery(api.stripe.products);
-  const subscription = useQuery(api.stripe.subscription);
+  const subscription = useQuery(api.stripe.subscription, {});
 
   const checkout = useAction(api.stripe.subscribe);
 
@@ -101,7 +102,7 @@ export const SubscriptionForm = () => {
                       (feature, index) =>
                         feature.name && (
                           <Text key={index}>- {feature.name}</Text>
-                        )
+                        ),
                     )}
                   </Flex>
                   <Button

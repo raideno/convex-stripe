@@ -1,5 +1,6 @@
 import { api } from "@/convex/api";
 import {
+  AspectRatio,
   Badge,
   Box,
   Button,
@@ -7,11 +8,14 @@ import {
   Flex,
   Grid,
   Heading,
+  Text,
 } from "@radix-ui/themes";
 import { useAction, useQuery } from "convex/react";
 import React from "react";
 import { toast } from "sonner";
 import { faker } from "@faker-js/faker";
+import { currencyToSymbol } from "./subscription-form";
+import { ConvexError } from "convex/values";
 
 const Account = () => {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -31,11 +35,16 @@ const Account = () => {
         price:
           parseFloat(faker.commerce.price({ min: 1000, max: 10000, dec: 0 })) ||
           1000,
+        images: [faker.image.url({ width: 480, height: 480 })],
       });
 
       toast.success("Product created successfully.");
-    } catch {
-      toast.error("Failed to create product.");
+    } catch (error: unknown) {
+      if (error instanceof ConvexError) {
+        toast.error(error.data);
+      } else {
+        toast.error("Failed to create product.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +95,9 @@ const Account = () => {
 
   return (
     <Flex direction={"row"} align={"center"} gap="2">
-      <Badge>{account.stripe.id}</Badge>
+      <Button variant="outline" disabled>
+        {account.stripe.id}
+      </Button>
       <Button variant="classic" onClick={handleProductCreation}>
         Create Product
       </Button>
@@ -103,20 +114,11 @@ export const Marketplace: React.FC<MarketplaceProps> = () => {
     return <div>Loading...</div>;
   }
 
-  console.log("[products]:", products);
-
-  /**
-   * TODO: stripe connect plan
-   *
-   * 1. First propose to create an account if not already.
-   * 2. If an account is available, show the create product button.
-   */
-
   return (
     <Box>
       <Flex direction="column" gap="4">
         <Flex justify={"between"}>
-          <Heading size={"6"}>Marketplace</Heading>
+          <Heading size={"6"}>Products Marketplace</Heading>
           <Account />
         </Flex>
         <Grid
@@ -124,14 +126,68 @@ export const Marketplace: React.FC<MarketplaceProps> = () => {
           justify={"between"}
           gap="4"
         >
-          {products.map((product) => {
-            return (
-              <Card key={product._id}>
-                <div>AccountId: {product.accountId || "Root"}</div>
-                <div>{product.stripe.name}</div>
-              </Card>
-            );
-          })}
+          {products
+            .filter(
+              (product) => !product.stripe.default_price?.stripe.recurring,
+            )
+            .sort((p1, p2) => {
+              if (!p1.accountId && p2.accountId) return -1;
+              if (p1.accountId && !p2.accountId) return 1;
+              return 0;
+            })
+            .map((product) => {
+              return (
+                <Card
+                  key={product._id}
+                  className="overflow-hidden cursor-pointer"
+                >
+                  <AspectRatio
+                    ratio={1 / 1}
+                    className="relative rounded overflow-hidden"
+                  >
+                    <img
+                      className="w-full h-full object-cover bg-gray-200 brightness-50"
+                      src={product.stripe.images[0]}
+                      alt={product.stripe.name}
+                    />
+
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-linear-to-t from-black via-transparent to-transparent" />
+
+                    {/* Content overlay */}
+                    <Box
+                      position="absolute"
+                      bottom="0"
+                      left="0"
+                      right="0"
+                      className="p-4"
+                    >
+                      <Text>
+                        {(product.stripe.default_price?.stripe.unit_amount ||
+                          0) / 100}
+                        {
+                          currencyToSymbol[
+                            product.stripe.default_price?.stripe.currency ||
+                              "unknown"
+                          ]
+                        }
+                      </Text>
+                      <Heading
+                        size="4"
+                        weight="bold"
+                        className="mb-2 line-clamp-1"
+                      >
+                        {product.stripe.name}
+                      </Heading>
+
+                      <Badge color="blue" variant="soft">
+                        {product.accountId || "Root Account"}
+                      </Badge>
+                    </Box>
+                  </AspectRatio>
+                </Card>
+              );
+            })}
         </Grid>
       </Flex>
     </Box>

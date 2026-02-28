@@ -37,7 +37,7 @@ export const { createCustomer, products, subscription } = stripe.helpers({
 
     if (args.entityId && args.entityId !== userId) return [false, null];
 
-    return [true, null];
+    return [true, userId];
   },
 });
 
