@@ -195,7 +195,13 @@ export const DEFAULT_OPTIONS: InternalOptions = {
 };
 
 export const normalizeOptions = (options: InputOptions): InternalOptions => {
-  return deepmerge(DEFAULT_OPTIONS, options);
+  const { logger, ...rest } = options;
+  const merged = deepmerge(DEFAULT_OPTIONS, rest);
+
+  return {
+    ...merged,
+    logger: logger || DEFAULT_OPTIONS.logger,
+  };
 };
 
 export const defineActionCallableFunction = <
