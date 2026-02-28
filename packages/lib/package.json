@@ -1,6 +1,6 @@
 {
   "name": "@raideno/convex-stripe",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Easy stripe billing for convex apps.",
   "keywords": [
     "billing",

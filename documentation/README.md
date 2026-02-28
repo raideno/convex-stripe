@@ -17,9 +17,9 @@ Stripe [syncing](./documentation/references/tables.md), subscriptions, [checkout
     - [7. Run the `sync` Action](#7-run-the-sync-action)
     - [8. Start Building](#8-start-building)
   - [Configuration](#configuration)
+    - [Schema Configuration](#schema-configuration)
     - [Stripe Configuration](#stripe-configuration)
     - [Sync Configuration](#sync-configuration)
-      - [Table Selection](#table-selection)
       - [Catalog (Unstable)](#catalog-unstable)
       - [Webhook Configuration](#webhook-configuration)
       - [Portal Configuration](#portal-configuration)
@@ -113,8 +113,7 @@ export default defineSchema({
 });
 ```
 
-> [!WARNING]
-> Ensure that your table configuration in `convex/schema.ts` matches your `sync.tables` configuration in `convex/stripe.ts` exactly! If your `sync.tables` tries to sync a table that is excluded from your schema, Convex Stripe will throw a runtime error when processing webhooks.
+The package will only sync the tables you defined.
 
 See [Tables Reference](./documentation/references/tables.md) for the full list of tables and their schemas.
 
@@ -125,15 +124,15 @@ Call `internalConvexStripe` with your Stripe credentials and sync configuration.
 ```ts
 // convex/stripe.ts
 
-import { internalConvexStripe, syncAllTables } from "@raideno/convex-stripe/server";
+import { internalConvexStripe } from "@raideno/convex-stripe/server";
+
+import schema from "./schema";
 
 export const { stripe, store, sync } = internalConvexStripe({
+  schema: schema,
   stripe: {
     secret_key: process.env.STRIPE_SECRET_KEY!,
     account_webhook_secret: process.env.STRIPE_ACCOUNT_WEBHOOK_SECRET!,
-  },
-  sync: {
-    tables: syncAllTables(),
   },
 });
 ```
@@ -260,6 +259,9 @@ The `internalConvexStripe` function accepts a configuration object and an option
 ```ts
 const { stripe, store, sync } = internalConvexStripe(configuration, options);
 ```
+### Schema Configuration
+
+The `schema` key holds your convex app schema, from it the package will infer which stripe tables should be synced or not depending on what stripeTables where defined.
 
 ### Stripe Configuration
 
@@ -276,29 +278,6 @@ The `stripe` key in the configuration object holds your Stripe credentials and A
 
 The `sync` key controls which tables are synced and allows you to define catalog items, webhook endpoints, and billing portal configuration.
 
-#### Table Selection
-
-Three helper functions are provided to control which Stripe tables are synced into Convex:
-
-```ts
-import {
-  syncAllTables,
-  syncAllTablesExcept,
-  syncOnlyTables,
-} from "@raideno/convex-stripe/server";
-
-// Sync all 24 tables (default)
-{ tables: syncAllTables() }
-
-// Sync all tables except specific ones
-{ tables: syncAllTablesExcept(["stripeReviews", "stripePlans"]) }
-
-// Sync only specific tables
-{ tables: syncOnlyTables(["stripeCustomers", "stripeSubscriptions", "stripeProducts", "stripePrices"]) }
-```
-
-All 24 available tables are listed in the [Synced Tables](#synced-tables) section.
-
 #### Catalog (Unstable)
 
 The `sync.catalog` key lets you pre-define products and prices that should exist in Stripe. When the `sync` action is called with `{ catalog: true }`, the library ensures these objects exist in your Stripe account.
@@ -307,7 +286,6 @@ The `sync.catalog` key lets you pre-define products and prices that should exist
 internalConvexStripe({
   // ...
   sync: {
-    tables: syncAllTables(),
     catalog: {
       products: [
         { name: "Pro Plan", metadata: { convex_stripe_key: "pro" } },
@@ -502,15 +480,17 @@ Then update your configuration to include it:
 ```ts
 // convex/stripe.ts
 
+import { internalConvexStripe } from "@raideno/convex-stripe/server";
+
+import schema from "./schema";
+
 export const { stripe, store, sync } = internalConvexStripe({
+  schema: schema,
   stripe: {
     secret_key: process.env.STRIPE_SECRET_KEY!,
     account_webhook_secret: process.env.STRIPE_ACCOUNT_WEBHOOK_SECRET!,
     connect_webhook_secret: process.env.STRIPE_CONNECT_WEBHOOK_SECRET!,
-  },
-  sync: {
-    tables: syncAllTables(),
-  },
+  }
 });
 ```
 

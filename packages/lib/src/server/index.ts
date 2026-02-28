@@ -42,16 +42,10 @@ export { defineWebhookHandler } from "./webhooks/types";
 export { RedirectHandler };
 
 export { buildSignedReturnUrl, REDIRECT_HANDLERS } from "./redirects/index";
-export { WEBHOOK_HANDLERS } from "./webhooks/index";
 export { SYNC_HANDLERS } from "./sync/tables";
+export { WEBHOOK_HANDLERS } from "./webhooks/index";
 
-export {
-  allStripeTablesExcept,
-  onlyStripeTables,
-  syncAllTables,
-  syncAllTablesExcept,
-  syncOnlyTables,
-} from "./helpers";
+export { allStripeTablesExcept, onlyStripeTables } from "./helpers";
 
 export { stripeTables } from "./schema";
 
@@ -135,7 +129,7 @@ const buildHttp = (
  * });
  */
 export const internalConvexStripe = (
-  configuration_: InputConfiguration,
+  configuration_: InputConfiguration & { sync?: { tables?: never } },
   options_?: InputOptions,
 ) => {
   const ConvexStripeInternalConfiguration =
@@ -176,8 +170,7 @@ export const internalConvexStripe = (
        * stripe.addHttpRoutes(http);
        * export default http;
        */
-      addHttpRoutes: (http: HttpRouter, config?: InputConfiguration) => {
-        config = normalizeConfiguration(config || configuration_);
+      addHttpRoutes: (http: HttpRouter) => {
         http.route({
           path: http_.webhook.path,
           method: http_.webhook.method,

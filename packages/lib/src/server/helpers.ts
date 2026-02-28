@@ -1,6 +1,11 @@
 import deepmerge from "deepmerge";
 
-import { GenericActionCtx, GenericMutationCtx } from "convex/server";
+import {
+  GenericActionCtx,
+  GenericMutationCtx,
+  GenericSchema,
+  SchemaDefinition,
+} from "convex/server";
 import { Infer, v, VObject } from "convex/values";
 
 import { Logger } from "@/logger";
@@ -22,28 +27,9 @@ import {
   optionalnullableobject,
 } from "./schema/validators";
 
-export const syncAllTables = () =>
-  Object.fromEntries(
-    Object.keys(stripeTables).map((table) => [table, true]),
-  ) as Record<keyof typeof stripeTables, boolean>;
-
-export const syncAllTablesExcept = (tables: Array<keyof typeof stripeTables>) =>
-  Object.fromEntries(
-    Object.keys(stripeTables).map((table) => [
-      table,
-      !tables.includes(table as keyof typeof stripeTables),
-    ]),
-  ) as Record<keyof typeof stripeTables, boolean>;
-
-export const syncOnlyTables = (tables: Array<keyof typeof stripeTables>) =>
-  Object.fromEntries(
-    Object.keys(stripeTables).map((table) => [
-      table,
-      tables.includes(table as keyof typeof stripeTables),
-    ]),
-  ) as Record<keyof typeof stripeTables, boolean>;
-
-export const allStripeTablesExcept = (tables: Array<keyof typeof stripeTables>) =>
+export const allStripeTablesExcept = (
+  tables: Array<keyof typeof stripeTables>,
+) =>
   Object.fromEntries(
     Object.entries(stripeTables).map(([table, definition]) => [
       table,
@@ -64,6 +50,7 @@ export const onlyStripeTables = (tables: Array<keyof typeof stripeTables>) =>
   ) as typeof stripeTables;
 
 export const DEFAULT_CONFIGURATION: InternalConfiguration = {
+  schema: undefined as unknown as SchemaDefinition<GenericSchema, true>,
   stripe: {
     version: "2025-08-27.basil",
     secret_key: "",
@@ -79,9 +66,37 @@ export const DEFAULT_CONFIGURATION: InternalConfiguration = {
   },
   detached: false,
   callbacks: {
-    afterChange: async () => { },
+    afterChange: async () => {},
   },
   sync: {
+    tables: {
+      stripeAccounts: true,
+      stripeBillingPortalConfigurations: true,
+      stripeCapabilities: true,
+      stripeCharges: true,
+      stripeCheckoutSessions: true,
+      stripeCoupons: true,
+      stripeCreditNotes: true,
+      stripeCustomers: true,
+      stripeDisputes: true,
+      stripeEarlyFraudWarnings: true,
+      stripeInvoices: true,
+      stripeMandates: true,
+      stripePaymentIntents: true,
+      stripePaymentMethods: true,
+      stripePayouts: true,
+      stripePlans: true,
+      stripePrices: true,
+      stripeProducts: true,
+      stripePromotionCodes: true,
+      stripeRefunds: true,
+      stripeReviews: true,
+      stripeSetupIntents: true,
+      stripeSubscriptions: true,
+      stripeSubscriptionSchedules: true,
+      stripeTaxIds: true,
+      stripeTransfers: true,
+    },
     catalog: {
       products: [],
       prices: [],
@@ -90,34 +105,6 @@ export const DEFAULT_CONFIGURATION: InternalConfiguration = {
         onExisting: "update",
         onMissingKey: "create",
       },
-    },
-    tables: {
-      stripeAccounts: true,
-      stripeCapabilities: true,
-      stripeTransfers: true,
-      stripeCoupons: true,
-      stripeCustomers: true,
-      stripePrices: true,
-      stripeProducts: true,
-      stripePromotionCodes: true,
-      stripeSubscriptions: true,
-      stripePayouts: true,
-      stripeCheckoutSessions: true,
-      stripePaymentIntents: true,
-      stripeRefunds: true,
-      stripeInvoices: true,
-      stripeReviews: true,
-      stripeCharges: true,
-      stripeCreditNotes: true,
-      stripeDisputes: true,
-      stripeEarlyFraudWarnings: true,
-      stripePaymentMethods: true,
-      stripePlans: true,
-      stripeSetupIntents: true,
-      stripeSubscriptionSchedules: true,
-      stripeTaxIds: true,
-      stripeMandates: true,
-      stripeBillingPortalConfigurations: true,
     },
     webhooks: {
       account: {
@@ -188,9 +175,16 @@ export const DEFAULT_CONFIGURATION: InternalConfiguration = {
 };
 
 export const normalizeConfiguration = (
-  config: InputConfiguration,
+  configuration: InputConfiguration,
 ): InternalConfiguration => {
-  return deepmerge(DEFAULT_CONFIGURATION, config as InternalConfiguration);
+  const output = deepmerge(DEFAULT_CONFIGURATION, configuration);
+  const stripeTableNames = Object.keys(stripeTables);
+  output.sync.tables = Object.fromEntries(
+    Object.keys(configuration.schema.tables)
+      .filter((table) => stripeTableNames.includes(table))
+      .map((table) => [table, true]),
+  ) as Record<keyof typeof stripeTables, boolean>;
+  return output;
 };
 
 export const DEFAULT_OPTIONS: InternalOptions = {

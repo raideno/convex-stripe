@@ -1,4 +1,9 @@
-import { GenericMutationCtx, IdField } from "convex/server";
+import {
+  GenericMutationCtx,
+  GenericSchema,
+  IdField,
+  SchemaDefinition,
+} from "convex/server";
 import { Infer, Validator } from "convex/values";
 import Stripe from "stripe";
 
@@ -34,6 +39,7 @@ export type RecursiveDeepRequired<T> = T extends (...args: any[]) => any
     : T;
 
 export interface InputConfiguration {
+  schema: SchemaDefinition<GenericSchema, true>;
   stripe: {
     /** Stripe API version to pin against (recommended for stability). */
     version?: Stripe.StripeConfig["apiVersion"];
@@ -51,7 +57,7 @@ export interface InputConfiguration {
     connect_webhook_secret?: string;
   };
 
-  sync: {
+  sync?: {
     catalog?: {
       /** Products to ensure exist in Stripe (optional bootstrap). */
       products?: Stripe.ProductCreateParams[];
@@ -104,7 +110,7 @@ export interface InputConfiguration {
     portal?: Stripe.BillingPortal.ConfigurationCreateParams;
 
     /** Which Stripe tables you want to sync into Convex. */
-    tables: Record<keyof typeof stripeTables, boolean>;
+    tables?: Record<keyof typeof stripeTables, boolean>;
   };
 
   callbacks?: {
