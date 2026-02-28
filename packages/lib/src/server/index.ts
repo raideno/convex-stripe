@@ -17,7 +17,7 @@ import {
   PortalImplementation,
   SubscribeImplementation,
 } from "./actions";
-import type { HelperAuthCallback, StripeHelpersConfig, SubscribeUrls, PayUrls, PortalUrls } from "./convex";
+import type { HelperAuthCallback, StripeHelpersConfig } from "./convex";
 import { buildHelpers } from "./convex";
 import { normalizeConfiguration, normalizeOptions } from "./helpers";
 import { redirectImplementation } from "./redirects";
@@ -53,7 +53,7 @@ export { stripeTables } from "./schema";
 
 export { Logger } from "./logger";
 
-export { HelperAuthCallback, StripeHelpersConfig, SubscribeUrls, PayUrls, PortalUrls };
+export { HelperAuthCallback, StripeHelpersConfig };
 
 export {
   CallbackAfterChange,

@@ -3,11 +3,7 @@ import { GenericActionCtx, GenericQueryCtx } from "convex/server";
 /**
  * The operations handled by action-type helpers (run in an action context).
  */
-export type ActionOperation =
-    | "createCustomer"
-    | "subscribe"
-    | "pay"
-    | "portal";
+export type ActionOperation = "createCustomer";
 
 /**
  * The operations handled by query-type helpers (run in a query context).
@@ -27,15 +23,15 @@ export type HelperOperation = ActionOperation | QueryOperation;
  * it is narrowed to `GenericQueryCtx<any>`.
  */
 export type AuthArgs =
-    | {
-        context: GenericActionCtx<any>;
-        operation: ActionOperation;
-        entityId?: string;
+  | {
+      context: GenericActionCtx<any>;
+      operation: ActionOperation;
+      entityId?: string;
     }
-    | {
-        context: GenericQueryCtx<any>;
-        operation: QueryOperation;
-        entityId?: string;
+  | {
+      context: GenericQueryCtx<any>;
+      operation: QueryOperation;
+      entityId?: string;
     };
 
 /**
@@ -63,83 +59,15 @@ export type AuthArgs =
  * };
  */
 export type HelperAuthCallback = (
-    args: AuthArgs,
+  args: AuthArgs,
 ) => Promise<[boolean, string | null]>;
-
-/**
- * A value that resolves to a URL string. Can be a static string or a
- * function (sync or async) that receives the operation context and arguments.
- */
-export type UrlResolver<T> =
-    | string
-    | ((args: {
-        context: GenericActionCtx<any>;
-        entityId: string;
-        args: T;
-    }) => string | Promise<string>);
-
-/**
- * URL configuration for the `subscribe` helper.
- */
-export interface SubscribeUrls {
-    /** URL to redirect to after a successful subscription checkout. */
-    success: UrlResolver<{ priceId: string }>;
-    /** URL to redirect to if a subscription checkout is cancelled. */
-    cancel: UrlResolver<{ priceId: string }>;
-    /** URL to redirect to if redirect signing fails. */
-    failure: UrlResolver<{ priceId: string }>;
-}
-
-/**
- * URL configuration for the `pay` helper.
- */
-export interface PayUrls {
-    /** URL to redirect to after a successful one-time payment. */
-    success: UrlResolver<{
-        referenceId: string;
-        line_items: Array<{ price: string; quantity: number }>;
-    }>;
-    /** URL to redirect to if a one-time payment is cancelled. */
-    cancel: UrlResolver<{
-        referenceId: string;
-        line_items: Array<{ price: string; quantity: number }>;
-    }>;
-    /** URL to redirect to if redirect signing fails. */
-    failure: UrlResolver<{
-        referenceId: string;
-        line_items: Array<{ price: string; quantity: number }>;
-    }>;
-}
-
-/**
- * URL configuration for the `portal` helper.
- */
-export interface PortalUrls {
-    /** URL to redirect to when the user returns from the billing portal. */
-    return: UrlResolver<{}>;
-    /** URL to redirect to if redirect signing fails. */
-    failure: UrlResolver<{}>;
-}
 
 /**
  * Configuration for the pre-built Stripe helpers.
  */
 export interface StripeHelpersConfig {
-    /**
-     * Callback that authenticates the caller and returns [isAuthorized, resolvedEntityId].
-     */
-    authenticateAndAuthorize: HelperAuthCallback;
-
-    /**
-     * Centralized return URL configuration for checkout and portal sessions.
-     * All URLs are required — they are no longer accepted as per-call arguments.
-     */
-    urls: {
-        /** URLs for the `subscribe` helper (success, cancel, failure). */
-        subscribe: SubscribeUrls;
-        /** URLs for the `pay` helper (success, cancel, failure). */
-        pay: PayUrls;
-        /** URLs for the `portal` helper (return, failure). */
-        portal: PortalUrls;
-    };
+  /**
+   * Callback that authenticates the caller and returns [isAuthorized, resolvedEntityId].
+   */
+  authenticateAndAuthorize: HelperAuthCallback;
 }
