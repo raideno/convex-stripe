@@ -34,18 +34,34 @@ export const { stripe, store, sync } = internalConvexStripe({
   },
 });
 
-export const createCustomer = internalAction({
-  args: {
-    email: v.optional(v.string()),
-    entityId: v.string(),
-  },
-  handler: async (context, args) => {
-    return stripe.customers.create(context, {
-      email: args.email,
-      entityId: args.entityId,
-    });
-  },
-});
+export const { createCustomer, products, subscription, subscribe, portal } =
+  stripe.helpers({
+    authenticateAndAuthorize: async (args) => {
+      const userId = await getAuthUserId(args.context);
+
+      if (!userId) return [false, null];
+
+      if (args.entityId && args.entityId !== userId) return [false, null];
+
+      return [true, null];
+    },
+    urls: {
+      subscribe: {
+        success: "https://example.com/success",
+        cancel: "https://example.com/cancel",
+        failure: "https://example.com/failure",
+      },
+      portal: {
+        return: "https://example.com/portal-return",
+        failure: "https://example.com/portal-failure",
+      },
+      pay: {
+        success: "https://example.com/pay-success",
+        cancel: "https://example.com/pay-cancel",
+        failure: "https://example.com/pay-failure",
+      },
+    },
+  });
 
 export const createInternalPaymentRecord = internalMutation({
   args: {
@@ -93,32 +109,6 @@ export const pay = action({
   },
 });
 
-export const subscribe = action({
-  args: {
-    priceId: v.string(),
-  },
-  handler: async (
-    context,
-    args,
-  ): Promise<{
-    url: string | null;
-  }> => {
-    const userId = await getAuthUserId(context);
-
-    if (!userId) throw new Error("Unauthorized");
-
-    const checkout = await stripe.subscribe(context as any, {
-      entityId: userId,
-      priceId: args.priceId,
-      mode: "subscription",
-      success_url: `${process.env.SITE_URL}/?return-from-checkout=success`,
-      cancel_url: `${process.env.SITE_URL}/?return-from-checkout=cancel`,
-    });
-
-    return checkout;
-  },
-});
-
 export const payments = query({
   args: v.object({}),
   handler: async (context) => {
@@ -148,63 +138,5 @@ export const payments = query({
     }));
 
     return payments;
-  },
-});
-
-export const products = query({
-  args: v.object({}),
-  handler: async (context) => {
-    const prices = await context.db.query("stripePrices").collect();
-    const products = await context.db.query("stripeProducts").collect();
-
-    return products.map((product) => ({
-      ...product,
-      prices: prices.filter(
-        (price) => price.stripe.productId === product.productId,
-      ),
-    }));
-  },
-});
-
-export const subscription = query({
-  args: v.object({}),
-  handler: async (context) => {
-    const userId = await getAuthUserId(context);
-
-    if (!userId) throw new Error("Unauthorized");
-
-    const customer = await context.db
-      .query("stripeCustomers")
-      .withIndex("byEntityId", (q) => q.eq("entityId", userId))
-      .unique();
-
-    if (!customer) return null;
-
-    const subscription = await context.db
-      .query("stripeSubscriptions")
-      .withIndex("byCustomerId", (q) => q.eq("customerId", customer.customerId))
-      .unique();
-
-    return subscription || null;
-  },
-});
-
-export const portal = action({
-  args: v.object({}),
-  handler: async (
-    context,
-  ): Promise<{
-    url: string | null;
-  }> => {
-    const userId = await getAuthUserId(context);
-
-    if (!userId) throw new Error("Unauthorized");
-
-    const portal = await stripe.portal(context as any, {
-      entityId: userId,
-      return_url: `${process.env.SITE_URL}/?return-from-portal=success`,
-    });
-
-    return portal;
   },
 });

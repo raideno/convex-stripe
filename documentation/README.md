@@ -46,6 +46,15 @@ Stripe [syncing](./documentation/references/tables.md), subscriptions, [checkout
     - [`stripe.client`](#stripeclient)
     - [`sync` Action](#sync-action)
     - [`store` Mutation](#store-mutation)
+    - [`stripe.helpers`](#stripehelpers)
+  - [Pre-built Helper Functions](#pre-built-helper-functions)
+    - [`helpers.createCustomer`](#helperscreatecustomer)
+    - [`helpers.subscribe`](#helperssubscribe)
+    - [`helpers.pay`](#helperspay)
+    - [`helpers.products`](#helpersproducts)
+    - [`helpers.subscription`](#helperssubscription)
+    - [`helpers.customer`](#helperscustomer)
+    - [`helpers.portal`](#helpersportal)
   - [Synced Tables](#synced-tables)
   - [Synced Events](#synced-events)
   - [Best Practices](#best-practices)
@@ -796,6 +805,254 @@ This action is typically called manually from the Convex dashboard, or set up to
 ### `store` Mutation
 
 An internal mutation that persists Stripe objects into your Convex database. This is called automatically from within the webhook handler and is not meant for direct use. It must be exported from the same file as your `internalConvexStripe` call.
+
+### `stripe.helpers`
+
+Returns a set of pre-built, authorization-aware Convex functions that cover the most common Stripe operations. These are ready to export and call from your frontend directly — no boilerplate required.
+
+Each returned function invokes your `authenticateAndAuthorize` callback to resolve the caller's identity before delegating to the underlying Stripe implementation. When a caller omits `entityId`, it means they want to act on themselves — your callback is responsible for deriving their identity from the Convex `context`.
+
+stripe.helpers({
+  authenticateAndAuthorize: async ({ context, operation, entityId }) => {
+    // Return [isAuthorized, resolvedEntityId | null]
+  },
+  urls: {
+    // URLs can be strings...
+    subscribe: {
+      success: "https://example.com/subscribe-success",
+      // ...or functions (sync/async) that receive context and args!
+      cancel: async ({ context, entityId, args }) => {
+        // args is { priceId: string } for subscribe
+        return `https://example.com/pricing?canceled=true&price=${args.priceId}`;
+      },
+      failure: "https://example.com/error",
+    },
+    pay: {
+      success: "https://example.com/pay-success",
+      cancel: "https://example.com/pay-cancel",
+      failure: "https://example.com/pay-error",
+    },
+    portal: {
+      return:  "https://example.com/account",
+      failure: "https://example.com/portal-error",
+    },
+  },
+})
+```
+
+**`authenticateAndAuthorize` parameters (passed as a single object):**
+
+| Parameter   | Type                                                                                                 | Description                                                                                                                                                                                                            |
+| :---------- | :--------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `context`   | `GenericActionCtx<any>` or `GenericQueryCtx<any>`                                                    | The Convex context, **narrowed by `operation`**: action ops (`createCustomer`, `subscribe`, `pay`, `portal`) receive `GenericActionCtx`; query ops (`products`, `subscription`, `customer`) receive `GenericQueryCtx`. |
+| `operation` | `"createCustomer" \| "subscribe" \| "pay" \| "products" \| "subscription" \| "customer" \| "portal"` | The operation being performed.                                                                                                                                                                                         |
+| `entityId`  | `string \| undefined`                                                                                | The entity ID passed by the caller, or `undefined` if acting on themselves.                                                                                                                                            |
+
+**Returns:** `Promise<[boolean, string | null]>` — `[isAuthorized, entityId]`.
+
+**`urls` configuration (all fields required):**
+
+URLs are grouped by the operation they belong to. Each URL value can be a static string or a function (sync or async) that receives `{ context, entityId, args }` and returns a string.
+
+| Group       | Key       | `args` shape                                                  | Description                                              |
+| :---------- | :-------- | :------------------------------------------------------------ | :------------------------------------------------------- |
+| `subscribe` | `success` | `{ priceId: string }`                                         | Redirect after a successful subscription checkout.       |
+| `subscribe` | `cancel`  | `{ priceId: string }`                                         | Redirect if a subscription checkout is cancelled.        |
+| `subscribe` | `failure` | `{ priceId: string }`                                         | Redirect if redirect signing fails for subscribe.        |
+| `pay`       | `success` | `{ referenceId: string, line_items: [...] }`                  | Redirect after a successful one-time payment.            |
+| `pay`       | `cancel`  | `{ referenceId: string, line_items: [...] }`                  | Redirect if a one-time payment checkout is cancelled.    |
+| `pay`       | `failure` | `{ referenceId: string, line_items: [...] }`                  | Redirect if redirect signing fails for pay.              |
+| `portal`    | `return`  | `{}`                                                          | Redirect when the user returns from the billing portal.  |
+| `portal`    | `failure` | `{}`                                                          | Redirect if redirect signing fails for portal.           |
+
+**Returned functions:**
+
+| Name             | Kind             | Description                                  |
+| :--------------- | :--------------- | :------------------------------------------- |
+| `createCustomer` | `internalAction` | Create a Stripe customer for a given entity. |
+| `subscribe`      | `action`         | Create a subscription checkout session.      |
+| `pay`            | `action`         | Create a one-time payment checkout session.  |
+| `products`       | `query`          | List all synced products with their prices.  |
+| `subscription`   | `query`          | Get the entity's active subscription.        |
+| `customer`       | `query`          | Get the entity's Stripe customer record.     |
+| `portal`         | `action`         | Open a Billing Portal session.               |
+
+## Pre-built Helper Functions
+
+`stripe.helpers()` is the fastest way to add Stripe to your app. Instead of hand-writing each Convex function, call `stripe.helpers()` once and export the returned functions:
+
+```ts
+// convex/stripe.ts
+import { getAuthUserId } from "@convex-dev/auth/server";
+import { internalConvexStripe } from "@raideno/convex-stripe/server";
+import type { HelperAuthCallback } from "@raideno/convex-stripe/server";
+import schema from "./schema";
+
+export const { stripe, store, sync } = internalConvexStripe({
+  schema,
+  stripe: {
+    secret_key: process.env.STRIPE_SECRET_KEY!,
+    account_webhook_secret: process.env.STRIPE_ACCOUNT_WEBHOOK_SECRET!,
+  },
+});
+
+// A single callback that authenticates every helper function.
+// `context` is automatically typed as GenericActionCtx or GenericQueryCtx
+// depending on which `operation` is being executed.
+const authenticateAndAuthorize: HelperAuthCallback = async ({
+  context,   // GenericActionCtx<any> or GenericQueryCtx<any>
+  operation,
+  entityId,
+}) => {
+  // For product listings there is no specific entity — allow everyone.
+  if (operation === "products") return [true, null];
+
+  const userId = await getAuthUserId(context);
+  if (!userId) return [false, null];
+
+  // If the caller passed an explicit entityId, use it; otherwise they act on themselves.
+  return [true, entityId ?? userId];
+};
+
+export const {
+  createCustomer,
+  subscribe,
+  pay,
+  products,
+  subscription,
+  customer,
+  portal,
+} = stripe.helpers({
+  authenticateAndAuthorize,
+  urls: {
+    subscribe: {
+      success: ({ args }) => `${process.env.SITE_URL}/success?price=${args.priceId}`,
+      cancel:  `${process.env.SITE_URL}/pricing`,
+      failure: `${process.env.SITE_URL}/error`,
+    },
+    pay: {
+      success: `${process.env.SITE_URL}/pay-success`,
+      cancel:  `${process.env.SITE_URL}/pay-cancel`,
+      failure: `${process.env.SITE_URL}/pay-error`,
+    },
+    portal: {
+      return:  `${process.env.SITE_URL}/account`,
+      failure: `${process.env.SITE_URL}/portal-error`,
+    },
+  },
+});
+```
+
+Then register `createCustomer` with your auth callbacks (the same way as the manual approach), and call the rest from your frontend:
+
+```ts
+// frontend
+const items     = await convex.query(api.stripe.products, {});
+const sub       = await convex.query(api.stripe.subscription, {});
+const me        = await convex.query(api.stripe.customer, {});
+
+// Return URLs are handled by helper config, so frontend calls stay clean.
+const { url }   = await convex.action(api.stripe.subscribe, {
+  priceId: "price_xxx",
+});
+
+const { url }   = await convex.action(api.stripe.pay, {
+  referenceId: "order_123",
+  line_items: [{ price: "price_yyy", quantity: 1 }],
+});
+
+const { url }   = await convex.action(api.stripe.portal, {});
+```
+
+### `helpers.createCustomer`
+
+An **internal** Convex action that creates a Stripe customer for the given `entityId`. Designed to be called from auth lifecycle callbacks (e.g. `afterUserCreatedOrUpdated`), not from the frontend directly.
+
+**Arguments:**
+
+| Parameter  | Type     | Required | Description                                         |
+| :--------- | :------- | :------- | :-------------------------------------------------- |
+| `entityId` | `string` | Yes      | Your app's internal identifier for the entity.      |
+| `email`    | `string` | No       | Email address to set on the Stripe customer record. |
+
+**Returns:** The Stripe customer document from your Convex database.
+
+### `helpers.subscribe`
+
+A **public** Convex action that creates a Stripe Checkout session in `subscription` mode. The authenticated entity is derived via `authenticateAndAuthorize`.
+
+**Arguments:**
+
+| Parameter  | Type     | Required | Description                                   |
+| :--------- | :------- | :------- | :-------------------------------------------- |
+| `entityId` | `string` | No       | Override the entity (defaults to the caller). |
+| `priceId`  | `string` | Yes      | The Stripe Price ID to subscribe to.          |
+
+*Return URLs (`subscribe.success`, `subscribe.cancel`, `subscribe.failure`) must be provided in `stripe.helpers({ urls: { subscribe: { ... } } })`.*
+
+**Returns:** `{ url: string | null }` — use `url` to redirect the user to checkout.
+
+### `helpers.pay`
+
+A **public** Convex action that creates a Stripe Checkout session in `payment` mode (one-time payment).
+
+**Arguments:**
+
+| Parameter     | Type     | Required | Description                                             |
+| :------------ | :------- | :------- | :------------------------------------------------------ |
+| `entityId`    | `string` | No       | Override the entity (defaults to the caller).           |
+| `referenceId` | `string` | Yes      | An internal reference for the purchase (e.g. Order ID). |
+| `line_items`  | `array`  | Yes      | Array of `{ price: string, quantity: number }`.         |
+
+*Return URLs (`pay.success`, `pay.cancel`, `pay.failure`) must be provided in `stripe.helpers({ urls: { pay: { ... } } })`.*
+
+**Returns:** `{ url: string | null }` — use `url` to redirect the user to checkout.
+
+### `helpers.products`
+
+A **public** Convex query that returns all synced Stripe products with their associated prices nested inside.
+
+**Arguments:** none
+
+**Returns:** An array of product documents from `stripeProducts`, each with a `prices` field containing all related entries from `stripePrices`.
+
+### `helpers.subscription`
+
+A **public** Convex query that returns the active Stripe subscription for the authenticated entity, or `null` if they have no subscription.
+
+**Arguments:**
+
+| Parameter  | Type     | Required | Description                                   |
+| :--------- | :------- | :------- | :-------------------------------------------- |
+| `entityId` | `string` | No       | Override the entity (defaults to the caller). |
+
+**Returns:** The subscription document from `stripeSubscriptions`, or `null`.
+
+### `helpers.customer`
+
+A **public** Convex query that returns the Stripe customer record for the authenticated entity, or `null` if they have no customer yet.
+
+**Arguments:**
+
+| Parameter  | Type     | Required | Description                                   |
+| :--------- | :------- | :------- | :-------------------------------------------- |
+| `entityId` | `string` | No       | Override the entity (defaults to the caller). |
+
+**Returns:** The customer document from `stripeCustomers`, or `null`.
+
+### `helpers.portal`
+
+A **public** Convex action that opens a Stripe Billing Portal session for the authenticated entity, allowing them to manage their subscription, invoices, and payment methods.
+
+**Arguments:**
+
+| Parameter  | Type     | Required | Description                                   |
+| :--------- | :------- | :------- | :-------------------------------------------- |
+| `entityId` | `string` | No       | Override the entity (defaults to the caller). |
+
+*Return URL and failure URL (`portal.return`, `portal.failure`) must be provided in `stripe.helpers({ urls: { portal: { ... } } })`.*
+
+**Returns:** `{ url: string | null }` — use `url` to redirect the user to the portal.
 
 ## Synced Tables
 

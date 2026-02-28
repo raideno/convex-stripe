@@ -17,6 +17,8 @@ import {
   PortalImplementation,
   SubscribeImplementation,
 } from "./actions";
+import type { HelperAuthCallback, StripeHelpersConfig, SubscribeUrls, PayUrls, PortalUrls } from "./convex";
+import { buildHelpers } from "./convex";
 import { normalizeConfiguration, normalizeOptions } from "./helpers";
 import { redirectImplementation } from "./redirects";
 import { StripeDataModel } from "./schema";
@@ -50,6 +52,8 @@ export { allStripeTablesExcept, onlyStripeTables } from "./helpers";
 export { stripeTables } from "./schema";
 
 export { Logger } from "./logger";
+
+export { HelperAuthCallback, StripeHelpersConfig, SubscribeUrls, PayUrls, PortalUrls };
 
 export {
   CallbackAfterChange,
@@ -325,6 +329,72 @@ export const internalConvexStripe = (
           );
         },
       },
+
+      /**
+       * Returns a set of pre-built, authorization-aware Convex functions
+       * (actions and queries) that cover the most common Stripe operations.
+       *
+       * Each returned function calls your `authenticateAndAuthorize` callback
+       * to resolve the caller's identity and enforce access control before
+       * delegating to the underlying Stripe implementation.
+       *
+       * When a caller omits `entityId`, it signals that they want to act on
+       * themselves — your callback is responsible for deriving their identity
+       * from `context` (e.g. via `getAuthUserId`).
+       *
+       * **Returned functions:**
+       * - `internalCreateCustomer` — internal action: create a Stripe customer for a given entity.
+       * - `subscribe`             — public action:   create a subscription checkout session.
+       * - `pay`                   — public action:   create a one-time payment checkout session.
+       * - `products`              — public query:    list all products with their prices.
+       * - `subscription`          — public query:    get the entity's active subscription.
+       * - `customer`              — public query:    get the entity's Stripe customer record.
+       * - `portal`                — public action:   open a Billing Portal session.
+       *
+       * @param config - Configuration for the helpers.
+       * @param config.authenticateAndAuthorize - Callback that authenticates the
+       *   caller and returns `[isAuthorized, entityId | null]`.
+       * @param config.urls - Centralized return URL configuration (required). URLs are grouped
+       *   by operation: `subscribe`, `pay`, and `portal`.
+       *
+       * @example
+       * // convex/stripe.ts
+       * import { getAuthUserId } from "@convex-dev/auth/server";
+       *
+       * export const { stripe, store, sync } = internalConvexStripe({ ... });
+       *
+       * export const { internalCreateCustomer, subscribe, pay, products, subscription, customer, portal } =
+       *   stripe.helpers({
+       *     authenticateAndAuthorize: async ({ context, operation, entityId }) => {
+       *       const userId = await getAuthUserId(context);
+       *       if (!userId) return [false, null];
+       *       // If caller passed an explicit entityId, use it; otherwise act on themselves.
+       *       return [true, entityId ?? userId];
+       *     },
+       *     urls: {
+       *       subscribe: {
+       *         success: "https://example.com/success",
+       *         cancel: "https://example.com/cancel",
+       *         failure: "https://example.com/error",
+       *       },
+       *       pay: {
+       *         success: "https://example.com/pay-success",
+       *         cancel: "https://example.com/pay-cancel",
+       *         failure: "https://example.com/pay-error",
+       *       },
+       *       portal: {
+       *         return: "https://example.com/account",
+       *         failure: "https://example.com/portal-error",
+       *       },
+       *     },
+       *   });
+       */
+      helpers: (config: StripeHelpersConfig) =>
+        buildHelpers(
+          ConvexStripeInternalConfiguration,
+          ConvexStripeInternalOptions,
+          config,
+        ),
     },
 
     /**
