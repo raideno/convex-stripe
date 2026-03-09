@@ -32,8 +32,6 @@ export default defineWebhookHandler({
           options,
         );
         break;
-      // TODO: careful here as the deletion is just a soft delete in Stripe
-      // so maybe we want to keep the record and just mark it as deleted?
       case "product.deleted":
         await storeDispatchTyped(
           {

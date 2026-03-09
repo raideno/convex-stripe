@@ -1,11 +1,14 @@
 import {
+  DataModelFromSchemaDefinition,
   GenericActionCtx,
   GenericDataModel,
+  GenericSchema,
   httpActionGeneric,
   HttpRouter,
   internalActionGeneric,
   internalMutationGeneric,
   RoutableMethod,
+  SchemaDefinition,
 } from "convex/server";
 import Stripe from "stripe";
 
@@ -132,8 +135,10 @@ const buildHttp = (
  *   },
  * });
  */
-export const internalConvexStripe = (
-  configuration_: InputConfiguration & { sync?: { tables?: never } },
+export const internalConvexStripe = <
+  Schema extends SchemaDefinition<GenericSchema, boolean>,
+>(
+  configuration_: InputConfiguration<Schema> & { sync?: { tables?: never } },
   options_?: InputOptions,
 ) => {
   const ConvexStripeInternalConfiguration =
@@ -200,7 +205,7 @@ export const internalConvexStripe = (
        * @param options - Optional overrides (e.g. portal configuration ID).
        */
       portal: (
-        context: GenericActionCtx<any>,
+        context: GenericActionCtx<DataModelFromSchemaDefinition<Schema>>,
         args: Parameters<(typeof PortalImplementation)["handler"]>[1],
         options: Parameters<(typeof PortalImplementation)["handler"]>[2] = {},
       ) =>
@@ -221,7 +226,7 @@ export const internalConvexStripe = (
        * @param options - Optional overrides for the Checkout session.
        */
       subscribe: (
-        context: GenericActionCtx<any>,
+        context: GenericActionCtx<DataModelFromSchemaDefinition<Schema>>,
         args: Parameters<(typeof SubscribeImplementation)["handler"]>[1],
         options: Parameters<
           (typeof SubscribeImplementation)["handler"]
@@ -243,7 +248,7 @@ export const internalConvexStripe = (
        * @param options - Optional overrides for the Checkout session.
        */
       pay: (
-        context: GenericActionCtx<any>,
+        context: GenericActionCtx<DataModelFromSchemaDefinition<Schema>>,
         args: Parameters<(typeof PayImplementation)["handler"]>[1],
         options: Parameters<(typeof PayImplementation)["handler"]>[2] = {},
       ) =>
@@ -264,7 +269,7 @@ export const internalConvexStripe = (
          * @param options - Optional overrides for the customer creation.
          */
         create: (
-          context: GenericActionCtx<any>,
+          context: GenericActionCtx<DataModelFromSchemaDefinition<Schema>>,
           args: Parameters<(typeof CreateCustomerImplementation)["handler"]>[1],
           options: Parameters<
             (typeof CreateCustomerImplementation)["handler"]
@@ -289,7 +294,7 @@ export const internalConvexStripe = (
          * @param options - Optional overrides for the account creation.
          */
         create: (
-          context: GenericActionCtx<any>,
+          context: GenericActionCtx<DataModelFromSchemaDefinition<Schema>>,
           args: Parameters<(typeof CreateAccountImplementation)["handler"]>[1],
           options: Parameters<
             (typeof CreateAccountImplementation)["handler"]
@@ -312,7 +317,7 @@ export const internalConvexStripe = (
          * @param options - Optional overrides for the account link.
          */
         link: (
-          context: GenericActionCtx<any>,
+          context: GenericActionCtx<DataModelFromSchemaDefinition<Schema>>,
           args: Parameters<
             (typeof CreateAccountLinkImplementation)["handler"]
           >[1],

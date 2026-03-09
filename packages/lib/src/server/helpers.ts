@@ -174,10 +174,15 @@ export const DEFAULT_CONFIGURATION: InternalConfiguration = {
   },
 };
 
-export const normalizeConfiguration = (
-  configuration: InputConfiguration,
+export const normalizeConfiguration = <
+  Schema extends SchemaDefinition<GenericSchema, boolean>,
+>(
+  configuration: InputConfiguration<Schema>,
 ): InternalConfiguration => {
-  const output = deepmerge(DEFAULT_CONFIGURATION, configuration);
+  const output = deepmerge(
+    DEFAULT_CONFIGURATION,
+    configuration,
+  ) as unknown as InternalConfiguration;
   const stripeTableNames = Object.keys(stripeTables);
   output.sync.tables = Object.fromEntries(
     Object.keys(configuration.schema.tables)

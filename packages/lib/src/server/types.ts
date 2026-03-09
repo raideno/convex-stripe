@@ -1,7 +1,7 @@
 import {
+  DataModelFromSchemaDefinition,
   GenericMutationCtx,
   GenericSchema,
-  IdField,
   SchemaDefinition,
 } from "convex/server";
 import { Infer, Validator } from "convex/values";
@@ -26,8 +26,13 @@ export type CallbackEvent = {
   };
 }[keyof StripeDataModel];
 
-export type CallbackAfterChange = (
-  context: GenericMutationCtx<any>,
+export type CallbackAfterChange<
+  Schema extends SchemaDefinition<GenericSchema, boolean> = SchemaDefinition<
+    GenericSchema,
+    boolean
+  >,
+> = (
+  context: GenericMutationCtx<DataModelFromSchemaDefinition<Schema>>,
   operation: "upsert" | "delete" | "insert",
   event: CallbackEvent,
 ) => Promise<void>;
@@ -38,8 +43,13 @@ export type RecursiveDeepRequired<T> = T extends (...args: any[]) => any
     ? { [K in keyof T]-?: RecursiveDeepRequired<T[K]> }
     : T;
 
-export interface InputConfiguration {
-  schema: SchemaDefinition<GenericSchema, true>;
+export interface InputConfiguration<
+  Schema extends SchemaDefinition<GenericSchema, boolean> = SchemaDefinition<
+    GenericSchema,
+    boolean
+  >,
+> {
+  schema: Schema;
   stripe: {
     /** Stripe API version to pin against (recommended for stability). */
     version?: Stripe.StripeConfig["apiVersion"];
@@ -115,7 +125,7 @@ export interface InputConfiguration {
 
   callbacks?: {
     /** Called after a row is inserted/upserted/deleted in your Stripe tables. */
-    afterChange?: CallbackAfterChange;
+    afterChange?: CallbackAfterChange<Schema>;
   };
 
   /**
