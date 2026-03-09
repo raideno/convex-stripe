@@ -19,12 +19,22 @@ export interface InternalOptions {
   base: string;
 }
 
-export type CallbackEvent = {
-  [K in keyof StripeDataModel]: {
+/** The stripe table keys that are present in the user's schema. */
+type SchemaStripeTableKeys<
+  Schema extends SchemaDefinition<GenericSchema, boolean>,
+> = Extract<keyof StripeDataModel, keyof Schema["tables"]>;
+
+export type CallbackEvent<
+  Schema extends SchemaDefinition<GenericSchema, boolean> = SchemaDefinition<
+    GenericSchema,
+    boolean
+  >,
+> = {
+  [K in SchemaStripeTableKeys<Schema>]: {
     table: K;
     _id: StripeDataModel[K]["document"]["_id"];
   };
-}[keyof StripeDataModel];
+}[SchemaStripeTableKeys<Schema>];
 
 export type CallbackAfterChange<
   Schema extends SchemaDefinition<GenericSchema, boolean> = SchemaDefinition<
@@ -34,7 +44,7 @@ export type CallbackAfterChange<
 > = (
   context: GenericMutationCtx<DataModelFromSchemaDefinition<Schema>>,
   operation: "upsert" | "delete" | "insert",
-  event: CallbackEvent,
+  event: CallbackEvent<Schema>,
 ) => Promise<void>;
 
 export type RecursiveDeepRequired<T> = T extends (...args: any[]) => any

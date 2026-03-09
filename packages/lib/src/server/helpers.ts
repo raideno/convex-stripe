@@ -27,27 +27,27 @@ import {
   optionalnullableobject,
 } from "./schema/validators";
 
-export const allStripeTablesExcept = (
-  tables: Array<keyof typeof stripeTables>,
+export const allStripeTablesExcept = <
+  const T extends Array<keyof typeof stripeTables>,
+>(
+  tables: T,
 ) =>
   Object.fromEntries(
-    Object.entries(stripeTables).map(([table, definition]) => [
-      table,
-      !tables.includes(table as keyof typeof stripeTables)
-        ? definition
-        : undefined,
-    ]),
-  ) as typeof stripeTables;
+    Object.entries(stripeTables).filter(
+      ([table]) => !tables.includes(table as keyof typeof stripeTables),
+    ),
+  ) as Omit<typeof stripeTables, T[number]>;
 
-export const onlyStripeTables = (tables: Array<keyof typeof stripeTables>) =>
+export const onlyStripeTables = <
+  const T extends Array<keyof typeof stripeTables>,
+>(
+  tables: T,
+) =>
   Object.fromEntries(
-    Object.entries(stripeTables).map(([table, definition]) => [
-      table,
-      tables.includes(table as keyof typeof stripeTables)
-        ? definition
-        : undefined,
-    ]),
-  ) as typeof stripeTables;
+    Object.entries(stripeTables).filter(([table]) =>
+      tables.includes(table as keyof typeof stripeTables),
+    ),
+  ) as Pick<typeof stripeTables, T[number]>;
 
 export const DEFAULT_CONFIGURATION: InternalConfiguration = {
   schema: undefined as unknown as SchemaDefinition<GenericSchema, true>,
