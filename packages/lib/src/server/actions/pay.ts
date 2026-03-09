@@ -33,6 +33,12 @@ export const PayImplementation = defineActionCallableFunction<
   Promise<Stripe.Response<Stripe.Checkout.Session>>
 >({
   name: "pay",
+  /**
+   * TODO: make it so the received context contains only the tables needed by the pay action.
+   * It define a property below name which will be tables: ["stripeAccounts", ...].
+   * This property will be used to correctly create the context.
+   * Later users when using the .pay action and providing a context, the context is forced to contain the necessary tables.
+   */
   handler: async (context, args, stripeOptions, configuration, options) => {
     const createStripeCustomerIfMissing =
       args.createStripeCustomerIfMissing ??

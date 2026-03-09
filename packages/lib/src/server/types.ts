@@ -24,6 +24,15 @@ type SchemaStripeTableKeys<
   Schema extends SchemaDefinition<GenericSchema, boolean>,
 > = Extract<keyof StripeDataModel, keyof Schema["tables"]>;
 
+/**
+ * Constrains a schema to one that contains at least one stripe table.
+ * Resolves to `Schema` when valid, or `never` (triggering a type error) when
+ * the provided schema has no stripe table keys at all.
+ */
+type SchemaWithStripeTables<
+  Schema extends SchemaDefinition<GenericSchema, boolean>,
+> = SchemaStripeTableKeys<Schema> extends never ? never : Schema;
+
 export type CallbackEvent<
   Schema extends SchemaDefinition<GenericSchema, boolean> = SchemaDefinition<
     GenericSchema,
@@ -59,7 +68,8 @@ export interface InputConfiguration<
     boolean
   >,
 > {
-  schema: Schema;
+  /** The Convex schema for your app. Must include at least one stripe table (e.g. from `stripeTables`). */
+  schema: SchemaWithStripeTables<Schema>;
   stripe: {
     /** Stripe API version to pin against (recommended for stability). */
     version?: Stripe.StripeConfig["apiVersion"];
