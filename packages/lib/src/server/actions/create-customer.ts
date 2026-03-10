@@ -27,8 +27,11 @@ export const CreateCustomerImplementation = defineActionCallableFunction<
         {
           operation: "selectOne",
           table: "stripeCustomers",
-          indexName: "byEntityId",
-          indexValues: { entityId: args.entityId },
+          indexName: "byAccountIdAndEntityid",
+          indexValues: {
+            entityId: args.entityId,
+            accountId: stripeOptions.stripeAccount,
+          },
         },
         context,
         configuration,
@@ -93,14 +96,13 @@ export const CreateCustomerImplementation = defineActionCallableFunction<
               : customer.test_clock?.id,
         },
         lastSyncedAt: Date.now(),
+        accountId: stripeOptions.stripeAccount,
       };
 
       const response = await storeDispatchTyped(
         {
-          operation: "upsert",
+          operation: "insert",
           table: "stripeCustomers",
-          indexName: "byEntityId",
-          indexValues: { entityId: args.entityId },
           data: data,
         },
         context,

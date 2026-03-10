@@ -33,12 +33,6 @@ export const PayImplementation = defineActionCallableFunction<
   Promise<Stripe.Response<Stripe.Checkout.Session>>
 >({
   name: "pay",
-  /**
-   * TODO: make it so the received context contains only the tables needed by the pay action.
-   * It define a property below name which will be tables: ["stripeAccounts", ...].
-   * This property will be used to correctly create the context.
-   * Later users when using the .pay action and providing a context, the context is forced to contain the necessary tables.
-   */
   handler: async (context, args, stripeOptions, configuration, options) => {
     const createStripeCustomerIfMissing =
       args.createStripeCustomerIfMissing ??
@@ -48,22 +42,15 @@ export const PayImplementation = defineActionCallableFunction<
       apiVersion: configuration.stripe.version,
     });
 
-    /**
-     * TODO: make the select return the customer directly rather than having to do a .defineActionCallableFunction
-     * TODO: make it compatible with accounts, let people pass either entityId or customerId directly
-     * TODO: when passing a entityId with accountId, correctly fetch customerId by considering accountId
-     * TODO: create a byEntityIdAndAccountId index maybe or find another way to handle that.
-     */
-
-    /**
-     * TODO: we might need to modify the interface for the selectOne to accept an object defining the values for the index rather than having a single field with a single value.
-     */
     const stripeCustomer = await storeDispatchTyped(
       {
         operation: "selectOne",
         table: "stripeCustomers",
-        indexName: "byEntityId",
-        indexValues: { entityId: args.entityId },
+        indexName: "byAccountIdAndEntityid",
+        indexValues: {
+          entityId: args.entityId,
+          accountId: stripeOptions.stripeAccount,
+        },
       },
       context,
       configuration,
@@ -86,7 +73,7 @@ export const PayImplementation = defineActionCallableFunction<
               email: undefined,
               metadata: undefined,
             },
-            {},
+            stripeOptions,
             configuration,
             options,
           )
@@ -159,14 +146,13 @@ export const PayImplementation = defineActionCallableFunction<
 
     await storeDispatchTyped(
       {
-        operation: "upsert",
+        operation: "insert",
         table: "stripeCheckoutSessions",
-        indexName: BY_STRIPE_ID_INDEX_NAME,
-        indexValues: { checkoutSessionId: checkout.id },
         data: {
           checkoutSessionId: checkout.id,
           stripe: CheckoutSessionStripeToConvex(checkout),
           lastSyncedAt: Date.now(),
+          accountId: stripeOptions.stripeAccount,
         },
       },
       context,
@@ -183,14 +169,13 @@ export const PayImplementation = defineActionCallableFunction<
     ) {
       await storeDispatchTyped(
         {
-          operation: "upsert",
+          operation: "insert",
           table: "stripePaymentIntents",
-          indexName: BY_STRIPE_ID_INDEX_NAME,
-          indexValues: { paymentIntentId: paymentIntent.id },
           data: {
             paymentIntentId: paymentIntent.id,
             stripe: PaymentIntentStripeToConvex(paymentIntent),
             lastSyncedAt: Date.now(),
+            accountId: stripeOptions.stripeAccount,
           },
         },
         context,

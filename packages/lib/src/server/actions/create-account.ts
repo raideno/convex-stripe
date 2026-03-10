@@ -86,10 +86,8 @@ export const CreateAccountImplementation = defineActionCallableFunction<
 
       const response = await storeDispatchTyped(
         {
-          operation: "upsert",
+          operation: "insert",
           table: "stripeAccounts",
-          indexName: "byEntityId",
-          indexValues: { entityId: args.entityId },
           data: data,
         },
         context,

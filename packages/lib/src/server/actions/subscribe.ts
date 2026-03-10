@@ -2,7 +2,6 @@ import Stripe from "stripe";
 
 import { CreateCustomerImplementation } from "@/actions/create-customer";
 import { buildSignedReturnUrl } from "@/redirects";
-import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { CheckoutSessionStripeToConvex } from "@/schema/models/checkout-session";
 import { SubscriptionStripeToConvex } from "@/schema/models/subscription";
 import { storeDispatchTyped } from "@/store";
@@ -47,8 +46,11 @@ export const SubscribeImplementation = defineActionCallableFunction<
       {
         operation: "selectOne",
         table: "stripeCustomers",
-        indexName: "byEntityId",
-        indexValues: { entityId: args.entityId },
+        indexName: "byAccountIdAndEntityid",
+        indexValues: {
+          entityId: args.entityId,
+          accountId: stripeOptions.stripeAccount,
+        },
       },
       context,
       configuration,
@@ -71,7 +73,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
               email: undefined,
               metadata: undefined,
             },
-            {},
+            stripeOptions,
             configuration,
             options,
           )
@@ -143,14 +145,13 @@ export const SubscribeImplementation = defineActionCallableFunction<
 
     await storeDispatchTyped(
       {
-        operation: "upsert",
+        operation: "insert",
         table: "stripeCheckoutSessions",
-        indexName: BY_STRIPE_ID_INDEX_NAME,
-        indexValues: { checkoutSessionId: checkout.id },
         data: {
           checkoutSessionId: checkout.id,
           stripe: CheckoutSessionStripeToConvex(checkout),
           lastSyncedAt: Date.now(),
+          accountId: stripeOptions.stripeAccount,
         },
       },
       context,
@@ -167,14 +168,13 @@ export const SubscribeImplementation = defineActionCallableFunction<
     ) {
       await storeDispatchTyped(
         {
-          operation: "upsert",
+          operation: "insert",
           table: "stripeSubscriptions",
-          indexName: BY_STRIPE_ID_INDEX_NAME,
-          indexValues: { subscriptionId: subscription.id },
           data: {
             subscriptionId: subscription.id,
             customerId: customerId,
             stripe: SubscriptionStripeToConvex(subscription),
+            accountId: stripeOptions.stripeAccount,
             lastSyncedAt: Date.now(),
           },
         },

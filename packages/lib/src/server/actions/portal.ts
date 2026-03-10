@@ -32,8 +32,11 @@ export const PortalImplementation = defineActionCallableFunction<
       {
         operation: "selectOne",
         table: "stripeCustomers",
-        indexName: "byEntityId",
-        indexValues: { entityId: args.entityId },
+        indexName: "byAccountIdAndEntityid",
+        indexValues: {
+          entityId: args.entityId,
+          accountId: stripeOptions.stripeAccount,
+        },
       },
       context,
       configuration,
@@ -56,7 +59,7 @@ export const PortalImplementation = defineActionCallableFunction<
               email: undefined,
               metadata: undefined,
             },
-            {},
+            stripeOptions,
             configuration,
             options,
           )
