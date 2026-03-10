@@ -36,11 +36,19 @@ export const PaymentsForm = () => {
               <Table.Header>
                 <Table.Row>
                   <Table.ColumnHeaderCell>Link</Table.ColumnHeaderCell>
-                  <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
-                  <Table.ColumnHeaderCell>Amount</Table.ColumnHeaderCell>
-                  <Table.ColumnHeaderCell>Status</Table.ColumnHeaderCell>
-                  <Table.ColumnHeaderCell>Mode</Table.ColumnHeaderCell>
+                  <Table.ColumnHeaderCell align="right">
+                    Amount
+                  </Table.ColumnHeaderCell>
+                  <Table.ColumnHeaderCell align="center">
+                    Status
+                  </Table.ColumnHeaderCell>
+                  <Table.ColumnHeaderCell align="center">
+                    Mode
+                  </Table.ColumnHeaderCell>
                   <Table.ColumnHeaderCell>Date</Table.ColumnHeaderCell>
+                  <Table.ColumnHeaderCell align="center">
+                    AccountId
+                  </Table.ColumnHeaderCell>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
@@ -52,24 +60,12 @@ export const PaymentsForm = () => {
                   </Table.Row>
                 )}
                 {payments.map((payment) => {
-                  const product = products.find(
-                    (p) =>
-                      p.prices.map((price) => price.priceId === payment.priceId)
-                        .length > 0
-                  );
-
-                  const name = product
-                    ? product.stripe.name
-                    : "Unknown Product";
-
-                  if (!payment.checkout) return null;
-
                   return (
                     <Table.Row key={payment._id}>
                       <Table.Cell>
-                        <Link href={payment.checkout.stripe.url || "#"}>
+                        <Link href={payment.stripe.url || "#"}>
                           <IconButton
-                            disabled={!payment.checkout.stripe.url}
+                            disabled={!payment.stripe.url}
                             variant="ghost"
                             size="2"
                           >
@@ -77,45 +73,45 @@ export const PaymentsForm = () => {
                           </IconButton>
                         </Link>
                       </Table.Cell>
-                      <Table.Cell>{name}</Table.Cell>
-                      <Table.Cell>
-                        {(
-                          (payment.checkout.stripe.amount_total || 0) / 100
-                        ).toFixed(2)}{" "}
-                        {payment.checkout.stripe.currency
-                          ? currencyToSymbol[payment.checkout.stripe.currency]
+                      <Table.Cell align="right">
+                        {((payment.stripe.amount_total || 0) / 100).toFixed(2)}{" "}
+                        {payment.stripe.currency
+                          ? currencyToSymbol[payment.stripe.currency]
                           : "x"}
                       </Table.Cell>
-                      <Table.Cell>
+                      <Table.Cell align="center">
                         <Badge
                           color={
-                            payment.checkout.stripe.payment_status === "paid"
+                            payment.stripe.payment_status === "paid"
                               ? "green"
                               : "red"
                           }
                         >
-                          {payment.checkout.stripe.payment_status}
+                          {payment.stripe.payment_status}
                         </Badge>
                       </Table.Cell>
-                      <Table.Cell>
+                      <Table.Cell align="center">
                         <Badge
                           color={
-                            payment.checkout.stripe.mode === "payment"
-                              ? "blue"
-                              : "cyan"
+                            payment.stripe.mode === "payment" ? "blue" : "cyan"
                           }
                         >
-                          {payment.checkout.stripe.mode}
+                          {payment.stripe.mode}
                         </Badge>
                       </Table.Cell>
                       <Table.Cell>
                         {new Date(
-                          payment.checkout.stripe.created * 1000
+                          payment.stripe.created * 1000,
                         ).toLocaleDateString()}{" "}
                         -{" "}
                         {new Date(
-                          payment.checkout.stripe.created * 1000
+                          payment.stripe.created * 1000,
                         ).toLocaleTimeString()}
+                      </Table.Cell>
+                      <Table.Cell align="center">
+                        <Badge color="gray">
+                          {payment.accountId || "Root"}
+                        </Badge>
                       </Table.Cell>
                     </Table.Row>
                   );

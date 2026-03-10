@@ -5,8 +5,7 @@ import {
 } from "@raideno/convex-stripe/server";
 import { v } from "convex/values";
 
-import { internal } from "./_generated/api";
-import { action, internalMutation, query } from "./_generated/server";
+import { action, query } from "./_generated/server";
 import schema from "./schema";
 
 export const { stripe, store, sync } = internalConvexStripe({
@@ -15,6 +14,11 @@ export const { stripe, store, sync } = internalConvexStripe({
     secret_key: process.env.STRIPE_SECRET_KEY!,
     account_webhook_secret: process.env.STRIPE_ACCOUNT_WEBHOOK_SECRET!,
     connect_webhook_secret: process.env.STRIPE_CONNECT_WEBHOOK_SECRET!,
+  },
+  callbacks: {
+    afterChange: async (context, operation, event) => {
+      console.log("[stripe.afterChange]:", operation, event.table, event._id);
+    },
   },
   redirect: {
     handlers: [
@@ -29,7 +33,7 @@ export const { stripe, store, sync } = internalConvexStripe({
   },
 });
 
-export const { createCustomer, products, subscription } = stripe.helpers({
+export const { createCustomer, subscription } = stripe.helpers({
   authenticateAndAuthorize: async (args) => {
     const userId = await getAuthUserId(args.context);
 
@@ -41,47 +45,50 @@ export const { createCustomer, products, subscription } = stripe.helpers({
   },
 });
 
-export const createInternalPaymentRecord = internalMutation({
-  args: {
-    priceId: v.string(),
-    checkoutSessionId: v.string(),
-    userId: v.id("users"),
-  },
+export const products = query({
+  args: {},
   handler: async (context, args) => {
-    await context.db.insert("payments", {
-      priceId: args.priceId,
-      userId: args.userId,
-      checkoutSessionId: args.checkoutSessionId,
-    });
+    const prices = await context.db.query("stripePrices").collect();
+    const products = await context.db.query("stripeProducts").collect();
+
+    return products.map((product) => ({
+      ...product,
+      stripe: {
+        ...product.stripe,
+        default_price: prices.find(
+          (price) => price.priceId === product.stripe.default_price,
+        ),
+      },
+      prices: prices.filter(
+        (price) => price.stripe.productId === product.productId,
+      ),
+    }));
   },
 });
 
 export const pay = action({
   args: {
     priceId: v.string(),
+    accountId: v.optional(v.string()),
   },
   handler: async (context, args): Promise<{ url: string | null }> => {
     const userId = await getAuthUserId(context);
 
     if (!userId) throw new Error("Unauthorized");
 
-    // TODO: shouldn't be done this way, add entityId to it or something
-    const orderId = "#" + Math.floor(Math.random() * 1000);
-
-    const checkout = await stripe.pay(context, {
-      referenceId: orderId,
-      entityId: userId,
-      mode: "payment",
-      line_items: [{ price: args.priceId, quantity: 1 }],
-      success_url: `${process.env.SITE_URL}/?return-from-pay=success`,
-      cancel_url: `${process.env.SITE_URL}/?return-from-pay=cancel`,
-    });
-
-    await context.runMutation(internal.stripe.createInternalPaymentRecord, {
-      priceId: args.priceId,
-      checkoutSessionId: checkout.id,
-      userId: userId,
-    });
+    const checkout = await stripe.pay(
+      context,
+      {
+        referenceId: "#" + Math.floor(Math.random() * 1000),
+        entityId: userId,
+        mode: "payment",
+        line_items: [{ price: args.priceId, quantity: 1 }],
+        success_url: `${process.env.SITE_URL}/?return-from-pay=success`,
+        cancel_url: `${process.env.SITE_URL}/?return-from-pay=cancel`,
+        createStripeCustomerIfMissing: true,
+      },
+      { stripeAccount: args.accountId },
+    );
 
     return checkout;
   },
@@ -127,21 +134,7 @@ export const payments = query({
       )
       .collect();
 
-    const payments = (
-      await context.db
-        .query("payments")
-        .withIndex("byUserId", (q) => q.eq("userId", userId))
-        .collect()
-    ).map((payment) => ({
-      ...payment,
-      checkout:
-        checkouts.find(
-          (checkout) =>
-            checkout.checkoutSessionId === payment.checkoutSessionId,
-        ) || null,
-    }));
-
-    return payments;
+    return checkouts;
   },
 });
 

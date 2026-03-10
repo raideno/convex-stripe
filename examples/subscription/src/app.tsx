@@ -11,12 +11,9 @@ import {
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
 
 import { AuthForm } from "./components/forms/auth-form";
-import { CreditCardForm } from "./components/forms/credit-card-form";
 import { PaymentsForm } from "./components/forms/payments-form";
-import { ProductsForm } from "./components/forms/products-form";
 import { SubscriptionForm } from "./components/forms/subscription-form";
 import { UserForm } from "./components/forms/user-form";
-import { ChatForm } from "./components/forms/chat-form";
 import { GenericReturnFromModal } from "./components/modals/generic-return-from-modal";
 import { Marketplace } from "./components/forms/marketplace-form";
 
@@ -71,15 +68,10 @@ export default function App() {
           <Skeleton style={{ width: "100%", height: "256px" }} />
         </Box>
       </AuthLoading>
-      <Box my="8">
-        <ChatForm />
-      </Box>
       <Authenticated>
         <Flex direction={"column"} gap="6">
           <UserForm />
-          <CreditCardForm />
           <SubscriptionForm />
-          <ProductsForm />
           <PaymentsForm />
           <Marketplace />
         </Flex>

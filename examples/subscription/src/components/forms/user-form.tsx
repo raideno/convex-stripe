@@ -20,8 +20,8 @@ export const UserForm = () => {
 
   const portal = useAction(api.stripe.portal);
   const products = useQuery(api.stripe.products);
-  const subscription_ = useQuery(api.stripe.subscription);
-  const profile = useQuery(api.profile.me);
+  const subscription_ = useQuery(api.stripe.subscription, {});
+  const profile = useQuery(api.auth.me);
 
   const [loading, setLoading] = React.useState<string | null>(null);
 
@@ -67,7 +67,7 @@ export const UserForm = () => {
 
   const product = subscription
     ? products.find(
-        (p) => p.productId === subscription.items.data[0].price.product
+        (p) => p.productId === subscription.items.data[0].price.product,
       )
     : null;
 

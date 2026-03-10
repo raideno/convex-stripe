@@ -9,10 +9,10 @@
  */
 
 import type * as auth from "../auth.js";
-import type * as chat from "../chat.js";
 import type * as http from "../http.js";
-import type * as marketplace from "../marketplace.js";
-import type * as profile from "../profile.js";
+import type * as marketplace_accounts from "../marketplace/accounts.js";
+import type * as marketplace_capabilities from "../marketplace/capabilities.js";
+import type * as marketplace_products from "../marketplace/products.js";
 import type * as stripe from "../stripe.js";
 
 import type {
@@ -23,10 +23,10 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
-  chat: typeof chat;
   http: typeof http;
-  marketplace: typeof marketplace;
-  profile: typeof profile;
+  "marketplace/accounts": typeof marketplace_accounts;
+  "marketplace/capabilities": typeof marketplace_capabilities;
+  "marketplace/products": typeof marketplace_products;
   stripe: typeof stripe;
 }>;
 
