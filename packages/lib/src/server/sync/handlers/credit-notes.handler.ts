@@ -32,7 +32,7 @@ export const CreditNotesSyncImplementation = defineActionImplementation({
           operation: "upsert",
           table: "stripeCreditNotes",
           indexName: BY_STRIPE_ID_INDEX_NAME,
-          idField: "creditNoteId",
+          indexValues: { creditNoteId: creditNote.id },
           data: {
             creditNoteId: creditNote.id,
             stripe: CreditNoteStripeToConvex(creditNote),

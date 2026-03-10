@@ -22,7 +22,7 @@ export default defineWebhookHandler({
             operation: "upsert",
             table: "stripeEarlyFraudWarnings",
             indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "earlyFraudWarningId",
+            indexValues: { earlyFraudWarningId: earlyFraudWarning.id },
             data: {
               earlyFraudWarningId: earlyFraudWarning.id,
               stripe: EarlyFraudWarningStripeToConvex(earlyFraudWarning),

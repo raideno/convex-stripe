@@ -32,7 +32,7 @@ export const PaymentMethodsSyncImplementation = defineActionImplementation({
           operation: "upsert",
           table: "stripePaymentMethods",
           indexName: BY_STRIPE_ID_INDEX_NAME,
-          idField: "paymentMethodId",
+          indexValues: { paymentMethodId: paymentMethod.id },
           data: {
             paymentMethodId: paymentMethod.id,
             stripe: PaymentMethodStripeToConvex(paymentMethod),

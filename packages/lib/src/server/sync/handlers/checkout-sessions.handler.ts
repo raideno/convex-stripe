@@ -31,7 +31,7 @@ export const CheckoutSessionsSyncImplementation = defineActionImplementation({
         {
           operation: "upsert",
           table: "stripeCheckoutSessions",
-          idField: "checkoutSessionId",
+          indexValues: { checkoutSessionId: checkoutSession.id },
           indexName: BY_STRIPE_ID_INDEX_NAME,
           data: {
             checkoutSessionId: checkoutSession.id,

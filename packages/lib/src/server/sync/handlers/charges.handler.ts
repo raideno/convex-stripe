@@ -32,7 +32,7 @@ export const ChargesSyncImplementation = defineActionImplementation({
           operation: "upsert",
           indexName: BY_STRIPE_ID_INDEX_NAME,
           table: "stripeCharges",
-          idField: "chargeId",
+          indexValues: { chargeId: charge.id },
           data: {
             chargeId: charge.id,
             stripe: ChargeStripeToConvex(charge),

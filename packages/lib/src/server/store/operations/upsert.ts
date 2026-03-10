@@ -16,24 +16,34 @@ type StripeIndexFieldPath<
   IndexTiebreakerField
 >;
 
+type IndexValuesFor<
+  TableName extends keyof StripeDataModel,
+  IndexName extends keyof StripeDataModel[TableName]["indexes"] & string,
+> = {
+  [K in StripeIndexFieldPath<TableName, IndexName> &
+    string]?: FieldTypeFromFieldPath<StripeDataModel[TableName]["document"], K>;
+};
+
 export async function upsert<
   TableName extends keyof StripeDataModel,
   IndexName extends keyof StripeDataModel[TableName]["indexes"] & string,
-  IndexField extends StripeIndexFieldPath<TableName, IndexName>,
 >(
   context: GenericMutationCtx<StripeDataModel>,
   table: TableName,
   indexName: IndexName,
-  idField: IndexField,
-  data: WithoutSystemFields<StripeDataModel[TableName]["document"]> &
-    Record<
-      IndexField,
-      FieldTypeFromFieldPath<StripeDataModel[TableName]["document"], IndexField>
-    >,
+  indexValues: IndexValuesFor<TableName, IndexName>,
+  data: WithoutSystemFields<StripeDataModel[TableName]["document"]>,
 ): Promise<GenericId<TableName>> {
   const existing = await context.db
     .query(table)
-    .withIndex(indexName, (q) => q.eq(idField, data[idField]))
+    .withIndex(indexName, (q) => {
+      let query = q;
+      for (const [field, value] of Object.entries(indexValues)) {
+        // @ts-ignore - dynamic field access over index fields
+        query = query.eq(field, value);
+      }
+      return query;
+    })
     .unique();
 
   if (existing) {

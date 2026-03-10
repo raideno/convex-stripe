@@ -1,14 +1,8 @@
-// index.ts
-import {
-  FieldTypeFromFieldPath,
-  GenericActionCtx,
-  IndexTiebreakerField,
-  WithoutSystemFields,
-} from "convex/server";
+import { GenericActionCtx, WithoutSystemFields } from "convex/server";
 import { GenericId, v } from "convex/values";
 
 import { defineMutationImplementation } from "@/helpers";
-import { BY_STRIPE_ID_INDEX_NAME, StripeDataModel } from "@/schema";
+import { StripeDataModel } from "@/schema";
 
 import { InternalConfiguration, InternalOptions } from "../types";
 import { StoreDispatchArgs, StoreResultFor } from "./types";
@@ -22,7 +16,10 @@ import {
   upsert,
 } from "./operations";
 
-async function wrapStoreOperation<T>(promise: Promise<T>, table: string): Promise<T> {
+async function wrapStoreOperation<T>(
+  promise: Promise<T>,
+  table: string,
+): Promise<T> {
   try {
     return await promise;
   } catch (error: unknown) {
@@ -33,22 +30,14 @@ async function wrapStoreOperation<T>(promise: Promise<T>, table: string): Promis
     ) {
       throw new Error(
         `\n\n[Convex Stripe Error] Table "${table}" was not found in your Convex schema.\n\n` +
-        `This happens when your 'sync.tables' configuration in 'convex/stripe.ts' includes a table that is not present in your 'convex/schema.ts'.\n\n` +
-        `Please ensure that the arrays passed to 'syncOnlyTables'/'syncAllTablesExcept' match the arrays passed to 'onlyStripeTables'/'allStripeTablesExcept' exactly.\n\n` +
-        `Original Error: ${error.message}\n`
+          `This happens when your 'sync.tables' configuration in 'convex/stripe.ts' includes a table that is not present in your 'convex/schema.ts'.\n\n` +
+          `Please ensure that the arrays passed to 'syncOnlyTables'/'syncAllTablesExcept' match the arrays passed to 'onlyStripeTables'/'allStripeTablesExcept' exactly.\n\n` +
+          `Original Error: ${error.message}\n`,
       );
     }
     throw error;
   }
 }
-
-type StripeIndexFieldPath<
-  TableName extends keyof StripeDataModel,
-  IndexName extends keyof StripeDataModel[TableName]["indexes"] & string,
-> = Exclude<
-  StripeDataModel[TableName]["indexes"][IndexName][number],
-  IndexTiebreakerField
->;
 
 export const StoreImplementation = defineMutationImplementation({
   name: "store",
@@ -56,11 +45,8 @@ export const StoreImplementation = defineMutationImplementation({
     operation: v.string(),
     table: v.string(),
     indexName: v.optional(v.string()),
-    idField: v.optional(v.string()),
+    indexValues: v.optional(v.any()),
     data: v.optional(v.any()),
-    idValue: v.optional(v.any()),
-    field: v.optional(v.string()),
-    value: v.optional(v.any()),
     id: v.optional(v.any()),
   },
   handler: async (context, args, configuration) => {
@@ -83,8 +69,8 @@ export const StoreImplementation = defineMutationImplementation({
         if (!args.indexName) {
           throw new Error('Missing "indexName" for upsert');
         }
-        if (!args.idField) {
-          throw new Error('Missing "idField" for upsert');
+        if (!args.indexValues || typeof args.indexValues !== "object") {
+          throw new Error('Missing "indexValues" for upsert');
         }
         if (args.data == null) {
           throw new Error('Missing "data" for upsert');
@@ -92,28 +78,19 @@ export const StoreImplementation = defineMutationImplementation({
 
         const upsertIndexName =
           args.indexName as keyof StripeDataModel[typeof table]["indexes"] &
-          string;
-        const upsertIdField = args.idField as StripeIndexFieldPath<
-          typeof table,
-          typeof upsertIndexName
-        >;
-
+            string;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const upsertIndexValues = args.indexValues as any;
         const upsertData = args.data as WithoutSystemFields<
           StripeDataModel[typeof table]["document"]
-        > &
-          Record<
-            typeof upsertIdField,
-            FieldTypeFromFieldPath<
-              StripeDataModel[typeof table]["document"],
-              typeof upsertIdField
-            >
-          >;
+        >;
+
         const _id = await wrapStoreOperation(
           upsert(
             context,
             table,
             upsertIndexName,
-            upsertIdField,
+            upsertIndexValues,
             upsertData,
           ),
           table,
@@ -139,7 +116,10 @@ export const StoreImplementation = defineMutationImplementation({
         const insertData = args.data as WithoutSystemFields<
           StripeDataModel[typeof table]["document"]
         >;
-        const _id = await wrapStoreOperation(insert(context, table, insertData), table);
+        const _id = await wrapStoreOperation(
+          insert(context, table, insertData),
+          table,
+        );
         if (configuration.callbacks && configuration.callbacks.afterChange)
           try {
             await configuration.callbacks.afterChange(
@@ -158,32 +138,22 @@ export const StoreImplementation = defineMutationImplementation({
         if (!args.indexName) {
           throw new Error('Missing "indexName" for deleteById');
         }
-        if (!args.idField) {
-          throw new Error('Missing "idField" for deleteById');
-        }
-        if (typeof args.idValue === "undefined") {
-          throw new Error('Missing "idValue" for deleteById');
+        if (!args.indexValues || typeof args.indexValues !== "object") {
+          throw new Error('Missing "indexValues" for deleteById');
         }
 
         const deleteByIdIndexName =
           args.indexName as keyof StripeDataModel[typeof table]["indexes"] &
-          string;
-        const deleteByIdIdField = args.idField as StripeIndexFieldPath<
-          typeof table,
-          typeof deleteByIdIndexName
-        >;
-        const deleteByIdIdValue = args.idValue as FieldTypeFromFieldPath<
-          StripeDataModel[typeof table]["document"],
-          typeof deleteByIdIdField
-        >;
+            string;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const deleteByIdIndexValues = args.indexValues as any;
 
         const _id = await wrapStoreOperation(
           deleteById(
             context,
             table,
             deleteByIdIndexName,
-            deleteByIdIdField,
-            deleteByIdIdValue,
+            deleteByIdIndexValues,
           ),
           table,
         );
@@ -205,31 +175,18 @@ export const StoreImplementation = defineMutationImplementation({
         if (!args.indexName) {
           throw new Error('Missing "indexName" for selectOne');
         }
-        if (!args.field) {
-          throw new Error('Missing "field" for selectOne');
+        if (!args.indexValues || typeof args.indexValues !== "object") {
+          throw new Error('Missing "indexValues" for selectOne');
         }
-        if (typeof args.value === "undefined") {
-          throw new Error('Missing "value" for selectOne');
-        }
+
         const selectOneIndexName =
           args.indexName as keyof StripeDataModel[typeof table]["indexes"] &
-          string;
-        const selectOneField = args.field as StripeIndexFieldPath<
-          typeof table,
-          typeof selectOneIndexName
-        >;
-        const selectOneValue = args.value as FieldTypeFromFieldPath<
-          StripeDataModel[typeof table]["document"],
-          typeof selectOneField
-        >;
+            string;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const selectOneIndexValues = args.indexValues as any;
+
         const doc = await wrapStoreOperation(
-          selectOne(
-            context,
-            table,
-            selectOneIndexName,
-            selectOneField,
-            selectOneValue,
-          ),
+          selectOne(context, table, selectOneIndexName, selectOneIndexValues),
           table,
         );
         return { doc };
@@ -239,7 +196,10 @@ export const StoreImplementation = defineMutationImplementation({
         if (args.id == null) {
           throw new Error('Missing "id" for selectById');
         }
-        const doc = await wrapStoreOperation(selectById(context, table, args.id as GenericId<any>), table);
+        const doc = await wrapStoreOperation(
+          selectById(context, table, args.id as GenericId<any>),
+          table,
+        );
         return { doc };
       }
 

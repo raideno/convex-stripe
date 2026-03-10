@@ -36,7 +36,7 @@ export const InvoicesSyncImplementation = defineActionImplementation({
         {
           operation: "upsert",
           table: "stripeInvoices",
-          idField: "invoiceId",
+          indexValues: { invoiceId: invoice.id },
           indexName: BY_STRIPE_ID_INDEX_NAME,
           data: {
             invoiceId: invoice.id,

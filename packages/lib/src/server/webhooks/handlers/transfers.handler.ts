@@ -27,7 +27,7 @@ export default defineWebhookHandler({
             operation: "upsert",
             table: "stripeTransfers",
             indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "transferId",
+            indexValues: { transferId: transfer.id },
             data: {
               accountId: event.account,
               transferId: transfer.id,

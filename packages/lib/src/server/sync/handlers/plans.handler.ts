@@ -35,7 +35,7 @@ export const PlansSyncImplementation = defineActionImplementation({
           operation: "upsert",
           table: "stripePlans",
           indexName: BY_STRIPE_ID_INDEX_NAME,
-          idField: "planId",
+          indexValues: { planId: plan.id },
           data: {
             planId: plan.id,
             stripe: PlanStripeToConvex(plan),

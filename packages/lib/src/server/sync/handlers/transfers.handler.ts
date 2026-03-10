@@ -32,7 +32,7 @@ export const TransfersSyncImplementation = defineActionImplementation({
           operation: "upsert",
           table: "stripeTransfers",
           indexName: BY_STRIPE_ID_INDEX_NAME,
-          idField: "transferId",
+          indexValues: { transferId: transfer.id },
           data: {
             transferId: transfer.id,
             stripe: TransferStripeToConvex(transfer),

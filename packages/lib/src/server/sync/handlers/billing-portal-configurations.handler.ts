@@ -34,7 +34,7 @@ export const BillingPortalConfigurationsSyncImplementation =
           {
             operation: "upsert",
             table: "stripeBillingPortalConfigurations",
-            idField: "billingPortalConfigurationId",
+            indexValues: { billingPortalConfigurationId: billingPortalConfiguration.id },
             indexName: BY_STRIPE_ID_INDEX_NAME,
             data: {
               billingPortalConfigurationId: billingPortalConfiguration.id,

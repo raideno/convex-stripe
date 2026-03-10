@@ -32,7 +32,7 @@ export const EarlyFraudWarningsSyncImplementation = defineActionImplementation({
           operation: "upsert",
           table: "stripeEarlyFraudWarnings",
           indexName: BY_STRIPE_ID_INDEX_NAME,
-          idField: "earlyFraudWarningId",
+          indexValues: { earlyFraudWarningId: early_fraud_warning.id },
           data: {
             earlyFraudWarningId: early_fraud_warning.id,
             stripe: EarlyFraudWarningStripeToConvex(early_fraud_warning),

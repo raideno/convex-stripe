@@ -34,7 +34,7 @@ export default defineWebhookHandler({
             operation: "upsert",
             table: "stripeSubscriptions",
             indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "subscriptionId",
+            indexValues: { subscriptionId: subscription.id },
             data: {
               subscriptionId: subscription.id,
               customerId:

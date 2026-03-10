@@ -19,7 +19,7 @@ export default defineWebhookHandler({
             operation: "upsert",
             table: "stripeCoupons",
             indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "couponId",
+            indexValues: { couponId: coupon.id },
             data: {
               couponId: coupon.id,
               stripe: CouponStripeToConvex(coupon),
@@ -38,8 +38,7 @@ export default defineWebhookHandler({
             operation: "deleteById",
             table: "stripeCoupons",
             indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "couponId",
-            idValue: coupon.id,
+            indexValues: { couponId: coupon.id },
           },
           context,
           configuration,

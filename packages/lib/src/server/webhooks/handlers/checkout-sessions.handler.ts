@@ -26,7 +26,7 @@ export default defineWebhookHandler({
             operation: "upsert",
             table: "stripeCheckoutSessions",
             indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "checkoutSessionId",
+            indexValues: { checkoutSessionId: checkoutSession.id },
             data: {
               checkoutSessionId: checkoutSession.id,
               stripe: CheckoutSessionStripeToConvex(checkoutSession),

@@ -32,7 +32,7 @@ export const ReviewsSyncImplementation = defineActionImplementation({
           operation: "upsert",
           table: "stripeReviews",
           indexName: BY_STRIPE_ID_INDEX_NAME,
-          idField: "reviewId",
+          indexValues: { reviewId: review.id },
           data: {
             reviewId: review.id,
             stripe: ReviewStripeToConvex(review),

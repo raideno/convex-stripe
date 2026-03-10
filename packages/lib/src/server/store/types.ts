@@ -55,6 +55,17 @@ type IndexFieldPath<M, T extends keyof M, IndexName extends string> = Exclude<
   IndexTiebreakerField
 >;
 
+// Builds an indexValues object type for all fields in an index, where each
+// field maps to the corresponding document field type.
+type IndexValuesFor<M, T extends keyof M, IndexName extends string> = {
+  [K in IndexFieldPath<M, T, IndexName> & string]?: DocOf<
+    M,
+    T
+  > extends GenericDocument
+    ? FieldTypeFromFieldPath<DocOf<M, T>, K>
+    : never;
+};
+
 type Operation =
   | "upsert"
   | "insert"
@@ -68,21 +79,13 @@ type UpsertArgsFor<M, T extends keyof M> =
   HasStripeIndex<M, T> extends true
     ? {
         [I in IndexNamesOf<M, T>]: {
-          [K in IndexFieldPath<M, T, I> & string]: {
-            operation: "upsert";
-            table: T;
-            indexName: I;
-            idField: K;
-            // @ts-ignore
-            data: WithoutSystemFields<DocOf<M, T>> &
-              Record<
-                K,
-                DocOf<M, T> extends GenericDocument
-                  ? FieldTypeFromFieldPath<DocOf<M, T>, K>
-                  : never
-              >;
-          };
-        }[IndexFieldPath<M, T, I> & string];
+          operation: "upsert";
+          table: T;
+          indexName: I;
+          indexValues: IndexValuesFor<M, T, I>;
+          // @ts-ignore
+          data: WithoutSystemFields<DocOf<M, T>>;
+        };
       }[IndexNamesOf<M, T>]
     : never;
 
@@ -97,30 +100,27 @@ type InsertArgsFor<M, T extends keyof M> = {
 type DeleteByIdArgsFor<M, T extends keyof M> =
   HasStripeIndex<M, T> extends true
     ? {
-        [K in StripeIndexFieldPath<M, T> & string]: {
-          operation: "deleteById";
-          table: T;
-          indexName: typeof BY_STRIPE_ID_INDEX_NAME;
-          idField: K;
-          idValue: DocOf<M, T> extends GenericDocument
+        operation: "deleteById";
+        table: T;
+        indexName: typeof BY_STRIPE_ID_INDEX_NAME;
+        indexValues: {
+          [K in StripeIndexFieldPath<M, T> & string]?: DocOf<
+            M,
+            T
+          > extends GenericDocument
             ? FieldTypeFromFieldPath<DocOf<M, T>, K>
             : never;
         };
-      }[StripeIndexFieldPath<M, T> & string]
+      }
     : never;
 
 type SelectOneArgsFor<M, T extends keyof M> = {
   [I in IndexNamesOf<M, T>]: {
-    [K in IndexFieldPath<M, T, I> & string]: {
-      operation: "selectOne";
-      table: T;
-      indexName: I;
-      field: K;
-      value: DocOf<M, T> extends GenericDocument
-        ? FieldTypeFromFieldPath<DocOf<M, T>, K>
-        : never;
-    };
-  }[IndexFieldPath<M, T, I> & string];
+    operation: "selectOne";
+    table: T;
+    indexName: I;
+    indexValues: IndexValuesFor<M, T, I>;
+  };
 }[IndexNamesOf<M, T>];
 
 type SelectByIdArgsFor<M, T extends keyof M & string> = {

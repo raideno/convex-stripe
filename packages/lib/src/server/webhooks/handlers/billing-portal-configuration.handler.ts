@@ -22,7 +22,7 @@ export default defineWebhookHandler({
             operation: "upsert",
             table: "stripeBillingPortalConfigurations",
             indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "billingPortalConfigurationId",
+            indexValues: { billingPortalConfigurationId: billingPortalConfiguration.id },
             data: {
               billingPortalConfigurationId: billingPortalConfiguration.id,
               stripe: BillingPortalConfigurationStripeToConvex(

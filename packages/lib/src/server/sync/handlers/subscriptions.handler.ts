@@ -49,7 +49,7 @@ export const SubscriptionsSyncImplementation = defineActionImplementation({
           operation: "upsert",
           table: "stripeSubscriptions",
           indexName: "byCustomerId",
-          idField: "customerId",
+          indexValues: { customerId: customerId },
           data: {
             customerId: customerId,
             subscriptionId: subscription.id,
@@ -83,7 +83,7 @@ export const SubscriptionsSyncImplementation = defineActionImplementation({
             operation: "upsert",
             table: "stripeSubscriptions",
             indexName: "byCustomerId",
-            idField: "customerId",
+            indexValues: { customerId: sub.customerId },
             data: {
               customerId: sub.customerId,
               subscriptionId: null,

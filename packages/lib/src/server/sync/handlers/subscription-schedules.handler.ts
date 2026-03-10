@@ -33,7 +33,7 @@ export const SubscriptionSchedulesSyncImplementation =
           {
             operation: "upsert",
             table: "stripeSubscriptionSchedules",
-            idField: "subscriptionScheduleId",
+            indexValues: { subscriptionScheduleId: subscriptionSchedule.id },
             indexName: BY_STRIPE_ID_INDEX_NAME,
             data: {
               subscriptionScheduleId: subscriptionSchedule.id,

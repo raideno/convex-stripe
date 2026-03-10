@@ -19,7 +19,7 @@ export default defineWebhookHandler({
             operation: "upsert",
             table: "stripePromotionCodes",
             indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "promotionCodeId",
+            indexValues: { promotionCodeId: promotionCode.id },
             data: {
               promotionCodeId: promotionCode.id,
               stripe: PromotionCodeStripeToConvex(promotionCode),

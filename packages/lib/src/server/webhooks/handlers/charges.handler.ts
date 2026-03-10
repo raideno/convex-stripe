@@ -32,7 +32,7 @@ export default defineWebhookHandler({
             operation: "upsert",
             table: "stripeCharges",
             indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "chargeId",
+            indexValues: { chargeId: charge.id },
             data: {
               chargeId: charge.id,
               stripe: ChargeStripeToConvex(charge),

@@ -32,7 +32,7 @@ export default defineWebhookHandler({
             operation: "upsert",
             table: "stripeSubscriptionSchedules",
             indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "subscriptionScheduleId",
+            indexValues: { subscriptionScheduleId: subscriptionSchedule.id },
             data: {
               subscriptionScheduleId: subscriptionSchedule.id,
               stripe: SubscriptionScheduleStripeToConvex(subscriptionSchedule),

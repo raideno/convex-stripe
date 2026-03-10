@@ -32,7 +32,7 @@ export const CouponsSyncImplementation = defineActionImplementation({
           operation: "upsert",
           table: "stripeCoupons",
           indexName: BY_STRIPE_ID_INDEX_NAME,
-          idField: "couponId",
+          indexValues: { couponId: coupon.id },
           data: {
             couponId: coupon.id,
             stripe: CouponStripeToConvex(coupon),

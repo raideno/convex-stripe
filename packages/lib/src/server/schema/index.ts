@@ -68,6 +68,7 @@ export const stripeTables = {
   })
     .index("byEntityId", ["entityId"])
     .index("byAccountId", ["accountId"])
+    .index("byAccountIdAndEntityid", ["accountId", "entityId"])
     .index(BY_STRIPE_ID_INDEX_NAME, ["customerId"]),
   stripeSubscriptions: defineTable({
     subscriptionId: v.union(v.string(), v.null()),

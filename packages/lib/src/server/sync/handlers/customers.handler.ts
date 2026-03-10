@@ -39,7 +39,7 @@ export const CustomersSyncImplementation = defineActionImplementation({
           operation: "upsert",
           table: "stripeCustomers",
           indexName: BY_STRIPE_ID_INDEX_NAME,
-          idField: "customerId",
+          indexValues: { customerId: customer.id },
           data: {
             customerId: customer.id,
             entityId: entityId,

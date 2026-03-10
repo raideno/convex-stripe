@@ -19,7 +19,7 @@ export default defineWebhookHandler({
             operation: "upsert",
             table: "stripeProducts",
             indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "productId",
+            indexValues: { productId: product.id },
             data: {
               productId: product.id,
               stripe: ProductStripeToConvex(product),
@@ -38,8 +38,7 @@ export default defineWebhookHandler({
             operation: "deleteById",
             table: "stripeProducts",
             indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "productId",
-            idValue: product.id,
+            indexValues: { productId: product.id },
           },
           context,
           configuration,

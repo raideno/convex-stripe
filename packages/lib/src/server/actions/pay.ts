@@ -48,13 +48,22 @@ export const PayImplementation = defineActionCallableFunction<
       apiVersion: configuration.stripe.version,
     });
 
+    /**
+     * TODO: make the select return the customer directly rather than having to do a .defineActionCallableFunction
+     * TODO: make it compatible with accounts, let people pass either entityId or customerId directly
+     * TODO: when passing a entityId with accountId, correctly fetch customerId by considering accountId
+     * TODO: create a byEntityIdAndAccountId index maybe or find another way to handle that.
+     */
+
+    /**
+     * TODO: we might need to modify the interface for the selectOne to accept an object defining the values for the index rather than having a single field with a single value.
+     */
     const stripeCustomer = await storeDispatchTyped(
       {
         operation: "selectOne",
         table: "stripeCustomers",
         indexName: "byEntityId",
-        field: "entityId",
-        value: args.entityId,
+        indexValues: { entityId: args.entityId },
       },
       context,
       configuration,
@@ -153,7 +162,7 @@ export const PayImplementation = defineActionCallableFunction<
         operation: "upsert",
         table: "stripeCheckoutSessions",
         indexName: BY_STRIPE_ID_INDEX_NAME,
-        idField: "checkoutSessionId",
+        indexValues: { checkoutSessionId: checkout.id },
         data: {
           checkoutSessionId: checkout.id,
           stripe: CheckoutSessionStripeToConvex(checkout),
@@ -177,7 +186,7 @@ export const PayImplementation = defineActionCallableFunction<
           operation: "upsert",
           table: "stripePaymentIntents",
           indexName: BY_STRIPE_ID_INDEX_NAME,
-          idField: "paymentIntentId",
+          indexValues: { paymentIntentId: paymentIntent.id },
           data: {
             paymentIntentId: paymentIntent.id,
             stripe: PaymentIntentStripeToConvex(paymentIntent),

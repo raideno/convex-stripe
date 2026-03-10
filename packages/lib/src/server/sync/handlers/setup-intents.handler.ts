@@ -32,7 +32,7 @@ export const SetupIntentsSyncImplementation = defineActionImplementation({
           operation: "upsert",
           table: "stripeSetupIntents",
           indexName: BY_STRIPE_ID_INDEX_NAME,
-          idField: "setupIntentId",
+          indexValues: { setupIntentId: setupIntent.id },
           data: {
             setupIntentId: setupIntent.id,
             stripe: SetupIntentStripeToConvex(setupIntent),

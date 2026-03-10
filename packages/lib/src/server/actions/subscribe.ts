@@ -48,8 +48,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
         operation: "selectOne",
         table: "stripeCustomers",
         indexName: "byEntityId",
-        field: "entityId",
-        value: args.entityId,
+        indexValues: { entityId: args.entityId },
       },
       context,
       configuration,
@@ -147,7 +146,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
         operation: "upsert",
         table: "stripeCheckoutSessions",
         indexName: BY_STRIPE_ID_INDEX_NAME,
-        idField: "checkoutSessionId",
+        indexValues: { checkoutSessionId: checkout.id },
         data: {
           checkoutSessionId: checkout.id,
           stripe: CheckoutSessionStripeToConvex(checkout),
@@ -171,7 +170,7 @@ export const SubscribeImplementation = defineActionCallableFunction<
           operation: "upsert",
           table: "stripeSubscriptions",
           indexName: BY_STRIPE_ID_INDEX_NAME,
-          idField: "subscriptionId",
+          indexValues: { subscriptionId: subscription.id },
           data: {
             subscriptionId: subscription.id,
             customerId: customerId,

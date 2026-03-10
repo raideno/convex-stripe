@@ -25,7 +25,7 @@ export default defineWebhookHandler({
             operation: "upsert",
             table: "stripeRefunds",
             indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "refundId",
+            indexValues: { refundId: refund.id },
             data: {
               refundId: refund.id,
               stripe: RefundStripeToConvex(refund),

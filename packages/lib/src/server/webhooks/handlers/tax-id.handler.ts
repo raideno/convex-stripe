@@ -24,7 +24,7 @@ export default defineWebhookHandler({
             operation: "upsert",
             table: "stripeTaxIds",
             indexName: BY_STRIPE_ID_INDEX_NAME,
-            idField: "taxIdId",
+            indexValues: { taxIdId: taxId.id },
             data: {
               taxIdId: taxId.id,
               stripe: TaxIdStripeToConvex(taxId),
