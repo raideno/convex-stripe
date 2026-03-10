@@ -57,7 +57,7 @@ export const PayImplementation = defineActionCallableFunction<
       options,
     );
 
-    let customerId = stripeCustomer?.doc?.customerId || null;
+    let customerId = stripeCustomer?.customerId || null;
 
     if (!customerId) {
       if (!createStripeCustomerIfMissing) {

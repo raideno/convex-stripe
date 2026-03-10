@@ -76,7 +76,7 @@ export const SubscriptionsSyncImplementation = defineActionImplementation({
       ),
     );
 
-    for (const sub of localSubsResponse.docs || []) {
+    for (const sub of localSubsResponse || []) {
       if (!hasSub.has(sub.customerId)) {
         await storeDispatchTyped(
           {

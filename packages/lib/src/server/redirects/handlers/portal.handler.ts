@@ -24,7 +24,7 @@ export const PortalReturnImplementation = defineRedirectHandler({
       options,
     );
 
-    const customerId = customer?.doc?.customerId || null;
+    const customerId = customer?.customerId || null;
 
     if (customerId) {
       await SubscriptionSyncImplementation.handler(

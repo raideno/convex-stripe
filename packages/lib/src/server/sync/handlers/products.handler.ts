@@ -28,7 +28,7 @@ export const ProductsSyncImplementation = defineActionImplementation({
       options,
     );
     const localProductsById = new Map(
-      (localProductsResponse.docs || []).map((p) => [p.productId, p]),
+      (localProductsResponse || []).map((p) => [p.productId, p]),
     );
 
     const products = await stripe.products

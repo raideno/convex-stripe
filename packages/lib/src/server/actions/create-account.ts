@@ -22,19 +22,17 @@ export const CreateAccountImplementation = defineActionCallableFunction<
 
     // TODO: is it enough to check on the locally synced version, what if someone modifies the dashboard in the mean time
     // And deletes the customer, we'll then have an issue as we'll return a customerId that don't exist anymore
-    const stripeAccount = (
-      await storeDispatchTyped(
-        {
-          operation: "selectOne",
-          table: "stripeAccounts",
-          indexName: "byEntityId",
-          indexValues: { entityId: args.entityId },
-        },
-        context,
-        configuration,
-        options,
-      )
-    ).doc;
+    const stripeAccount = await storeDispatchTyped(
+      {
+        operation: "selectOne",
+        table: "stripeAccounts",
+        indexName: "byEntityId",
+        indexValues: { entityId: args.entityId },
+      },
+      context,
+      configuration,
+      options,
+    );
 
     if (stripeAccount) {
       return stripeAccount;
@@ -84,7 +82,7 @@ export const CreateAccountImplementation = defineActionCallableFunction<
         lastSyncedAt: Date.now(),
       };
 
-      const response = await storeDispatchTyped(
+      const _id = await storeDispatchTyped(
         {
           operation: "insert",
           table: "stripeAccounts",
@@ -96,7 +94,7 @@ export const CreateAccountImplementation = defineActionCallableFunction<
       );
 
       return {
-        _id: response.id,
+        _id,
         ...data,
         _creationTime: new Date().getTime(),
       };

@@ -166,15 +166,18 @@ export type StoreResultFor<M, A extends StoreDispatchArgs<M>> = A extends {
   operation: "upsert";
   table: infer T extends keyof M & string;
 }
-  ? { id: GenericId<T> }
+  ? GenericId<T>
   : A extends { operation: "insert"; table: infer T extends keyof M & string }
-    ? { id: GenericId<T> }
-    : A extends { operation: "deleteById" }
-      ? { deleted: boolean }
+    ? GenericId<T>
+    : A extends {
+          operation: "deleteById";
+          table: infer T extends keyof M & string;
+        }
+      ? GenericId<T> | null
       : A extends { operation: "selectOne"; table: infer T extends keyof M }
-        ? { doc: DocOf<M, T> | null }
+        ? DocOf<M, T> | null
         : A extends { operation: "selectById"; table: infer T extends keyof M }
-          ? { doc: DocOf<M, T> | null }
+          ? DocOf<M, T> | null
           : A extends { operation: "selectAll"; table: infer T extends keyof M }
-            ? { docs: DocOf<M, T>[] }
+            ? DocOf<M, T>[]
             : never;

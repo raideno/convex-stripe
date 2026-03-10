@@ -106,7 +106,7 @@ export const StoreImplementation = defineMutationImplementation({
           } catch (error) {
             console.error("[afterChange]:", error);
           }
-        return { _id };
+        return _id;
       }
 
       case "insert": {
@@ -131,7 +131,7 @@ export const StoreImplementation = defineMutationImplementation({
           } catch (error) {
             console.error("[afterChange]:", error);
           }
-        return { _id };
+        return _id;
       }
 
       case "deleteById": {
@@ -168,7 +168,7 @@ export const StoreImplementation = defineMutationImplementation({
           } catch (error) {
             console.error("[afterChange]:", error);
           }
-        return { _id };
+        return _id;
       }
 
       case "selectOne": {
@@ -189,7 +189,7 @@ export const StoreImplementation = defineMutationImplementation({
           selectOne(context, table, selectOneIndexName, selectOneIndexValues),
           table,
         );
-        return { doc };
+        return doc;
       }
 
       case "selectById": {
@@ -200,12 +200,12 @@ export const StoreImplementation = defineMutationImplementation({
           selectById(context, table, args.id as GenericId<any>),
           table,
         );
-        return { doc };
+        return doc;
       }
 
       case "selectAll": {
         const docs = await wrapStoreOperation(selectAll(context, table), table);
-        return { docs };
+        return docs;
       }
     }
   },
