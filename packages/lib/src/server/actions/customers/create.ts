@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { storeDispatchTyped } from "@/store";
 
 import { StripeDataModel } from "@/schema";
-import { defineActionCallableFunction } from "../helpers";
+import { defineActionCallableFunction } from "../../helpers";
 
 export type ReturnType = StripeDataModel["stripeCustomers"]["document"];
 

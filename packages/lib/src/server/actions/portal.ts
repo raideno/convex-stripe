@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 
-import { CreateCustomerImplementation } from "@/actions/create-customer";
+import { CreateCustomerImplementation } from "@/actions/customers/create";
 import { buildSignedReturnUrl } from "@/redirects";
 import { storeDispatchTyped } from "@/store";
 

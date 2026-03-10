@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 
-import { CreateCustomerImplementation } from "@/actions/create-customer";
+import { CreateCustomerImplementation } from "@/actions/customers/create";
 import { buildSignedReturnUrl } from "@/redirects";
 import { BY_STRIPE_ID_INDEX_NAME } from "@/schema";
 import { CheckoutSessionStripeToConvex } from "@/schema/models/checkout-session";
